@@ -13,6 +13,7 @@ All notable user-visible changes. Format: [Keep a Changelog](https://keepachange
 - Command harness: structured output, one repair turn for invalid edits, guardrails enforced in code, typed errors, timings and token usage; per-IP rate limit, daily cap and optional access code.
 - Command bar states for the AI: thinking / still thinking, AI latency badge, Retry with request id, degraded-mode banner when the AI is unavailable (local commands keep working).
 - Free default AI provider: Gemini (`GEMINI_API_KEY`, free tier); Claude stays available with `ARCHIE_PROVIDER=anthropic`.
+- Groq fallback (`GROQ_API_KEY`, free tier) when Gemini is rate-limited, overloaded or out of quota, plus per-provider quota guards that answer 429 before a free tier is overrun; `/api/health` shows quota usage.
 - `npm run eval`: command-understanding eval (31 cases across 15 categories, structural assertions, accuracy, false-action rate and latency percentiles).
 - Brand: logo (an "A" drawn as a three-node graph), favicon that adapts to dark mode, Apple touch icon, social preview image, web app manifest.
 - SEO: title template, description, Open Graph and Twitter cards, canonical URL, theme colours, JSON-LD, robots rules (boards and API not indexed) and sitemap.
