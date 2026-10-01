@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      run_evals:
+        description: "Run real-AI evals (spends API credits)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  guard:
+    name: Repo hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Block .claude/ from the repository
+        run: |
+          if git ls-files | grep -q '^\.claude/'; then
+            echo "::error::.claude/ must never be committed"; exit 1; fi
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-test:
+    name: Lint, typecheck, test, build
+    needs: guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Detect workspace (skipped until Phase 0 scaffold exists)
+        id: pkg
+        run: |
+          if [ -f package.json ]; then echo "present=true" >> "$GITHUB_OUTPUT"
+          else echo "present=false" >> "$GITHUB_OUTPUT"; echo "No package.json yet, skipping build/test."; fi
+      - uses: actions/setup-node@v4
+        if: steps.pkg.outputs.present == 'true'
+        with: { node-version: 22, cache: npm }
+      - if: steps.pkg.outputs.present == 'true'
+        run: npm ci
+      - if: steps.pkg.outputs.present == 'true'
+        run: npm run lint
+      - if: steps.pkg.outputs.present == 'true'
+        run: npm run typecheck
+      - if: steps.pkg.outputs.present == 'true'
+        run: npm test
+      - if: steps.pkg.outputs.present == 'true'
+        run: npm audit --audit-level=high
+      - if: steps.pkg.outputs.present == 'true'
+        run: npm run build
+      - name: Ensure no API key or LLM code in the client bundle
+        if: steps.pkg.outputs.present == 'true'
+        run: |
+          if grep -rqE 'sk-ant|ANTHROPIC_API_KEY|@anthropic-ai/sdk' frontend/.next/static; then
+            echo "::error::secret or server-only code found in client bundle"; exit 1; fi
+      - name: E2E (AI mocked)
+        if: steps.pkg.outputs.present == 'true'
+        run: npx playwright install --with-deps chromium && npm run test:e2e
+
+  evals:
+    name: Evals (real AI, manual)
+    needs: build-test
+    if: github.event_name == 'workflow_dispatch' && inputs.run_evals
+    runs-on: ubuntu-latest
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run eval -- --split test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: eval-results
+          path: evals/results/
