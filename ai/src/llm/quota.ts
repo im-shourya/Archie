@@ -132,6 +132,17 @@ export class QuotaGuard {
   }
 }
 
+/** ms until the next midnight in `zone` (when a daily quota resets). */
+export function msUntilMidnight(zone: string, now: number = Date.now()): number {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-US", { timeZone: zone, hourCycle: "h23", hour: "numeric", minute: "numeric", second: "numeric" })
+      .formatToParts(now)
+      .map((p) => [p.type, p.value]),
+  );
+  const elapsed = (Number(parts.hour) * 3600 + Number(parts.minute) * 60 + Number(parts.second)) * 1000;
+  return Math.max(1_000, 86_400_000 - elapsed);
+}
+
 /** Rough token estimate for budgeting (about 3.5 characters per token for this prompt). */
 export function estimateTokens(chars: number, outputAllowance: number): number {
   return Math.ceil(chars / 3.5) + outputAllowance;

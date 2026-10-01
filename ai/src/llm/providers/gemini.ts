@@ -1,5 +1,6 @@
-import { ApiError, GoogleGenAI, ThinkingLevel, type GenerateContentResponse } from "@google/genai";
+import { ApiError, GoogleGenAI, ThinkingLevel, type GenerateContentConfig, type GenerateContentResponse } from "@google/genai";
 import { z } from "zod";
+import { msUntilMidnight } from "../quota";
 import { WireResultSchema } from "../schemas";
 import { ProviderError, type Completion, type CompletionRequest, type LlmProvider } from "./types";
 
@@ -9,7 +10,14 @@ import { ProviderError, type Completion, type CompletionRequest, type LlmProvide
  * to improve its products, which is fine for public demo boards, not for private designs.
  */
 
-export const GEMINI_DEFAULT_MODEL = "gemini-3.8-flash";
+/**
+ * The default model ladder (ADR-017). Free-tier quotas are per model per project (about 20
+ * requests a day each at the time of writing), so several models in a row multiply the free
+ * capacity. Ordered by measured latency and availability (2026-10-02): 2.5-flash answered in
+ * about 1.8 s with no errors; the 3.6–3.8 Flash models were often "high demand" (503).
+ */
+export const GEMINI_DEFAULT_MODELS = ["gemini-2.5-flash", "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.8-flash"] as const;
+export const GEMINI_DEFAULT_MODEL = GEMINI_DEFAULT_MODELS[0];
 /** Thinking tokens count toward maxOutputTokens on Gemini, so this is higher than Claude's cap. */
 export const GEMINI_MAX_TOKENS = 8_000;
 
@@ -37,10 +45,21 @@ function defaultClient(): ModelsClient {
   return client;
 }
 
-/** Gemini 429 bodies say "Please retry in 37.5s". */
+/**
+ * How long until a 429'd model can be used again. A per-day quota ("…PerDay…" in the quota id)
+ * resets at midnight Pacific, whatever the body's "retry in 20s" says. A per-minute one honours it.
+ */
 function retryAfter(message: string): number | undefined {
+  if (/PerDay/i.test(message)) return msUntilMidnight("America/Los_Angeles");
   const m = /retry in ([\d.]+)s/i.exec(message);
   return m ? Math.ceil(Number(m[1]) * 1000) : undefined;
+}
+
+/** Thinking control differs by generation: 2.5 takes a budget (0 = off), 3.x a level, Lite none. */
+export function thinkingFor(model: string): GenerateContentConfig["thinkingConfig"] | undefined {
+  if (/lite/.test(model)) return undefined;
+  if (/^gemini-2\.5/.test(model)) return { thinkingBudget: 0 };
+  return { thinkingLevel: /^gemini-3\.6/.test(model) ? ThinkingLevel.MINIMAL : ThinkingLevel.LOW };
 }
 
 function classify(err: unknown): ProviderError {
@@ -68,7 +87,7 @@ export function createGeminiProvider(options: { client?: ModelsClient; model?: s
   return {
     name: "gemini",
     model,
-    effort: "thinking low",
+    effort: thinkingFor(model)?.thinkingBudget === 0 ? "thinking off" : thinkingFor(model) ? "thinking low" : "default",
     async complete(req: CompletionRequest): Promise<Completion> {
       let res: GenerateContentResponse;
       try {
@@ -81,7 +100,7 @@ export function createGeminiProvider(options: { client?: ModelsClient; model?: s
             responseMimeType: "application/json",
             responseJsonSchema: WIRE_JSON_SCHEMA,
             maxOutputTokens: GEMINI_MAX_TOKENS * req.tokenScale,
-            thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+            ...(thinkingFor(model) ? { thinkingConfig: thinkingFor(model) } : {}),
             abortSignal: req.signal,
           },
         });

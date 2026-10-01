@@ -10,6 +10,7 @@ export {
   getProvider,
   isConfigured,
   keyEnv,
+  modelLadder,
   modelName,
   primaryWaitMs,
   providerName,
