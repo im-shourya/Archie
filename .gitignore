@@ -1,6 +1,7 @@
 # Local agent config + skills — never commit or push
 .claude/
 CLAUDE.local.md
+WORKLOG.local.md
 
 # Dependencies / build
 node_modules/
