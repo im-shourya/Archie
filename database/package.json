@@ -11,6 +11,10 @@
     "typecheck": "tsc -p ."
   },
   "dependencies": {
-    "@archie/simulator": "0.1.0"
+    "@archie/simulator": "0.1.0",
+    "idb": "^8.0.3",
+    "lz-string": "^1.5.0",
+    "ulid": "^3.0.2",
+    "zod": "^4.6.5"
   }
 }
