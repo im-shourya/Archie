@@ -4,7 +4,7 @@ Where the project is **right now**. Update at the end of every phase (and whenev
 
 ## Current phase
 
-**Phase 0 · Setup**: not started. Planning complete.
+**Phase 0 · Setup**: scaffold built on `chore/scaffold` (PR pending). Next: Phase 1.
 
 ## Completed
 
@@ -18,7 +18,8 @@ Where the project is **right now**. Update at the end of every phase (and whenev
 ## In progress
 
 - [ ] Wispr Flow signup via the referral link
-- [ ] Phase 0 scaffold (by voice)
+- [x] Phase 0 scaffold: workspaces, Next.js + Hono `/api`, health, lint, typecheck, Vitest, Playwright
+- [ ] Phase 1: core graph + canvas
 
 ## Blocked
 
@@ -37,8 +38,8 @@ _None yet._
 
 1. Sign up for Wispr Flow via <https://ref.wisprflow.ai/hhg>
 2. Test screen recording with the Wispr overlay visible
-3. 🎙 Phase 0 prompt from [29](29-roadmap.md)
-4. 🎙 Phase 1 prompt
+3. Merge the Phase 0 PR
+4. 🎙 Phase 1 prompt from [29](29-roadmap.md)
 
 ## Metrics snapshot
 

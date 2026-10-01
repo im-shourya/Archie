@@ -57,14 +57,25 @@ Next.js · React Flow · elkjs · Zustand · Hono · TypeScript · Zod · Claude
 
 ## Getting started
 
-> Setup instructions land with Phase 0 ([roadmap](docs/29-roadmap.md)).
+Requires Node 22+ (`.nvmrc`).
 
 ```bash
-git clone <repo-url> archie && cd archie
-cp .env.example .env.local      # add ANTHROPIC_API_KEY
+git clone https://github.com/im-shourya/hh-goa-4.git archie && cd archie
+cp .env.example .env.local      # add ANTHROPIC_API_KEY (needed from Phase 4)
 npm install
-npm run dev                     # http://localhost:3000
+npm run dev                     # http://localhost:3000  ·  health: /api/health
 ```
+
+| Command | What it does |
+|---------|--------------|
+| `npm run dev` | Next.js dev server with the API mounted at `/api` |
+| `npm run dev:backend` | Backend alone on `http://localhost:8787/api` |
+| `npm run lint` · `npm run typecheck` | ESLint · TypeScript across all workspaces |
+| `npm test` | Unit and integration tests (Vitest) |
+| `npm run test:e2e` | Playwright smoke tests (`npx playwright install chromium` first) |
+| `npm run build` | Production build |
+
+Repository layout: `frontend/` (Next.js) · `backend/` (Hono) · `simulator/` · `ai/` · `database/` · `evals/` · `tests/` · `specs/`. See the [overview](docs/00-overview.md#repository-structure).
 
 ## Documentation
 

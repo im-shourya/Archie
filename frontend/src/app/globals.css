@@ -1,0 +1,40 @@
+/* Placeholder tokens. The real design system is decided in Phase 5 (docs/06). */
+:root {
+  --surface-canvas: #f6f7f9;
+  --surface-panel: #ffffff;
+  --text-primary: #111418;
+  --text-secondary: #4a5260;
+  --border-subtle: #dde1e7;
+  --accent: #2550d9;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface-canvas: #0f1216;
+    --surface-panel: #171b21;
+    --text-primary: #e8ebef;
+    --text-secondary: #a3abb7;
+    --border-subtle: #2a3038;
+    --accent: #7b9cff;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--surface-canvas);
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.5;
+}
