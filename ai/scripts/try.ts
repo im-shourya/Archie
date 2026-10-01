@@ -1,6 +1,7 @@
 // Manual real call: npx tsx ai/scripts/try.ts "add a cache in front of postgres" [--empty]
 // Confirms the structured-output schema compiles and shows timings, usage and cache hits.
-// Needs ANTHROPIC_API_KEY (read from .env.local if present). Never run in CI.
+// Needs GEMINI_API_KEY (free, default) or ANTHROPIC_API_KEY with ARCHIE_PROVIDER=anthropic.
+// Keys are read from .env.local if present. Never run in CI.
 import { existsSync } from "node:fs";
 import { buildTemplate, emptyGraph } from "@archie/simulator";
 import { runCommand } from "../src/llm/harness";

@@ -5,8 +5,8 @@
  *   fixture + utterance → fast path → (null) → harness (real Claude) → guardrails → applyBatch → assertions
  * and writes a RunResult validated against specs/evaluation-schema.json.
  *
- * B0 = --fastpath-only (no AI). B1 = default config. Needs ANTHROPIC_API_KEY for B1 (read from
- * .env.local if present). Cases run sequentially so latency numbers aren't skewed by concurrency.
+ * B0 = --fastpath-only (no AI). B1 = default config: Gemini (free tier, GEMINI_API_KEY) unless
+ * ARCHIE_PROVIDER=anthropic. Keys are read from .env.local if present. Cases run sequentially so latency numbers aren't skewed by concurrency.
  */
 import { createHash } from "node:crypto";
 import { execSync } from "node:child_process";
@@ -17,9 +17,10 @@ import { parseCommand } from "@archie/ai/fastpath";
 import {
   buildUserMessage,
   COMMAND_SYSTEM_PROMPT,
+  getProvider,
   HarnessError,
   isConfigured,
-  modelName,
+  keyEnv,
   runCommand,
 } from "@archie/ai/llm";
 import { applyBatch, simulate, type Graph } from "@archie/simulator";
@@ -39,7 +40,7 @@ const out = flag("out") ?? (fastpathOnly ? "evals/results/b0-fastpath.json" : "e
 
 if (existsSync(".env.local")) process.loadEnvFile(".env.local");
 if (!fastpathOnly && !isConfigured()) {
-  console.error("ANTHROPIC_API_KEY is not set (env or .env.local). Use --fastpath-only for the B0 baseline.");
+  console.error(`${keyEnv()} is not set (env or .env.local). Use --fastpath-only for the B0 baseline.`);
   process.exit(1);
 }
 
@@ -127,8 +128,8 @@ const run = {
   createdAt: new Date().toISOString(),
   commit,
   split,
-  model: fastpathOnly ? "none" : modelName(),
-  effort: fastpathOnly ? "none" : "low",
+  model: fastpathOnly ? "none" : getProvider().model,
+  effort: fastpathOnly ? "none" : getProvider().effort,
   promptHash: createHash("sha256").update(COMMAND_SYSTEM_PROMPT).digest("hex").slice(0, 12),
   target: "local",
   environment: { cpu: os.cpus()[0]?.model ?? "unknown", node: process.version },
@@ -150,7 +151,7 @@ if (!validate?.(run)) {
 mkdirSync("evals/results", { recursive: true });
 writeFileSync(out, JSON.stringify(run, null, 2) + "\n");
 
-console.log(`\n${fastpathOnly ? "B0 fast path only" : `B1 ${run.model} · effort low`} · split ${split} · ${results.length} cases · prompt ${run.promptHash}`);
+console.log(`\n${fastpathOnly ? "B0 fast path only" : `B1 ${run.model} · ${run.effort}`} · split ${split} · ${results.length} cases · prompt ${run.promptHash}`);
 console.log(`task accuracy     ${pct(metrics.taskAccuracy)}`);
 console.log(`kind accuracy     ${pct(metrics.kindAccuracy)}`);
 console.log(`false-action rate ${pct(metrics.falseActionRate)}`);

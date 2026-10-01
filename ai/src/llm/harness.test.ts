@@ -2,7 +2,8 @@ import Anthropic from "@anthropic-ai/sdk";
 import { describe, expect, it, vi } from "vitest";
 import { applyBatch, buildTemplate, type Graph, type Op } from "@archie/simulator";
 import { COMMAND_SYSTEM_PROMPT } from "./prompts/command";
-import { COMMAND_MAX_TOKENS, HarnessError, runCommand, type MessagesClient } from "./harness";
+import { HarnessError, runCommand } from "./harness";
+import { ANTHROPIC_MAX_TOKENS as COMMAND_MAX_TOKENS, createAnthropicProvider, type MessagesClient } from "./providers/anthropic";
 import type { CommandKind, WireOp } from "./schemas";
 
 const threeTier = buildTemplate("three-tier");
@@ -85,7 +86,7 @@ function mockClient(...replies: (Anthropic.Beta.BetaMessage | Error)[]) {
     if (r instanceof Error) create.mockRejectedValueOnce(r);
     else create.mockResolvedValueOnce(r);
   }
-  const client = { beta: { messages: { create } } } as unknown as MessagesClient;
+  const client = createAnthropicProvider({ client: { beta: { messages: { create } } } as unknown as MessagesClient });
   return { client, create };
 }
 
@@ -107,7 +108,7 @@ describe("runCommand: happy path", () => {
       { type: "replicate", id: "api", replicas: 5 },
     ];
     const { client, create } = mockClient(reply({ kind: "ops", ops, message: "Added Kafka.", focusNodeIds: ["kafka", "api"] }));
-    const res = await runCommand(request("add kafka and five api servers"), { client });
+    const res = await runCommand(request("add kafka and five api servers"), { provider: client });
 
     expect(res.kind).toBe("ops");
     expect(res.ops).toEqual(ops);
@@ -120,7 +121,7 @@ describe("runCommand: happy path", () => {
 
   it("sends the cached static system prompt, effort low, structured output and the refusal fallback", async () => {
     const { client, create } = mockClient(reply({ kind: "noop" }));
-    await runCommand({ ...request("hello"), history: ["kill redis"], selection: ["api"] }, { client, requestId: "req-1" });
+    await runCommand({ ...request("hello"), history: ["kill redis"], selection: ["api"] }, { provider: client, requestId: "req-1" });
     const [params, opts] = create.mock.calls[0]!;
     expect(params.model).toBe("claude-opus-5-5");
     expect(params.max_tokens).toBe(COMMAND_MAX_TOKENS);
@@ -139,13 +140,13 @@ describe("runCommand: happy path", () => {
 
   it("passes answers through with focus ids", async () => {
     const { client } = mockClient(reply({ kind: "answer", message: "pg is at ρ=0.83.", focusNodeIds: ["pg"] }));
-    const res = await runCommand(request("why is it slow?"), { client });
+    const res = await runCommand(request("why is it slow?"), { provider: client });
     expect(res).toMatchObject({ kind: "answer", ops: [], message: "pg is at ρ=0.83.", focusNodeIds: ["pg"] });
   });
 
   it("reports the model that actually served the request", async () => {
     const { client } = mockClient(reply({ kind: "noop" }, { model: "claude-opus-4-8" }));
-    expect((await runCommand(request("hi"), { client })).model).toBe("claude-opus-4-8");
+    expect((await runCommand(request("hi"), { provider: client })).model).toBe("claude-opus-4-8");
   });
 
   it("reads the text after the last fallback hop", async () => {
@@ -156,7 +157,7 @@ describe("runCommand: happy path", () => {
       ...msg.content,
     ];
     const { client } = mockClient(msg);
-    expect((await runCommand(request("hi"), { client })).message).toBe("final");
+    expect((await runCommand(request("hi"), { provider: client })).message).toBe("final");
   });
 });
 
@@ -165,7 +166,7 @@ describe("runCommand: repair loop", () => {
     const bad = reply({ kind: "ops", ops: [{ type: "connect", from: "api", to: "postgres" }] });
     const good = reply({ kind: "ops", ops: [{ type: "connect", from: "lb", to: "redis" }] });
     const { client, create } = mockClient(bad, good);
-    const res = await runCommand(request("connect the lb to the cache"), { client });
+    const res = await runCommand(request("connect the lb to the cache"), { provider: client });
 
     expect(res.attempts).toBe(2);
     expect(res.ops).toEqual([{ type: "connect", from: "lb", to: "redis" }]);
@@ -179,7 +180,7 @@ describe("runCommand: repair loop", () => {
   it("keeps the repair turn append-only: earlier messages are untouched", async () => {
     const bad = reply({ kind: "ops", ops: [{ type: "replicate", id: "ghost", replicas: 2 }] });
     const { client, create } = mockClient(bad, reply({ kind: "noop" }));
-    await runCommand(request("scale the ghost"), { client });
+    await runCommand(request("scale the ghost"), { provider: client });
 
     const firstCall = create.mock.calls[0]![0].messages;
     const secondCall = create.mock.calls[1]![0].messages;
@@ -188,7 +189,7 @@ describe("runCommand: repair loop", () => {
     expect(secondCall[1]).toEqual({ role: "assistant", content: bad.content });
     expect(secondCall[1].content).toBe(bad.content);
     expect(secondCall[2].role).toBe("user");
-    expect(firstCall[0]).toBe(secondCall[0]);
+    expect(secondCall[0]).toEqual(firstCall[0]);
   });
 
   it("falls back to clarify naming the closest ids when the repair also fails", async () => {
@@ -199,7 +200,7 @@ describe("runCommand: repair loop", () => {
     if (!twoDbs.ok) throw new Error("fixture");
     const bad = () => reply({ kind: "ops", ops: [{ type: "connect", from: "api", to: "orders" }] });
     const { client } = mockClient(bad(), bad());
-    const res = await runCommand(request("connect the api to orders", twoDbs.graph), { client });
+    const res = await runCommand(request("connect the api to orders", twoDbs.graph), { provider: client });
 
     expect(res.kind).toBe("clarify");
     expect(res.attempts).toBe(2);
@@ -212,7 +213,7 @@ describe("runCommand: repair loop", () => {
   it("asks to split a batch over 25 ops without a repair turn (G-06)", async () => {
     const ops = Array.from({ length: 26 }, (_, i) => ({ type: "addNode", kind: "service", label: `svc ${i}` }));
     const { client, create } = mockClient(reply({ kind: "ops", ops }));
-    const res = await runCommand(request("add 26 services"), { client });
+    const res = await runCommand(request("add 26 services"), { provider: client });
     expect(res).toMatchObject({ kind: "clarify", attempts: 1, message: "That's a lot at once. Can we do it in parts?" });
     expect(create).toHaveBeenCalledTimes(1);
   });
@@ -220,7 +221,7 @@ describe("runCommand: repair loop", () => {
   it("states the limit when numbers stay out of bounds (G-05)", async () => {
     const bad = () => reply({ kind: "ops", ops: [{ type: "replicate", id: "api", replicas: 5000 }] });
     const { client } = mockClient(bad(), bad());
-    const res = await runCommand(request("five thousand api servers"), { client });
+    const res = await runCommand(request("five thousand api servers"), { provider: client });
     expect(res.kind).toBe("clarify");
     expect(res.message).toMatch(/1000/);
   });
@@ -230,7 +231,7 @@ describe("runCommand: guardrails", () => {
   it("turns destructive ops into confirm (G-03)", async () => {
     const ops = ["redis", "pg", "pg-r1", "pg-r2"].map((id) => ({ type: "removeNode", id }));
     const { client } = mockClient(reply({ kind: "ops", ops, message: "Removed." }));
-    const res = await runCommand(request("drop the data tier"), { client });
+    const res = await runCommand(request("drop the data tier"), { provider: client });
     expect(res.kind).toBe("confirm");
     expect(res.ops).toHaveLength(4);
     expect(res.message).toMatch(/^This removes 4 components \(Redis, Postgres \(primary\), .*\)\. Go ahead\?$/);
@@ -242,7 +243,7 @@ describe("runCommand: guardrails", () => {
     ]);
     if (!small.ok) throw new Error("fixture");
     const { client } = mockClient(reply({ kind: "ops", ops: [{ type: "removeNode", id: "api" }] }));
-    expect((await runCommand(request("remove the api", small.graph), { client })).kind).toBe("confirm");
+    expect((await runCommand(request("remove the api", small.graph), { provider: client })).kind).toBe("confirm");
   });
 
   it("drops unknown focus ids (G-08) but keeps ids the ops create", async () => {
@@ -253,12 +254,12 @@ describe("runCommand: guardrails", () => {
         focusNodeIds: ["cdn", "nope", "api", "cdn"],
       }),
     );
-    expect((await runCommand(request("add a cdn"), { client })).focusNodeIds).toEqual(["cdn", "api"]);
+    expect((await runCommand(request("add a cdn"), { provider: client })).focusNodeIds).toEqual(["cdn", "api"]);
   });
 
   it("downgrades empty ops to noop (G-12)", async () => {
     const { client } = mockClient(reply({ kind: "ops", ops: [], message: "Nothing to change." }));
-    const res = await runCommand(request("make it better"), { client });
+    const res = await runCommand(request("make it better"), { provider: client });
     expect(res).toMatchObject({ kind: "noop", message: "Nothing to change.", ops: [] });
   });
 
@@ -270,7 +271,7 @@ describe("runCommand: guardrails", () => {
         options: ["a", "b", "c", "d", "e", "x".repeat(60)],
       }),
     );
-    const res = await runCommand(request("hmm"), { client });
+    const res = await runCommand(request("hmm"), { provider: client });
     expect(res.ops).toEqual([]);
     expect(res.options).toEqual(["a", "b", "c", "d"]);
   });
@@ -279,7 +280,7 @@ describe("runCommand: guardrails", () => {
 describe("runCommand: errors", () => {
   it("maps a refusal to LLM_REFUSED (G-10)", async () => {
     const { client } = mockClient(reply("", { stop_reason: "refusal", content: [] }));
-    expect((await harnessError(runCommand(request("x"), { client }))).code).toBe("LLM_REFUSED");
+    expect((await harnessError(runCommand(request("x"), { provider: client }))).code).toBe("LLM_REFUSED");
   });
 
   it("retries once with 2× max_tokens on truncation (G-11)", async () => {
@@ -287,7 +288,7 @@ describe("runCommand: errors", () => {
       reply("{\"kind\":\"ops\",\"ops\":[", { stop_reason: "max_tokens" }),
       reply({ kind: "noop" }),
     );
-    const res = await runCommand(request("big design"), { client });
+    const res = await runCommand(request("big design"), { provider: client });
     expect(res.kind).toBe("noop");
     expect(res.attempts).toBe(1);
     expect(create.mock.calls.map((c) => c[0].max_tokens)).toEqual([COMMAND_MAX_TOKENS, COMMAND_MAX_TOKENS * 2]);
@@ -296,29 +297,29 @@ describe("runCommand: errors", () => {
   it("gives up after the second truncation with LLM_UPSTREAM", async () => {
     const cut = () => reply("{", { stop_reason: "max_tokens" });
     const { client } = mockClient(cut(), cut());
-    expect((await harnessError(runCommand(request("x"), { client }))).code).toBe("LLM_UPSTREAM");
+    expect((await harnessError(runCommand(request("x"), { provider: client }))).code).toBe("LLM_UPSTREAM");
   });
 
   it("maps unparseable output to LLM_UPSTREAM", async () => {
     const { client } = mockClient(reply("not json"));
-    expect((await harnessError(runCommand(request("x"), { client }))).code).toBe("LLM_UPSTREAM");
+    expect((await harnessError(runCommand(request("x"), { provider: client }))).code).toBe("LLM_UPSTREAM");
   });
 
   it("maps a rate limit (after SDK retries) to LLM_UNAVAILABLE", async () => {
     const { client } = mockClient(new Anthropic.RateLimitError(429, undefined, "slow down", new Headers()));
-    const err = await harnessError(runCommand(request("x"), { client }));
+    const err = await harnessError(runCommand(request("x"), { provider: client }));
     expect(err.code).toBe("LLM_UNAVAILABLE");
     expect(err.message).not.toContain("slow down");
   });
 
   it("maps a connection timeout to LLM_UNAVAILABLE", async () => {
     const { client } = mockClient(new Anthropic.APIConnectionTimeoutError());
-    expect((await harnessError(runCommand(request("x"), { client }))).code).toBe("LLM_UNAVAILABLE");
+    expect((await harnessError(runCommand(request("x"), { provider: client }))).code).toBe("LLM_UNAVAILABLE");
   });
 
   it("maps other API errors to LLM_UPSTREAM without leaking provider text", async () => {
     const { client } = mockClient(new Anthropic.InternalServerError(500, undefined, "secret upstream detail", new Headers()));
-    const err = await harnessError(runCommand(request("x"), { client }));
+    const err = await harnessError(runCommand(request("x"), { provider: client }));
     expect(err.code).toBe("LLM_UPSTREAM");
     expect(err.message).not.toContain("secret");
   });
@@ -330,14 +331,15 @@ describe("runCommand: errors", () => {
           opts.signal.addEventListener("abort", () => reject(new Anthropic.APIUserAbortError()));
         }),
     );
-    const client = { beta: { messages: { create } } } as unknown as MessagesClient;
-    const err = await harnessError(runCommand(request("x"), { client, budgetMs: 20 }));
+    const client = createAnthropicProvider({ client: { beta: { messages: { create } } } as unknown as MessagesClient });
+    const err = await harnessError(runCommand(request("x"), { provider: client, budgetMs: 20 }));
     expect(err.code).toBe("LLM_UNAVAILABLE");
     expect(err.message).toMatch(/too long/);
   });
 
   it("fails fast with LLM_UNAVAILABLE when no API key is configured", async () => {
     vi.stubEnv("ANTHROPIC_API_KEY", "");
+    vi.stubEnv("GEMINI_API_KEY", "");
     try {
       const err = await harnessError(runCommand(request("x")));
       expect(err.code).toBe("LLM_UNAVAILABLE");
@@ -349,7 +351,7 @@ describe("runCommand: errors", () => {
 
   it("rejects an invalid request before calling the model", async () => {
     const { client, create } = mockClient();
-    const err = await harnessError(runCommand({ utterance: "", graph: threeTier, baseVersion: 0 }, { client }));
+    const err = await harnessError(runCommand({ utterance: "", graph: threeTier, baseVersion: 0 }, { provider: client }));
     expect(err.code).toBe("VALIDATION_ERROR");
     expect(create).not.toHaveBeenCalled();
   });
