@@ -14,7 +14,7 @@
 | Fast path that abstains (`parseCommand → null`) | `ai/src/fastpath` | tier 1; AI is only called on `null` |
 | `simulate()` with explanations | `simulator/src/sim` | grounding answers in real numbers |
 | Hono app with request ids, JSON logs, body limit, error shape | `backend/src` | hosting `/api/command` |
-| Command bar showing "not understood" + hint | `frontend/src/features/commandbar` | becomes "✦ thinking…" → AI result |
+| Command bar showing "not understood" + hint | `frontend/src/features/commandbar` | becomes "thinking…" → AI result |
 
 ## Prerequisites (before 09:00)
 
@@ -124,14 +124,14 @@ Files: `frontend/src/features/commandbar/useCommand.ts`, `ClarifyChips.tsx`, `Co
 
 | Response | UI |
 |----------|----|
-| `ops` | `baseVersion` check → re-validate if the board changed → `apply(ops, { source: "ai", timings })` → toast with Undo, badge `✦ AI · 1.8 s` |
+| `ops` | `baseVersion` check → re-validate if the board changed → `apply(ops, { source: "ai", timings })` → toast with Undo, badge `AI · 1.8 s` (sparkles icon) |
 | `clarify` | chips above the bar; tap or say the option (`1`–`4` keys) → re-send `"<original> (answer: <choice>)"` |
 | `confirm` | dialog naming the count; Confirm applies the held ops locally (no second call) |
 | `answer` | answer card above the bar; `focusNodeIds` highlight on hover |
 | `noop` | toast with the message |
 | error | toast with Retry + request id; 2 consecutive 502/503 → degraded banner, fast path keeps working |
 
-States: "✦ thinking…" shimmer after submit, "still thinking…" after 4 s, abort at 25 s, a newer submit aborts the older request.
+States: "thinking…" shimmer after submit, "still thinking…" after 4 s, abort at 25 s, a newer submit aborts the older request.
 
 **Tests:** e2e with `page.route("/api/command", …)` mocks for every kind, plus the stale-board and degraded paths (no real AI in CI).
 

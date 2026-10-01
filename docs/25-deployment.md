@@ -21,6 +21,7 @@ One Vercel project, root `frontend/`, with npm workspaces installed from the rep
 | `ARCHIE_DAILY_CAP` | opt | `50` | `500` | no |
 | `ARCHIE_ACCESS_CODE` | — | opt | opt (only if abused) | yes |
 | `ARCHIE_LOG_LEVEL` | `debug` | `info` | `info` | no |
+| `NEXT_PUBLIC_SITE_URL` | — | opt | recommended (canonical URL for OG/Twitter/sitemap; falls back to `VERCEL_PROJECT_PRODUCTION_URL`) | no |
 
 `.env.example` lists all of these with placeholder values.
 

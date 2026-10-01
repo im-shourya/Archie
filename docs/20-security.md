@@ -17,7 +17,7 @@ Follows `.claude/skills/security`. Any security-sensitive change must be called 
 | T-02 | API key committed to git | High | `.env*` gitignored, `.env.example` only; CI secret scan (gitleaks) | Planned |
 | T-03 | Budget drain (scripted calls) | High | Per-IP rate limit, daily cap, optional access code, Console spend limit | Planned |
 | T-04 | Prompt injection via utterance or node labels | Medium | Untrusted-data rule in prompt; output limited to schema'd ops/text; ops validated; no tools, no code execution, no URLs fetched | Planned |
-| T-05 | XSS via labels, AI messages, share links | High | React escaping only; no `dangerouslySetInnerHTML`; Mermaid/SVG export escaped; CSP | Planned |
+| T-05 | XSS via labels, AI messages, share links | High | React escaping only; no `dangerouslySetInnerHTML` for user or AI content (the single use is the Home page JSON-LD, built from constants); Mermaid/SVG export escaped; CSP | Partial (rendering safe; CSP in prod) |
 | T-06 | Malicious share link (huge / malformed) | Medium | Size cap 32 KB, Zod validation, bounds; errors render a safe page | Planned |
 | T-07 | Oversized request bodies (DoS) | Medium | 256 KB cap, ≤ 200 nodes, utterance ≤ 4,000 chars | Planned |
 | T-08 | Leaking provider errors / stack traces | Low | Error mapper returns codes only; details logged server-side | Planned |
@@ -50,7 +50,7 @@ Permissions-Policy: microphone=(self), camera=(), geolocation=()
 Strict-Transport-Security: max-age=63072000; includeSubDomains
 ```
 
-(`unsafe-inline` for scripts is needed by Next.js unless nonces are added. Tighten to nonces if time allows.)
+(`unsafe-inline` for scripts is needed by Next.js unless nonces are added. Tighten to nonces if time allows. Fonts are self-hosted by `next/font` at build time, so no third-party font origin is needed.)
 
 ### CORS
 

@@ -81,7 +81,7 @@ None. There is no server database ([ADR-003](30-architecture-decisions.md)).
 
 ```
 utterance → normalize → grammar match → resolve refs (unambiguous)
-→ ops → applyBatch (validate → apply → inverse) → version++
+→ ops → applyBatch (validate all → apply atomically) → version++ → undo snapshot
 → layout (worker) ∥ simulate() → render → save (debounced) → event log
 ```
 

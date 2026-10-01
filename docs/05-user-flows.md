@@ -22,16 +22,16 @@ Home ──► New board / Template ──► Describe ──► Load ──► 
 ## UF-02 · Describe a system (F-01, F-02, F-03)
 
 1. 🎙 *"Users hit two load balancers, thirty API servers behind them, Postgres primary with two read replicas, and a Redis cache."*
-2. Fast path misses (multi-component) → command bar shows "✦ thinking…" and a ghost shimmer on the canvas.
+2. Fast path misses (multi-component) → command bar shows "thinking…" and a ghost shimmer on the canvas.
 3. AI returns `kind: ops` (7 addNode + connects, with replicas set in props).
 4. Nodes animate in, the layout settles, new nodes pulse, and a toast says *"Added 7 components"* with **Undo**.
 5. The result is the `three-tier` golden graph ([10](10-traffic-model.md)), so the numbers below match the tests.
-6. Badge: `✦ AI · 1.9 s`.
+6. Badge: `AI · 1.9 s`.
 
 ## UF-03 · Load the system (F-05)
 
 1. 🎙 *"Send fifty thousand requests a second, ninety percent reads."*
-2. Fast path hit → `setWorkload` → badge `⚡ local · 3 ms`.
+2. Fast path hit → `setWorkload` → badge `local · 3 ms`.
 3. Simulation runs; particles flow; `postgres-primary` turns red.
 4. Bottleneck callout above the node: *"1,500 reads/s + 5,000 writes/s on 1 shard (capacity 10,000 reads / 4,000 writes per shard) → ρ = 1.40 → 28.6% of its requests dropped. Consider: shard the database, or reduce writes."*
 5. Metrics panel: success **96.3%** (every write and a third of cache-miss reads touch pg: 0.9 × 0.9905 + 0.1 × 0.7143), throughput 48.1k rps, p50/p95/p99 for reads and writes, cost.
@@ -44,7 +44,7 @@ Home ──► New board / Template ──► Describe ──► Load ──► 
 
 ## UF-05 · Break it (F-06)
 
-1. 🎙 *"Kill Redis."* → fast path → `fail redis` → node greyed with a ✕.
+1. 🎙 *"Kill Redis."* → fast path → `fail redis` → node dimmed and dashed with an × icon.
 2. Cache hit rate → 0: reads to the Postgres cluster go from 4,500/s to 45,000/s (15,000 per pool member), both replicas saturate. The blast-radius panel shows success **96.3% → 54.5%**, read p99 ~0.6 s → ~1.3 s, and lists the newly hot replicas.
 3. 🎙 *"Bring it back."* → `recover redis` (the reference resolves from the last event).
 
