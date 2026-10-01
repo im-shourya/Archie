@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { Ajv2020 } from "ajv/dist/2020.js";
 import { describe, expect, it } from "vitest";
-import { buildTemplate, GraphSchema, OpSchema } from "@archie/simulator";
+import { applyBatch, buildTemplate, GraphSchema, OpSchema, simulate } from "@archie/simulator";
 
 /** JSON Schemas in specs/ and Zod schemas in code must agree (docs/21 · contracts). */
 
@@ -10,12 +10,14 @@ const load = (path: string) => JSON.parse(readFileSync(new URL(`../../specs/${pa
 const graphSchema = load("graph-schema.json");
 const commandSchema = load("command-schema.json");
 const fixture = load("fixtures/three-tier.graph.json");
+const simulationSchema = load("simulation-schema.json");
 
 const ajv = new Ajv2020({ strict: false, allErrors: true });
 ajv.addSchema(graphSchema);
 ajv.addSchema(commandSchema);
 const jsonGraph = ajv.getSchema(graphSchema.$id)!;
 const jsonOp = ajv.getSchema(`${commandSchema.$id}#/$defs/Op`)!;
+const jsonSim = ajv.compile(simulationSchema);
 
 const validGraph = { nodes: [], edges: [], workload: { rps: 0, readRatio: 0.5, peakMultiplier: 1 }, version: 0 };
 const node = (overrides: object) => ({
@@ -60,5 +62,22 @@ describe("specs ↔ Zod contracts", () => {
     expect(sortById(template.nodes)).toEqual(sortById(fixture.nodes));
     expect(sortById(template.edges)).toEqual(sortById(fixture.edges));
     expect(template.workload).toEqual(fixture.workload);
+  });
+});
+
+describe("SimResult ↔ specs/simulation-schema.json", () => {
+  const scenarios: [string, unknown[]][] = [
+    ["three-tier at 50k", []],
+    ["cache down", [{ type: "fail", id: "redis" }]],
+    ["primary failover", [{ type: "fail", id: "pg" }]],
+    ["no traffic", [{ type: "setWorkload", rps: 0 }]],
+  ];
+  it.each(scenarios)("%s validates against the schema", (_name, ops) => {
+    const base = buildTemplate("three-tier");
+    const graph = ops.length ? (applyBatch(base, ops) as { ok: true; graph: typeof base }).graph : base;
+    const result = simulate(graph);
+    const valid = jsonSim(result);
+    expect(jsonSim.errors ?? []).toEqual([]);
+    expect(valid).toBe(true);
   });
 });

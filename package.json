@@ -28,7 +28,8 @@
     "test:e2e": "playwright test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "bench:fast": "tsx evals/src/bench/fastpath.ts"
+    "bench:fast": "tsx evals/src/bench/fastpath.ts",
+    "bench:sim": "tsx evals/src/bench/simulator.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -39,6 +40,7 @@
     "eslint": "^10.11.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "fake-indexeddb": "^6.2.5",
+    "fast-check": "^4.10.2",
     "prettier": "^3.9.9",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.71.0",
