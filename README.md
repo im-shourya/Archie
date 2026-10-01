@@ -33,7 +33,7 @@ A voice-first system-design board: describe an architecture out loud, see it dra
 |--------|-------|
 | Task accuracy (held-out) | _pending_ |
 | False-action rate | _pending_ |
-| Fast path P50 / P100 | _pending_ |
+| Fast path P50 / P100 | 0.006 ms / 0.138 ms (Apple M4, 14k samples, commit `c055a5e`) |
 | AI command P50 / P95 | _pending_ |
 | Simulator P95 @ 100 nodes | _pending_ |
 
@@ -72,7 +72,8 @@ npm run dev                     # http://localhost:3000  ·  health: /api/health
 | `npm run dev:backend` | Backend alone on `http://localhost:8787/api` |
 | `npm run lint` · `npm run typecheck` | ESLint · TypeScript across all workspaces |
 | `npm test` | Unit and integration tests (Vitest) |
-| `npm run test:e2e` | Playwright smoke tests (`npx playwright install chromium` first) |
+| `npm run test:e2e` | Playwright end-to-end tests (`npx playwright install chromium` first) |
+| `npm run bench:fast` | Fast-path latency percentiles → `evals/results/bench-fastpath.json` |
 | `npm run build` | Production build |
 
 Repository layout: `frontend/` (Next.js) · `backend/` (Hono) · `simulator/` · `ai/` · `database/` · `evals/` · `tests/` · `specs/`. See the [overview](docs/00-overview.md#repository-structure).
