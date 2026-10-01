@@ -30,6 +30,7 @@ describe("graphDsl", () => {
   it("includes load from the simulator", () => {
     const dsl = graphDsl(threeTier, simulate(threeTier));
     expect(dsl).toMatch(/ {2}api "API" \[service x30\] {2}ρ=\d\.\d\d/);
+    expect(dsl).toContain('client "Users" [client]\n');
   });
 
   it("marks down nodes and async edges", () => {
