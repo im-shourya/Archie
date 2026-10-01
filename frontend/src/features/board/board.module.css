@@ -10,12 +10,15 @@
   gap: 12px;
   height: 48px;
   padding: 0 16px;
-  border-bottom: 1px solid var(--border-subtle);
-  background: var(--surface-panel);
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: var(--color-surface);
 }
 
 .brand {
-  color: var(--text-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-primary);
   font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
@@ -27,7 +30,7 @@
   max-width: 360px;
   padding: 4px 8px;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: transparent;
   color: inherit;
   font: inherit;
@@ -35,7 +38,7 @@
 
 .name:hover,
 .name:focus {
-  border-color: var(--border-subtle);
+  border-color: var(--color-border-subtle);
 }
 
 .topActions {
@@ -46,19 +49,20 @@
 
 .iconButton,
 .button {
-  border: 1px solid var(--border-subtle);
-  border-radius: 6px;
-  background: var(--surface-panel);
-  color: var(--text-primary);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
   font: inherit;
   cursor: pointer;
   text-decoration: none;
 }
 
 .iconButton {
+  display: inline-grid;
+  place-items: center;
   width: 32px;
   height: 32px;
-  font-size: 18px;
 }
 
 .button {
@@ -74,14 +78,14 @@
 .iconButton:focus-visible,
 .button:focus-visible,
 .name:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
 .banner {
   margin: 0;
   padding: 6px 16px;
-  background: color-mix(in srgb, var(--accent) 12%, var(--surface-panel));
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
   font-size: 14px;
 }
 
@@ -100,8 +104,8 @@
 .panel {
   overflow: auto;
   padding: 16px;
-  border-left: 1px solid var(--border-subtle);
-  background: var(--surface-panel);
+  border-left: 1px solid var(--color-border-subtle);
+  background: var(--color-surface);
 }
 
 .panelTitle {
@@ -110,11 +114,11 @@
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .muted {
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .log {
@@ -136,7 +140,7 @@
 
 .logMeta {
   font-size: 12px;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   font-variant-numeric: tabular-nums;
 }
 
@@ -175,28 +179,27 @@
   width: 184px;
   height: 72px;
   padding: 8px 12px 12px;
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
-  background: var(--surface-panel);
-  color: var(--text-primary);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
 }
 
 .selected {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 35%, transparent);
 }
 
 .glyph {
   display: grid;
   place-items: center;
   flex: none;
-  min-width: 36px;
-  height: 36px;
-  padding: 0 4px;
-  border-radius: 6px;
-  background: var(--surface-canvas);
-  font: 600 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+  color: var(--color-text-secondary);
 }
 
 .text {
@@ -218,31 +221,31 @@
 
 .subtitle {
   font-size: 12px;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .load {
-  font: 600 11px/1.3 var(--font-mono, ui-monospace, monospace);
+  font: 600 11px/1.3 var(--font-mono), monospace;
   font-variant-numeric: tabular-nums;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 /* Simulation state (docs/06): colour + label + bar, never colour alone. */
 .node[data-sim="warm"] {
-  border-color: var(--state-warm);
+  border-color: var(--color-state-warm);
 }
 
 .node[data-sim="hot"] {
-  border-color: var(--state-hot);
+  border-color: var(--color-state-hot);
 }
 
 .node[data-sim="saturated"] {
-  border-color: var(--state-saturated);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--state-saturated) 30%, transparent);
+  border-color: var(--color-state-saturated);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-state-saturated) 30%, transparent);
 }
 
 .node[data-sim="saturated"] .load {
-  color: var(--state-saturated);
+  color: var(--color-state-saturated);
 }
 
 .node[data-sim="down"] {
@@ -261,26 +264,26 @@
   bottom: 6px;
   height: 3px;
   border-radius: 2px;
-  background: var(--border-subtle);
+  background: var(--color-border-subtle);
   overflow: hidden;
 }
 
 .rhoFill {
   display: block;
   height: 100%;
-  background: var(--state-healthy);
+  background: var(--color-state-healthy);
 }
 
 .node[data-sim="warm"] .rhoFill {
-  background: var(--state-warm);
+  background: var(--color-state-warm);
 }
 
 .node[data-sim="hot"] .rhoFill {
-  background: var(--state-hot);
+  background: var(--color-state-hot);
 }
 
 .node[data-sim="saturated"] .rhoFill {
-  background: var(--state-saturated);
+  background: var(--color-state-saturated);
 }
 
 /* Informational only: never block clicks on the nodes underneath. */
@@ -288,10 +291,10 @@
   pointer-events: none;
   max-width: 300px;
   padding: 10px 12px;
-  border: 1px solid var(--state-saturated);
-  border-radius: 8px;
-  background: var(--surface-panel);
-  color: var(--text-primary);
+  border: 1px solid var(--color-state-saturated);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
   box-shadow: 0 6px 20px rgb(0 0 0 / 0.12);
   font-size: 13px;
   line-height: 1.45;
@@ -305,15 +308,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: var(--state-saturated);
+  color: var(--color-state-saturated);
 }
 
 .calloutClose {
   pointer-events: auto;
+  display: inline-grid;
+  place-items: center;
   border: 0;
   background: transparent;
-  color: var(--text-secondary);
-  font-size: 16px;
+  color: var(--color-text-secondary);
   cursor: pointer;
 }
 
@@ -321,7 +325,7 @@
   display: flex;
   gap: 4px;
   margin: -4px 0 16px;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .tab {
@@ -329,7 +333,7 @@
   border: 0;
   border-bottom: 2px solid transparent;
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   font: inherit;
   font-size: 13px;
   font-weight: 600;
@@ -337,18 +341,18 @@
 }
 
 .tab[aria-selected="true"] {
-  border-bottom-color: var(--accent);
-  color: var(--text-primary);
+  border-bottom-color: var(--color-primary);
+  color: var(--color-text-primary);
 }
 
 .tab:focus-visible,
 .calloutClose:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
 .edge {
-  stroke: var(--edge-stroke);
+  stroke: var(--color-edge);
 }
 
 .edgeIdle {
@@ -356,32 +360,32 @@
 }
 
 .particle {
-  fill: var(--state-healthy);
+  fill: var(--color-state-healthy);
 }
 
 .particleError {
-  fill: var(--state-saturated);
+  fill: var(--color-state-saturated);
 }
 
 .edgeLabel {
   position: absolute;
   padding: 1px 5px;
   border-radius: 4px;
-  background: var(--surface-panel);
-  color: var(--text-secondary);
-  font: 500 10px/1.4 var(--font-mono, ui-monospace, monospace);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font: 500 10px/1.4 var(--font-mono), monospace;
   font-variant-numeric: tabular-nums;
   pointer-events: none;
   white-space: nowrap;
 }
 
 .edgeLabel[data-error="true"] {
-  color: var(--state-saturated);
+  color: var(--color-state-saturated);
 }
 
 .badge {
   margin-left: auto;
-  font: 600 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  font: 600 12px/1 var(--font-mono), monospace;
   font-variant-numeric: tabular-nums;
 }
 
@@ -389,7 +393,7 @@
   position: absolute;
   top: 4px;
   right: 6px;
-  font-size: 12px;
+  color: var(--color-state-down);
 }
 
 .handle {
@@ -402,7 +406,7 @@
 
 @keyframes pulse {
   0% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 60%, transparent);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 60%, transparent);
   }
   100% {
     box-shadow: 0 0 0 12px transparent;
@@ -425,13 +429,13 @@
 
   .panel {
     border-left: 0;
-    border-top: 1px solid var(--border-subtle);
+    border-top: 1px solid var(--color-border-subtle);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .pulse {
     animation: none;
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--color-primary);
   }
 }
