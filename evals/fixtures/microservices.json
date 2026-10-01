@@ -1,0 +1,186 @@
+{
+  "nodes": [
+    {
+      "id": "client",
+      "kind": "client",
+      "label": "Users",
+      "props": {
+        "replicas": 1
+      },
+      "status": "up"
+    },
+    {
+      "id": "gateway",
+      "kind": "gateway",
+      "label": "API gateway",
+      "props": {
+        "replicas": 1
+      },
+      "status": "up"
+    },
+    {
+      "id": "catalog",
+      "kind": "service",
+      "label": "Catalog service",
+      "props": {
+        "replicas": 6
+      },
+      "status": "up"
+    },
+    {
+      "id": "orders",
+      "kind": "service",
+      "label": "Orders service",
+      "props": {
+        "replicas": 4
+      },
+      "status": "up"
+    },
+    {
+      "id": "kafka",
+      "kind": "queue",
+      "label": "Kafka",
+      "props": {
+        "replicas": 1
+      },
+      "status": "up"
+    },
+    {
+      "id": "email-workers",
+      "kind": "worker",
+      "label": "Email workers",
+      "props": {
+        "replicas": 2
+      },
+      "status": "up"
+    },
+    {
+      "id": "catalog-db",
+      "kind": "nosql",
+      "label": "Catalog (MongoDB)",
+      "props": {
+        "replicas": 1,
+        "shards": 2
+      },
+      "status": "up"
+    },
+    {
+      "id": "orders-db",
+      "kind": "sql",
+      "label": "Orders (Postgres)",
+      "props": {
+        "replicas": 1,
+        "shards": 1,
+        "role": "primary",
+        "failover": false
+      },
+      "status": "up"
+    },
+    {
+      "id": "redis",
+      "kind": "cache",
+      "label": "Redis",
+      "props": {
+        "replicas": 1,
+        "hitRate": 0.9
+      },
+      "status": "up"
+    },
+    {
+      "id": "search",
+      "kind": "search",
+      "label": "Elasticsearch",
+      "props": {
+        "replicas": 1
+      },
+      "status": "up"
+    },
+    {
+      "id": "stripe",
+      "kind": "external",
+      "label": "Stripe",
+      "props": {
+        "replicas": 1
+      },
+      "status": "up"
+    }
+  ],
+  "edges": [
+    {
+      "id": "client->gateway",
+      "from": "client",
+      "to": "gateway",
+      "kind": "call",
+      "traffic": "all"
+    },
+    {
+      "id": "gateway->catalog",
+      "from": "gateway",
+      "to": "catalog",
+      "kind": "call",
+      "traffic": "all"
+    },
+    {
+      "id": "gateway->orders",
+      "from": "gateway",
+      "to": "orders",
+      "kind": "call",
+      "traffic": "all"
+    },
+    {
+      "id": "catalog->redis",
+      "from": "catalog",
+      "to": "redis",
+      "kind": "call",
+      "traffic": "read"
+    },
+    {
+      "id": "catalog->catalog-db",
+      "from": "catalog",
+      "to": "catalog-db",
+      "kind": "call",
+      "traffic": "all"
+    },
+    {
+      "id": "catalog->search",
+      "from": "catalog",
+      "to": "search",
+      "kind": "call",
+      "traffic": "read"
+    },
+    {
+      "id": "orders->orders-db",
+      "from": "orders",
+      "to": "orders-db",
+      "kind": "call",
+      "traffic": "all"
+    },
+    {
+      "id": "orders->stripe",
+      "from": "orders",
+      "to": "stripe",
+      "kind": "call",
+      "traffic": "write"
+    },
+    {
+      "id": "orders->kafka",
+      "from": "orders",
+      "to": "kafka",
+      "kind": "async",
+      "traffic": "write"
+    },
+    {
+      "id": "kafka->email-workers",
+      "from": "kafka",
+      "to": "email-workers",
+      "kind": "async",
+      "traffic": "write"
+    }
+  ],
+  "workload": {
+    "rps": 8000,
+    "readRatio": 0.85,
+    "peakMultiplier": 1
+  },
+  "version": 0
+}

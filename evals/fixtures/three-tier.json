@@ -1,0 +1,123 @@
+{
+  "nodes": [
+    {
+      "id": "client",
+      "kind": "client",
+      "label": "Users",
+      "props": {
+        "replicas": 1
+      },
+      "status": "up"
+    },
+    {
+      "id": "lb",
+      "kind": "lb",
+      "label": "Load balancer",
+      "props": {
+        "replicas": 2
+      },
+      "status": "up"
+    },
+    {
+      "id": "api",
+      "kind": "service",
+      "label": "API",
+      "props": {
+        "replicas": 30
+      },
+      "status": "up"
+    },
+    {
+      "id": "redis",
+      "kind": "cache",
+      "label": "Redis",
+      "props": {
+        "replicas": 1,
+        "hitRate": 0.9
+      },
+      "status": "up"
+    },
+    {
+      "id": "pg",
+      "kind": "sql",
+      "label": "Postgres (primary)",
+      "props": {
+        "replicas": 1,
+        "shards": 1,
+        "role": "primary",
+        "failover": true
+      },
+      "status": "up"
+    },
+    {
+      "id": "pg-r1",
+      "kind": "sql",
+      "label": "Postgres replica 1",
+      "props": {
+        "replicas": 1,
+        "role": "replica"
+      },
+      "status": "up"
+    },
+    {
+      "id": "pg-r2",
+      "kind": "sql",
+      "label": "Postgres replica 2",
+      "props": {
+        "replicas": 1,
+        "role": "replica"
+      },
+      "status": "up"
+    }
+  ],
+  "edges": [
+    {
+      "id": "client->lb",
+      "from": "client",
+      "to": "lb",
+      "kind": "call",
+      "traffic": "all"
+    },
+    {
+      "id": "lb->api",
+      "from": "lb",
+      "to": "api",
+      "kind": "call",
+      "traffic": "all"
+    },
+    {
+      "id": "api->redis",
+      "from": "api",
+      "to": "redis",
+      "kind": "call",
+      "traffic": "read"
+    },
+    {
+      "id": "api->pg",
+      "from": "api",
+      "to": "pg",
+      "kind": "call",
+      "traffic": "all"
+    },
+    {
+      "id": "pg->pg-r1",
+      "from": "pg",
+      "to": "pg-r1",
+      "kind": "replication",
+      "traffic": "write"
+    },
+    {
+      "id": "pg->pg-r2",
+      "from": "pg",
+      "to": "pg-r2",
+      "kind": "replication",
+      "traffic": "write"
+    }
+  ],
+  "workload": {
+    "rps": 50000,
+    "readRatio": 0.9,
+    "peakMultiplier": 1
+  },
+  "version": 0
+}

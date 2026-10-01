@@ -8,8 +8,9 @@
     "typecheck": "tsc -p ."
   },
   "dependencies": {
+    "@archie/ai": "0.1.0",
     "@archie/simulator": "0.1.0",
-    "@archie/ai": "0.1.0"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "tsx": "^4.23.15"

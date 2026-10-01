@@ -1,0 +1,72 @@
+{
+  "nodes": [
+    {
+      "id": "client",
+      "kind": "client",
+      "label": "Users",
+      "props": {
+        "replicas": 1
+      },
+      "status": "up"
+    },
+    {
+      "id": "lb",
+      "kind": "lb",
+      "label": "Load balancer",
+      "props": {
+        "replicas": 1
+      },
+      "status": "up"
+    },
+    {
+      "id": "api",
+      "kind": "service",
+      "label": "API",
+      "props": {
+        "replicas": 10
+      },
+      "status": "up"
+    },
+    {
+      "id": "pg",
+      "kind": "sql",
+      "label": "Postgres",
+      "props": {
+        "replicas": 1,
+        "shards": 1,
+        "role": "primary",
+        "failover": false
+      },
+      "status": "up"
+    }
+  ],
+  "edges": [
+    {
+      "id": "client->lb",
+      "from": "client",
+      "to": "lb",
+      "kind": "call",
+      "traffic": "all"
+    },
+    {
+      "id": "lb->api",
+      "from": "lb",
+      "to": "api",
+      "kind": "call",
+      "traffic": "all"
+    },
+    {
+      "id": "api->pg",
+      "from": "api",
+      "to": "pg",
+      "kind": "call",
+      "traffic": "all"
+    }
+  ],
+  "workload": {
+    "rps": 20000,
+    "readRatio": 0.9,
+    "peakMultiplier": 1
+  },
+  "version": 0
+}
