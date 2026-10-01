@@ -4,6 +4,7 @@ import { HTTPException } from "hono/http-exception";
 import { requestId } from "hono/request-id";
 import { AppError, errorBody } from "./errors";
 import { logger } from "./middleware/logger";
+import { command } from "./routes/command";
 import { health } from "./routes/health";
 
 const MAX_BODY_BYTES = 256 * 1024;
@@ -20,11 +21,14 @@ app.use(
 );
 
 app.route("/health", health);
+app.route("/command", command);
 
 app.notFound((c) => c.json(errorBody("NOT_FOUND", `No route for ${c.req.method} ${c.req.path}`), 404));
 
 app.onError((err, c) => {
   if (err instanceof AppError) {
+    const retryAfter = err.details?.retryAfterSeconds;
+    if (typeof retryAfter === "number") c.header("Retry-After", String(retryAfter));
     return c.json(errorBody(err.code, err.message, err.details), err.status);
   }
   if (err instanceof HTTPException) {
