@@ -16,6 +16,7 @@ Most interactions never reach the API. Fast-path commands, the simulator, undo/r
 | `PAYLOAD_TOO_LARGE` | 413 |
 | `LLM_REFUSED` | 422 |
 | `ACCESS_CODE_REQUIRED` | 401 |
+| `NOT_FOUND` | 404 |
 | `RATE_LIMITED` | 429 (+ `Retry-After`) |
 | `DAILY_CAP_REACHED` | 429 |
 | `LLM_UPSTREAM` | 502 |
