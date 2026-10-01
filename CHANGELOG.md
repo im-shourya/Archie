@@ -5,6 +5,9 @@ All notable user-visible changes. Format: [Keep a Changelog](https://keepachange
 ## [Unreleased]
 
 ### Added
+- Live simulation: per-component load, utilization and status, end-to-end success and p50/p95/p99 latency, throughput and monthly cost; cache-aside, read replicas, sharding, queues with backlog, failover and failure injection; every red component explains itself with the numbers.
+- Animated traffic on edges (failing requests in red), bottleneck callout, metrics panel with blast radius and component details.
+- `npm run bench:sim` latency benchmark.
 - Voice command bar: instant local commands (kill/recover, delete, connect/disconnect, replicas, shards, hit rate, workload, undo/redo, fit/zoom) with spoken-number and dictation-error handling; unclear commands are never guessed.
 - Latency badge, hands-free mode (auto-send when dictation settles), command history (↑/↓), toast with Undo, `/` and ⌘K focus, `H` toggle.
 - `npm run bench:fast` latency benchmark.
