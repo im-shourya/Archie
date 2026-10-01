@@ -60,7 +60,7 @@ Next.js · React Flow · elkjs · Zustand · Hono · TypeScript · Zod · Claude
 Requires Node 22+ (`.nvmrc`).
 
 ```bash
-git clone https://github.com/im-shourya/hh-goa-4.git archie && cd archie
+git clone https://github.com/im-shourya/Archie.git archie && cd archie
 cp .env.example .env.local      # add ANTHROPIC_API_KEY (needed from Phase 4)
 npm install
 npm run dev                     # http://localhost:3000  ·  health: /api/health
