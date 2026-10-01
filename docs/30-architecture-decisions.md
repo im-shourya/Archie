@@ -101,3 +101,10 @@ Format: Context → Decision → Alternatives → Consequences. Status: `Accepte
 **Decision:** At most 5 `<circle>` particles per edge (log₁₀ of rps) animated by the browser along the edge path; failing share drawn red; none under `prefers-reduced-motion` (stroke width shows volume instead).
 **Alternatives:** Canvas overlay (extra coordinate syncing on pan/zoom); CSS offset-path.
 **Consequences:** No per-frame JavaScript, pan/zoom just works, and the particle count stays bounded.
+
+## ADR-015 · Brand and design system: Plex, Lucide, semantic tokens, state-first colour
+**Status:** Accepted · 2026-10-01
+**Context:** Placeholder tokens, emoji used as icons, and system fonts made the product look generic. The product's meaning lives in component state, so colour must be reserved for it.
+**Decision:** Semantic CSS tokens (light warm paper / dark graphite), one cobalt primary for actions only, a WCAG-AA health ramp for simulation state, IBM Plex Sans + Mono via `next/font`, Lucide icons with one icon per component kind, and an "A as a graph" logo. Details in [06 · Design system](06-ui-ux.md#design-system).
+**Alternatives:** Inter + a default palette (generic); a blueprint-blue theme (cliché, competes with state colours); emoji icons (inconsistent rendering).
+**Consequences:** State colours never collide with the brand colour; every text role passes 4.5:1; fonts are self-hosted (no third-party origin in the CSP).

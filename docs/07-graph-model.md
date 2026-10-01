@@ -13,7 +13,7 @@ The domain model. The machine-readable contract is [`specs/graph-schema.json`](.
 | **Workload** | The traffic entering at `client` nodes |
 | **Op** | An atomic change instruction ([08](08-graph-operations.md)) |
 | **Batch** | The ops produced by one command, applied atomically |
-| **Event** | A logged batch with its utterance, tier, timings and inverse |
+| **Event** | A logged batch with its utterance, source, ops and timings (undo uses graph snapshots, ADR-011) |
 
 ## Types
 
