@@ -4,7 +4,7 @@ Where the project is **right now**. Update at the end of every phase (and whenev
 
 ## Current phase
 
-**Phase 4 built** on `feat/ai-harness` ([32-phase-4-plan.md](32-phase-4-plan.md)): schemas + context DSL, system prompt, harness with repair and guardrails, `/api/command` with rate limiting, the AI tier in the command bar, and the eval runner with 31 cases. All of it is tested with a mocked model. **The real-model checks are still open:** the structured-output schema call, the B1 eval and the AI latency, which need an `ANTHROPIC_API_KEY`.
+**Phase 4 built** on `feat/ai-harness` ([32-phase-4-plan.md](32-phase-4-plan.md)): schemas + context DSL, system prompt, harness with repair and guardrails, `/api/command` with rate limiting, the AI tier in the command bar, and the eval runner with 31 cases. All of it is tested with a mocked model. **The real-model checks are still open:** the structured-output schema call, the B1 eval and the AI latency, which need a model key. The default provider is now Gemini's free tier (`GEMINI_API_KEY`, [ADR-016](30-architecture-decisions.md)); Claude remains available with `ARCHIE_PROVIDER=anthropic`.
 
 ## Completed
 
@@ -28,7 +28,7 @@ Where the project is **right now**. Update at the end of every phase (and whenev
 
 ## Blocked
 
-- Real-model verification of Phase 4: no `ANTHROPIC_API_KEY` on the build machine yet (add it to `.env.local` and set a Console spend limit).
+- Real-model verification of Phase 4: no `GEMINI_API_KEY` on the build machine yet (free at aistudio.google.com/apikey; add it to `.env.local`).
 
 ## Known bugs
 
@@ -45,7 +45,7 @@ Where the project is **right now**. Update at the end of every phase (and whenev
 1. Sign up for Wispr Flow via <https://ref.wisprflow.ai/hhg>
 2. Test screen recording with the Wispr overlay visible
 3. Make the repository public before submitting (it's private, so the repo link and README images won't open for judges)
-4. Add `ANTHROPIC_API_KEY`, run `npx tsx ai/scripts/try.ts`, then `npm run eval -- --split dev` and record B1 in doc 22
+4. Add `GEMINI_API_KEY`, run `npx tsx ai/scripts/try.ts`, then `npm run eval -- --split dev` and record B1 in doc 22
 5. 🎙 Phase 5 per [29-roadmap.md](29-roadmap.md)
 
 ## Metrics snapshot

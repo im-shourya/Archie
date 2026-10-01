@@ -22,7 +22,7 @@ Archie is a system-design board you talk to. You describe changes out loud ("fiv
 ## What works today
 
 - **Voice commands, applied locally.** Dictate with Wispr Flow (or type) into the command bar. A deterministic parser turns commands like *"Kill Redis"*, *"Shard Postgres into two"* or *"Send fifty thousand requests a second, ninety percent reads"* into graph edits. Anything it isn't certain about is **not guessed** locally: it goes to the AI tier instead.
-- **An AI tier for everything else.** Full descriptions (*"users hit two load balancers, thirty API servers, Postgres with two read replicas, and Redis"*) become validated edits. When a reference is ambiguous it asks (*"Which database?"* with tappable answers), big deletions wait for your confirmation, questions get answers that cite the simulator's numbers and highlight the components, and off-topic requests change nothing. Claude only ever proposes operations: every one is validated, invalid ones get one repair attempt, and the guardrails are enforced in code.
+- **An AI tier for everything else.** Full descriptions (*"users hit two load balancers, thirty API servers, Postgres with two read replicas, and Redis"*) become validated edits. When a reference is ambiguous it asks (*"Which database?"* with tappable answers), big deletions wait for your confirmation, questions get answers that cite the simulator's numbers and highlight the components, and off-topic requests change nothing. The model only ever proposes operations: every one is validated, invalid ones get one repair attempt, and the guardrails are enforced in code.
 - **Hands-free mode.** The command sends itself once your dictation has been still for 1.2 seconds.
 - **A live simulator.** Every change re-runs a queueing model: per-component load and utilization (ρ), cache-aside reads, read replicas, sharding, queues with backlog, failover, end-to-end success rate, p50/p95/p99 latency, throughput and a monthly cost estimate.
 - **Explanations with the math.** The bottleneck gets a note such as *"1,500 reads/s + 5,000 writes/s on 1 shard (capacity 10,000 reads / 4,000 writes per shard) → ρ = 1.40 → 28.6% of its requests dropped."*
@@ -60,7 +60,7 @@ flowchart LR
     V[Wispr Flow dictation] --> C[Command bar]
     C --> F{Fast path<br/>deterministic parser}
     F -- understood --> O[Validated graph ops]
-    F -- unsure --> A[AI tier · /api/command<br/>Claude + validation + guardrails]
+    F -- unsure --> A[AI tier · /api/command<br/>Gemini or Claude + validation + guardrails]
     A -- ops --> O
     A -- clarify · confirm · answer · noop --> C
     O --> G[(Board graph)]
@@ -71,7 +71,7 @@ flowchart LR
 
 1. You speak a command; Wispr Flow types it into the command bar.
 2. The fast path matches it against an anchored grammar and resolves component names ("the db", "it", "postgres replica one"). It returns nothing unless it is certain.
-3. Otherwise `/api/command` sends the board (as a compact text form), the simulator summary and the utterance to Claude, which returns structured output: edits, a question, a confirmation request, an answer or a no-op. Edits are validated; invalid ones get one repair turn and then become a question.
+3. Otherwise `/api/command` sends the board (as a compact text form), the simulator summary and the utterance to the model (Gemini by default, Claude optional), which returns structured output: edits, a question, a confirmation request, an answer or a no-op. Edits are validated; invalid ones get one repair turn and then become a question.
 4. The result is a batch of typed operations, validated as a whole and applied atomically, so one bad operation changes nothing.
 5. The simulator re-runs on the new graph in a few milliseconds, and the canvas, metrics and explanations update.
 
@@ -94,7 +94,7 @@ flowchart LR
 frontend/    Next.js app: pages, canvas, command bar, metrics panel
 backend/     Hono API: /api/health and /api/command (rate limit, optional access code)
 simulator/   graph model, operations and the simulation engine (pure TypeScript)
-ai/          fastpath/ command parser (browser-safe); llm/ server-only Claude harness
+ai/          fastpath/ command parser (browser-safe); llm/ server-only model harness (Gemini or Claude)
 database/    IndexedDB repository and share-link codec
 evals/       eval runner, cases, fixtures, benchmarks and results
 specs/       JSON Schemas, OpenAPI and fixtures (machine-readable contracts)
@@ -115,7 +115,7 @@ npm run dev
 
 Open <http://localhost:3000>, pick **Open the 50k rps demo**, and try saying *"Shard Postgres into two."*
 
-Local commands and the simulator need no environment variables. AI commands (anything the fast path doesn't understand) need `ANTHROPIC_API_KEY` in `.env.local`, which is server-only and never sent to the browser. [`.env.example`](.env.example) lists the optional ones: `ARCHIE_MODEL`, `ARCHIE_DAILY_CAP`, `ARCHIE_ACCESS_CODE`, `ARCHIE_IP_SALT` and `NEXT_PUBLIC_SITE_URL`.
+Local commands and the simulator need no environment variables. AI commands (anything the fast path doesn't understand) need a free `GEMINI_API_KEY` from [Google AI Studio](https://aistudio.google.com/apikey) in `.env.local`. Keys are server-only and never sent to the browser. To use Claude instead, set `ANTHROPIC_API_KEY` and `ARCHIE_PROVIDER=anthropic`. Note that Google may use prompts sent on its free tier to improve its products. [`.env.example`](.env.example) lists the optional ones: `ARCHIE_PROVIDER`, `ARCHIE_MODEL`, `ARCHIE_DAILY_CAP`, `ARCHIE_ACCESS_CODE`, `ARCHIE_IP_SALT` and `NEXT_PUBLIC_SITE_URL`.
 
 ### Commands
 
@@ -127,7 +127,7 @@ Local commands and the simulator need no environment variables. AI commands (any
 | `npm test` | Unit, property and contract tests (Vitest) |
 | `npm run test:e2e` | End-to-end tests (run `npx playwright install chromium` once first) |
 | `npm run bench:fast` · `npm run bench:sim` | Latency benchmarks, written to `evals/results/` |
-| `npm run eval` | Command-understanding eval against the real model (needs `ANTHROPIC_API_KEY`); `-- --fastpath-only` for the no-AI baseline, `-- --split test` for the held-out split |
+| `npm run eval` | Command-understanding eval against the real model (needs `GEMINI_API_KEY`, or Claude via `ARCHIE_PROVIDER=anthropic`); `-- --fastpath-only` for the no-AI baseline, `-- --split test` for the held-out split |
 | `npm run dev:backend` | The API alone on <http://localhost:8787/api> |
 
 ## Built with Wispr Flow

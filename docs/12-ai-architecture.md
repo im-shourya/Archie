@@ -32,6 +32,8 @@ ai/src/
 
 ## Model configuration
 
+> **Provider (ADR-016):** the default is Gemini's free tier (`gemini-3.8-flash`, thinking `low`, JSON-schema output). The Claude settings below apply with `ARCHIE_PROVIDER=anthropic`.
+
 | Route | Model | Effort | max_tokens | Output |
 |-------|-------|--------|------------|--------|
 | `command` | `claude-opus-5-5` | `low` | 4,000 | `CommandResult` |
