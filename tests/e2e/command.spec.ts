@@ -17,7 +17,7 @@ test("dictated fast-path commands change the board instantly (F-01, F-02)", asyn
 
   await say(page, "Kill Redis.");
   await expect(page.getByTestId("node-redis")).toHaveAttribute("data-status", "down");
-  await expect(page.getByTestId("latency-badge")).toContainText("⚡ local");
+  await expect(page.getByTestId("latency-badge")).toContainText("local ·");
   await expect(page.getByRole("status").filter({ hasText: "Took down Redis" })).toBeVisible();
   await expect(bar(page)).toHaveValue("");
 
