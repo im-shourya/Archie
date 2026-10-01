@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { estimateTokens, QuotaGuard } from "./quota";
+import { estimateTokens, msUntilMidnight, QuotaGuard } from "./quota";
 
 function clock(start = Date.UTC(2026, 9, 3, 12, 0, 0)) {
   const c = { t: start, now: () => c.t };
@@ -57,6 +57,12 @@ describe("QuotaGuard", () => {
     const g = new QuotaGuard("groq", { rpm: 28 }, clock().now);
     g.reserve(6_000);
     expect(g.snapshot()).toMatchObject({ minute: { requests: 1, tokens: 6_000 }, day: { requests: 1, tokens: 6_000 } });
+  });
+
+  it("msUntilMidnight counts to the zone's next midnight", () => {
+    // 2026-10-03 07:00 UTC = 00:00 PDT → a full day; 06:00 UTC = 23:00 PDT → one hour.
+    expect(msUntilMidnight("America/Los_Angeles", Date.UTC(2026, 9, 3, 6, 0))).toBe(3_600_000);
+    expect(msUntilMidnight("UTC", Date.UTC(2026, 9, 3, 23, 30))).toBe(1_800_000);
   });
 
   it("estimateTokens", () => {

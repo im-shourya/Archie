@@ -167,6 +167,8 @@ describe("fallback config", () => {
     vi.stubEnv("GEMINI_RPD", "1000");
     vi.stubEnv("GEMINI_RPM", "");
     expect(quotaLimits("gemini")).toMatchObject({ rpd: 1000, rpm: 9, dayZone: "America/Los_Angeles" });
+    vi.stubEnv("GEMINI_RPD", "");
+    expect(quotaLimits("gemini").rpd).toBe(19); // just under the measured 20/day per model
     expect(quotaLimits("groq")).toMatchObject({ rpm: 28, tpm: 7_600, tpd: 190_000 });
   });
 });
