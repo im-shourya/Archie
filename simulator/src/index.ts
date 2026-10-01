@@ -1,2 +1,2 @@
-// Public API of @archie/simulator. Filled in by Phase 1 (graph) and Phase 3 (sim).
-export const SIMULATOR_VERSION = "0.1.0";
+// Public API of @archie/simulator: graph model and op engine (Phase 1); simulation (Phase 3).
+export * from "./graph";
