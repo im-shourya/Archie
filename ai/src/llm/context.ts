@@ -57,7 +57,8 @@ function loadNote(m: NodeMetrics | undefined): string {
 
 function nodeLine(node: ArchNode, sim: SimResult | null | undefined): string {
   const down = node.status === "down" ? " DOWN" : "";
-  const metrics = sim?.nodes[node.id];
+  // Clients generate load; they don't serve it, so their ρ is always 0 and only adds noise.
+  const metrics = node.kind === "client" ? undefined : sim?.nodes[node.id];
   // A down node already says DOWN; don't repeat it from the sim.
   const load = down && metrics?.status === "down" ? "" : loadNote(metrics);
   return `  ${node.id} "${escapeText(node.label)}" ${nodeSpec(node)}${down}${load}`;
