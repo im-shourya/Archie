@@ -80,7 +80,7 @@ export function Canvas({ graph }: { graph: Graph }) {
       aria-label="Architecture canvas"
     >
       <Background gap={24} size={1} />
-      <Controls showInteractive={false} position="bottom-left" />
+      <Controls showInteractive={false} position="top-left" />
     </ReactFlow>
   );
 }

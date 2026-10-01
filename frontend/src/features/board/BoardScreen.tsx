@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { ReactFlowProvider, useReactFlow } from "@xyflow/react";
 import { TEMPLATES, type TemplateId } from "@archie/simulator";
+import { CommandBar } from "../commandbar/CommandBar";
 import { useBoardStore } from "../store/board.store";
 import { Canvas } from "./Canvas";
 import { EventLog } from "./EventLog";
@@ -57,8 +58,9 @@ function EmptyBoard() {
     <div className={styles.empty}>
       <h2>Describe your system</h2>
       <p className={styles.muted}>
-        Voice commands arrive in Phase 2. Try saying things like{" "}
-        <em>“users hit a load balancer in front of three API servers”</em>. For now, start from a template:
+        Describing whole systems out loud (<em>“users hit a load balancer in front of three API
+        servers”</em>) arrives with the AI. For now, start from a template, then change it by voice:
+        <em> “kill Redis”</em>, <em>“five replicas of the API”</em>.
       </p>
       <div className={styles.emptyActions}>
         {(Object.keys(TEMPLATES) as TemplateId[]).map((id) => (
@@ -142,6 +144,7 @@ export function BoardScreen({ id }: { id: string }) {
             <EventLog events={events} />
           </aside>
         </main>
+        <CommandBar />
       </div>
     </ReactFlowProvider>
   );

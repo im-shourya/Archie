@@ -15,6 +15,22 @@ import { getRepository, newId, type Board } from "@archie/database";
  */
 
 export const UNDO_DEPTH = 200;
+
+/** Node ids referenced by the most recent change that had ops ("it" in "bring it back"). */
+export function recentNodeIds(events: readonly BoardEvent[]): string[] {
+  for (let i = events.length - 1; i >= 0; i--) {
+    const ops = events[i]!.ops;
+    if (ops.length === 0) continue;
+    const ids = new Set<string>();
+    for (const op of ops) {
+      if ("id" in op && op.id) ids.add(op.id);
+      if ("from" in op) ids.add(op.from).add(op.to);
+      if (op.type === "insertBetween" && op.node.id) ids.add(op.node.id);
+    }
+    return [...ids];
+  }
+  return [];
+}
 const SAVE_DEBOUNCE_MS = 500;
 
 export interface ApplyMeta {
