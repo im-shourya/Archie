@@ -12,6 +12,8 @@
     "typecheck": "tsc -p ."
   },
   "dependencies": {
-    "@archie/simulator": "0.1.0"
+    "@anthropic-ai/sdk": "^0.131.0",
+    "@archie/simulator": "0.1.0",
+    "zod": "^4.6.5"
   }
 }
