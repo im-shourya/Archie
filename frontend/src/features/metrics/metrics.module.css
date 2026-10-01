@@ -9,19 +9,19 @@
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .workload {
   margin: 0;
-  font: 600 15px/1.4 var(--font-mono, ui-monospace, monospace);
+  font: 600 15px/1.4 var(--font-mono), monospace;
   font-variant-numeric: tabular-nums;
 }
 
 .hint {
   margin: 4px 0 0;
   font-size: 13px;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .stats {
@@ -38,17 +38,17 @@
 
 .stats dt {
   font-size: 12px;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .stats dd {
   margin: 0;
-  font: 600 16px/1.2 var(--font-mono, ui-monospace, monospace);
+  font: 600 16px/1.2 var(--font-mono), monospace;
   font-variant-numeric: tabular-nums;
 }
 
 .stats dd[data-bad="true"] {
-  color: var(--state-saturated);
+  color: var(--color-state-saturated);
 }
 
 .latency {
@@ -62,22 +62,22 @@
 .latency td {
   padding: 4px 0;
   text-align: right;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .latency th:first-child {
   text-align: left;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .latency thead th {
   font-weight: 500;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .latency td {
-  font-family: var(--font-mono, ui-monospace, monospace);
+  font-family: var(--font-mono), monospace;
 }
 
 .explain {
@@ -96,13 +96,13 @@
 
 .blast {
   padding: 12px;
-  border: 1px solid color-mix(in srgb, var(--state-saturated) 40%, var(--border-subtle));
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--state-saturated) 6%, var(--surface-panel));
+  border: 1px solid color-mix(in srgb, var(--color-state-saturated) 40%, var(--color-border-subtle));
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-state-saturated) 6%, var(--color-surface));
 }
 
 .delta {
-  font-family: var(--font-mono, ui-monospace, monospace);
+  font-family: var(--font-mono), monospace;
   font-variant-numeric: tabular-nums;
 }
 

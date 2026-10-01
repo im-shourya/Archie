@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowLeft, Redo2, Undo2 } from "lucide-react";
+import { LogoMark } from "@/components/brand/LogoMark";
 import { useEffect, useState } from "react";
 import { ReactFlowProvider, useReactFlow } from "@xyflow/react";
 import { TEMPLATES, type Graph, type TemplateId } from "@archie/simulator";
@@ -157,7 +159,9 @@ export function BoardScreen({ id }: { id: string }) {
       <div className={styles.screen}>
         <header className={styles.topbar}>
           <Link href="/" className={styles.brand} aria-label="Archie home">
-            ◂ Archie
+            <ArrowLeft size={16} aria-hidden />
+            <LogoMark size={20} />
+            <span>Archie</span>
           </Link>
           <input
             key={board.name}
@@ -172,10 +176,10 @@ export function BoardScreen({ id }: { id: string }) {
           />
           <div className={styles.topActions}>
             <button type="button" className={styles.iconButton} onClick={undo} disabled={!canUndo} aria-label="Undo" title="Undo (⌘Z)">
-              ↶
+              <Undo2 size={16} aria-hidden />
             </button>
             <button type="button" className={styles.iconButton} onClick={redo} disabled={!canRedo} aria-label="Redo" title="Redo (⇧⌘Z)">
-              ↷
+              <Redo2 size={16} aria-hidden />
             </button>
           </div>
         </header>
