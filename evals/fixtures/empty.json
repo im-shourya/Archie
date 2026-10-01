@@ -1,0 +1,10 @@
+{
+  "nodes": [],
+  "edges": [],
+  "workload": {
+    "rps": 1000,
+    "readRatio": 0.9,
+    "peakMultiplier": 1
+  },
+  "version": 0
+}
