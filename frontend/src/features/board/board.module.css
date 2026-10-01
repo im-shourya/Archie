@@ -174,7 +174,7 @@
   gap: 10px;
   width: 184px;
   height: 72px;
-  padding: 10px 12px;
+  padding: 8px 12px 12px;
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
   background: var(--surface-panel);
@@ -185,11 +185,6 @@
 .selected {
   border-color: var(--accent);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent);
-}
-
-.down {
-  opacity: 0.55;
-  border-style: dashed;
 }
 
 .glyph {
@@ -226,6 +221,164 @@
   color: var(--text-secondary);
 }
 
+.load {
+  font: 600 11px/1.3 var(--font-mono, ui-monospace, monospace);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+
+/* Simulation state (docs/06): colour + label + bar, never colour alone. */
+.node[data-sim="warm"] {
+  border-color: var(--state-warm);
+}
+
+.node[data-sim="hot"] {
+  border-color: var(--state-hot);
+}
+
+.node[data-sim="saturated"] {
+  border-color: var(--state-saturated);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--state-saturated) 30%, transparent);
+}
+
+.node[data-sim="saturated"] .load {
+  color: var(--state-saturated);
+}
+
+.node[data-sim="down"] {
+  opacity: 0.55;
+  border-style: dashed;
+}
+
+.node[data-sim="idle"] {
+  opacity: 0.8;
+}
+
+.rhoTrack {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 6px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border-subtle);
+  overflow: hidden;
+}
+
+.rhoFill {
+  display: block;
+  height: 100%;
+  background: var(--state-healthy);
+}
+
+.node[data-sim="warm"] .rhoFill {
+  background: var(--state-warm);
+}
+
+.node[data-sim="hot"] .rhoFill {
+  background: var(--state-hot);
+}
+
+.node[data-sim="saturated"] .rhoFill {
+  background: var(--state-saturated);
+}
+
+/* Informational only: never block clicks on the nodes underneath. */
+.callout {
+  pointer-events: none;
+  max-width: 300px;
+  padding: 10px 12px;
+  border: 1px solid var(--state-saturated);
+  border-radius: 8px;
+  background: var(--surface-panel);
+  color: var(--text-primary);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.12);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.callout p {
+  margin: 4px 0 0;
+}
+
+.calloutHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--state-saturated);
+}
+
+.calloutClose {
+  pointer-events: auto;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin: -4px 0 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.tab {
+  padding: 6px 10px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tab[aria-selected="true"] {
+  border-bottom-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.tab:focus-visible,
+.calloutClose:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.edge {
+  stroke: var(--edge-stroke);
+}
+
+.edgeIdle {
+  opacity: 0.5;
+}
+
+.particle {
+  fill: var(--state-healthy);
+}
+
+.particleError {
+  fill: var(--state-saturated);
+}
+
+.edgeLabel {
+  position: absolute;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--surface-panel);
+  color: var(--text-secondary);
+  font: 500 10px/1.4 var(--font-mono, ui-monospace, monospace);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.edgeLabel[data-error="true"] {
+  color: var(--state-saturated);
+}
+
 .badge {
   margin-left: auto;
   font: 600 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -256,11 +409,11 @@
   }
 }
 
-.edge-async path {
+.edge-async {
   stroke-dasharray: 6 4;
 }
 
-.edge-replication path {
+.edge-replication {
   stroke-dasharray: 2 4;
 }
 

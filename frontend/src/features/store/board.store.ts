@@ -48,6 +48,9 @@ interface BoardState {
   redoStack: Graph[];
   /** Nodes touched by the last change, for the pulse animation. */
   changed: { ids: string[]; at: number };
+  /** Node ids selected on the canvas (mirrored from React Flow for the panels). */
+  selection: string[];
+  setSelection(ids: string[]): void;
   load(id: string): Promise<void>;
   apply(ops: readonly unknown[], meta: ApplyMeta): ApplyResult;
   undo(): boolean;
@@ -94,9 +97,16 @@ export const useBoardStore = create<BoardState>()((set, get) => {
     undoStack: [],
     redoStack: [],
     changed: { ids: [], at: 0 },
+    selection: [],
+
+    setSelection(ids) {
+      const current = get().selection;
+      if (ids.length === current.length && ids.every((id, i) => id === current[i])) return;
+      set({ selection: ids });
+    },
 
     async load(id) {
-      set({ status: "loading", board: null, events: [], undoStack: [], redoStack: [] });
+      set({ status: "loading", board: null, events: [], undoStack: [], redoStack: [], selection: [] });
       const repo = await getRepository();
       const [board, events] = await Promise.all([repo.getBoard(id), repo.listEvents(id)]);
       if (get().status !== "loading") return;
