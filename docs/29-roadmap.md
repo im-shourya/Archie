@@ -34,8 +34,8 @@ Where the project is going. Live status is in [31-project-state.md](31-project-s
 ## Phase 1 · Core graph + canvas (F-03, F-04, F-09)
 
 **Status:** ✅ merged in #3.
-- [ ] `simulator/graph`: types (match `specs/graph-schema.json`), catalog, ops, validate, ids, inverse
-- [ ] Tests first: atomicity, inverse, every error code; contract test vs specs
+- [ ] `simulator/graph`: types (match `specs/graph-schema.json`), catalog, ops, validate, ids (undo became snapshots: ADR-011)
+- [ ] Tests first: atomicity, every error code; contract test vs specs
 - [ ] `database`: repo + schema + share codec; fake-indexeddb tests
 - [ ] Frontend: Zustand store, React Flow node cards, ELK worker, pulse, templates, Home recent list
 > 🎙 *"Phase 1. Follow docs 07, 08 and 17 exactly. Write the applyBatch tests first."*

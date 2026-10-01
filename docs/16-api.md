@@ -200,10 +200,10 @@ Never calls the LLM.
 
 | Module | Function |
 |--------|----------|
-| `core/fastpath/parse` | `parse(utterance, graph) → { ops, actions, confidence } \| null` |
-| `core/graph/ops` | `applyBatch(graph, ops) → { graph, inverse }` |
-| `core/sim/simulate` | `simulate(graph) → SimResult` |
-| `core/export/share` | `encode(graph) → hash` · `decode(hash) → Graph` (Zod-validated) |
-| `core/export/mermaid` | `toMermaid(graph) → string` |
-| `core/export/designdoc` | `toDesignDoc(graph, sim, findings?) → markdown` |
-| `lib/storage` | `listBoards() · loadBoard(id) · saveBoard(board) · deleteBoard(id)` (IndexedDB) |
+| `@archie/ai/fastpath` | `parseCommand(utterance, graph, ctx) → { kind: 'ops' \| 'action', … } \| null` |
+| `@archie/simulator` | `applyBatch(graph, ops) → { ok, graph, changedNodeIds } \| { ok: false, errors }` |
+| `@archie/simulator` | `simulate(graph) → SimResult` |
+| `@archie/database` | `encodeShare({ name, graph })` · `decodeShare(hash)` (Zod-validated) |
+| export (Phase 7) | `toMermaid(graph) → string` |
+| export (Phase 7) | `toDesignDoc(graph, sim, findings?) → markdown` |
+| `@archie/database` | `getRepository()` → `listBoards · getBoard · saveBoard · deleteBoard · appendEvent · listEvents` (IndexedDB, memory fallback) |

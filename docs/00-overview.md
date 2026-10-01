@@ -60,7 +60,8 @@ Full detail: [03-product-spec.md](03-product-spec.md).
 | Validation / contracts | Zod in code, JSON Schema + OpenAPI in `specs/` |
 | Testing | Vitest, Playwright, custom eval runner |
 | Deployment | Vercel (single deploy), GitHub Actions CI |
-| Voice | Wispr Flow (system-wide dictation), Web Speech API fallback |
+| Design | IBM Plex Sans + Mono (`next/font`), Lucide icons, semantic CSS tokens ([06](06-ui-ux.md#design-system)) |
+| Voice | Wispr Flow (system-wide dictation), Web Speech API fallback (planned) |
 
 ## High-level flow
 

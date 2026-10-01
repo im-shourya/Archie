@@ -26,7 +26,7 @@ export function NewBoard() {
 
   return (
     <main style={{ display: "grid", placeContent: "center", minHeight: "100dvh", padding: 16 }}>
-      <p style={{ color: "var(--text-secondary)" }}>{error ?? "Creating board…"}</p>
+      <p style={{ color: "var(--color-text-secondary)" }}>{error ?? "Creating board…"}</p>
     </main>
   );
 }

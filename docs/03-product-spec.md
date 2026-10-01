@@ -6,21 +6,21 @@ What we're building, feature by feature, and in what order. Priority: **P0** mus
 
 | ID | Feature | Pri | Phase | Requirements | Status |
 |----|---------|-----|-------|--------------|--------|
-| F-01 | Voice command bar + hands-free | P0 | 2 | FR-001, 002, 006, 007, 062 | Planned |
-| F-02 | Two-tier command engine | P0 | 2, 4 | FR-003–005 | Planned |
-| F-03 | Graph ops, undo/redo, event log | P0 | 1 | FR-010–013 | Planned |
-| F-04 | Canvas, layout, inspector | P0 | 1, 5 | FR-014–016 | Planned |
-| F-05 | Simulator | P0 | 3 | FR-020–024, 026 | Planned |
-| F-06 | Failure injection | P0 | 3 | FR-025, 027 | Planned |
+| F-01 | Voice command bar + hands-free | P0 | 2 | FR-001, 002, 006, 007, 062 | Done (mic fallback: Phase 5) |
+| F-02 | Two-tier command engine | P0 | 2, 4 | FR-003–005 | In progress (fast path done; AI tier Phase 4) |
+| F-03 | Graph ops, undo/redo, event log | P0 | 1 | FR-010–013 | Done |
+| F-04 | Canvas, layout, inspector | P0 | 1, 5 | FR-014–016 | In progress (inspector editing: Phase 5) |
+| F-05 | Simulator | P0 | 3 | FR-020–024, 026 | Done |
+| F-06 | Failure injection | P0 | 3 | FR-025, 027 | Done (SPOF scan: Phase 6) |
 | F-07 | AI guardrails | P0 | 4 | FR-030–033, 035 | Planned |
 | F-08 | Ask the board | P0 | 4 | FR-034 | Planned |
-| F-09 | Local boards + templates | P0 | 1 | FR-040, 041 | Planned |
+| F-09 | Local boards + templates | P0 | 1 | FR-040, 041 | Done |
 | F-10 | Interview mode | P1 | 6 | FR-050–053 | Planned |
 | F-11 | Design review | P1 | 6 | FR-054 | Planned |
 | F-12 | Share + export | P1 | 7 | FR-042, 043 | Planned |
 | F-13 | Session replay | P1 | 7 | FR-044 | Planned |
 | F-14 | Eval report page | P1 | 7 | FR-060, 061 | Planned |
-| F-15 | Cost estimate | P1 | 6 | FR-028 | Planned |
+| F-15 | Cost estimate | P1 | 6 | FR-028 | Done |
 | F-16 | Multiplayer board | P2 | — | — | Backlog |
 | F-17 | `docker-compose.yml` export | P2 | — | — | Backlog |
 | F-18 | Regions / zones | P2 | — | — | Backlog |
@@ -37,14 +37,14 @@ What we're building, feature by feature, and in what order. Priority: **P0** mus
 
 | Tier | Where | Handles | Latency target |
 |------|-------|---------|----------------|
-| ⚡ Fast path | browser, `ai/fastpath` | undo/redo, kill/recover, delete, connect, replicas/shards, workload, sim/view actions | P50 < 10 ms |
-| ✦ AI | backend, `ai/llm` | multi-component descriptions, refactors, insertions, questions | P50 < 3 s |
+| Fast path | browser, `ai/fastpath` | undo/redo, kill/recover, delete, connect, replicas/shards, workload, sim/view actions | P50 < 10 ms |
+| AI | backend, `ai/llm` | multi-component descriptions, refactors, insertions, questions | P50 < 3 s |
 
 Spec: [13-command-understanding.md](13-command-understanding.md).
 
 ## F-03 · Graph ops
 
-10 op types, atomic batches, inverse ops for undo, an event log, and version numbers. Spec: [08-graph-operations.md](08-graph-operations.md).
+10 op types, atomic batches, snapshot undo/redo (ADR-011), an event log, and version numbers. Spec: [08-graph-operations.md](08-graph-operations.md).
 
 ## F-04 · Canvas
 

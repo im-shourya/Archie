@@ -10,26 +10,55 @@
 
 ## Design system
 
-Decided in Phase 5 with the **design-system-decision** skill and recorded here (tokens as CSS variables, light + dark). Until then, these are the *semantic* roles the code must use:
+Decided on 2026-10-01 with the **design-system-decision** skill. Tokens live in `frontend/src/app/globals.css`; components use semantic names only.
 
-| Token role | Used for |
-|------------|----------|
-| `--surface-canvas`, `--surface-panel`, `--surface-raised` | canvas bg, side panels, node cards |
-| `--text-primary/secondary/muted` | text hierarchy |
-| `--border-subtle/strong` | card outlines, separators |
-| `--accent` | primary actions, focus, the command bar |
-| `--state-healthy` (ρ < 0.7) | node bar, particles |
-| `--state-warm` (0.7–0.9) | |
-| `--state-hot` (0.9–1.0) | |
-| `--state-saturated` (≥ 1) | bottleneck, error particles |
-| `--state-down` | failed node (desaturated + ✕ icon) |
-| `--tier-local`, `--tier-ai` | command latency badge |
+### Why it looks like this
 
-State colours must pass 3:1 contrast against `--surface-raised` **and** be paired with an icon/label (NFR-012). Pick a colour-vision-safe ramp, not pure red/green.
+| Question | Answer → decision |
+|----------|-------------------|
+| Who | Engineers and interview-prep students at a laptop, often screen-recorded → high contrast, legible numbers at 1080p |
+| What matters most | The *state* of the system and its numbers → colour is reserved for state; numbers in mono with tabular figures |
+| Mood | A precise instrument, like a drafting table → warm paper neutrals, graphite ink, restrained radii, no gradients or glow |
+| What should be memorable | The graph is the product → the logo is an "A" drawn as a three-node graph; the health ramp is the colour story |
 
-**Typography:** one UI sans + one mono (numbers, ids, latency). Tabular numerals for all metrics.
-**Icons:** one icon set (decided in Phase 5), with one glyph per `NodeKind`.
-**Spacing:** 4 px base scale. **Radius:** small (cards 8, chips 999).
+### Brand
+
+- **Mark:** the letter A as a tiny architecture graph: an apex node and two base nodes joined by edges, with the crossbar as a third edge. The apex is the primary colour (the component that's "listening"); the rest is ink. Source: `frontend/src/components/brand/LogoMark.tsx`, `frontend/src/app/icon.svg` (adapts to dark mode), `frontend/public/brand/logo-mark-{light,dark}.svg`.
+- **Wordmark:** "Archie" in Plex Sans 600 next to the mark.
+- **Social card / icons:** `opengraph-image.tsx` (1200×630, a real simulator readout), `apple-icon.tsx` (180×180), `manifest.ts`.
+
+### Colour roles
+
+| Token | Light | Dark | Use |
+|-------|-------|------|-----|
+| `--color-background` | `#f6f5f1` | `#111317` | page and canvas (dominant, ~60%) |
+| `--color-surface` / `-sunken` | `#ffffff` / `#eeece6` | `#181b20` / `#21252b` | cards, panels, icon wells |
+| `--color-text-primary` / `-secondary` / `-muted` | `#16181d` / `#525866` / `#686e7b` | `#ecedef` / `#aab0ba` / `#8c929d` | text hierarchy |
+| `--color-border-subtle` / `-default` / `-strong` | `#e2e0d8` / `#cfccc2` / `#9c9890` | `#2a2f36` / `#3a4049` / `#5a606b` | structure |
+| `--color-primary` (+ hover, foreground, subtle) | `#2a44c8` | `#93a5ff` | actions, focus, the mic. **Never** used for state |
+| `--color-state-healthy` | `#1e7a58` | `#41c493` | ρ < 0.7 |
+| `--color-state-warm` | `#9a6200` | `#e5ac3e` | 0.7 ≤ ρ < 0.9 |
+| `--color-state-hot` | `#b8501a` | `#f28a4e` | 0.9 ≤ ρ < 1 |
+| `--color-state-saturated` | `#c0283a` | `#ff707b` | ρ ≥ 1, failing traffic |
+| `--color-state-down` | `#646a77` | `#8c929d` | failed component |
+
+Every text-bearing role (including all state colours, which colour ρ values and "fail" labels) is **≥ 4.5:1** on both background and surface in both themes (computed with the WCAG formula; lowest is light `hot` on the page background at 4.58:1). State is never shown by colour alone: each node also has a text status (`ρ 1.40`, `down`, `idle`), a utilization bar and an aria-label.
+
+### Typography
+
+- **IBM Plex Sans** (400/500/600) for UI and **IBM Plex Mono** (400/500/600) for numbers, ids, utterances and latency. One engineering superfamily: technical without being a monospace UI. Loaded with `next/font` (self-hosted, no layout shift); SIL OFL 1.1.
+- Scale in use: 11 (node load) · 12 (labels, captions) · 13 (panel headings, uppercase, tracked) · 14 (body small) · 16 (body, inputs) · 17–19 (lede, `clamp`) · 34–56 (display, `clamp`).
+- Tabular numerals for every metric.
+
+### Icons
+
+- **Lucide**, stroke 1.75–2.25, sizes 12 (inline badge) · 14 · 16 (buttons) · 18 (node kinds, mic).
+- One icon per component kind (`frontend/src/components/icons/KindIcon.tsx`): client `Users`, CDN `Globe`, LB `Split`, gateway `Router`, service `Server`, worker `Cog`, cache `MemoryStick`, SQL `Database`, NoSQL `Boxes`, queue `ListOrdered`, object storage `Archive`, search `Search`, external `Plug`.
+- No emoji anywhere in the UI. Decorative icons are `aria-hidden`; icon-only buttons have `aria-label`.
+
+### Shape and spacing
+
+4 px spacing base · radius `--radius-sm` 4 / `--radius-md` 8 / `--radius-lg` 12 · elevation `--shadow-raised` (cards) and `--shadow-overlay` (toasts, callouts) · touch targets ≥ 44 px on Home actions.
 
 ## Layout
 
@@ -42,7 +71,7 @@ State colours must pass 3:1 contrast against `--surface-raised` **and** be paire
 │                                              │ Inspector /    │   Inspector · Log ·
 │                                              │ Interviewer    │   Interview)
 ├──────────────────────────────────────────────┴────────────────┤
-│ 🎙 [ Describe or change your system…        ] ⚡4ms  ⌁ hands-free │  command bar 64px
+│ [mic] [ Describe or change your system…  ]  local · 4 ms  [Hands-free] │  command bar 64px
 └───────────────────────────────────────────────────────────────┘
 ```
 
@@ -54,7 +83,7 @@ State colours must pass 3:1 contrast against `--surface-raised` **and** be paire
 |-----------|----------------|
 | **Node card** | icon · label · `×N` badge · ρ bar · status colour · ✕ when down · pulse (600 ms) when changed · selected ring |
 | **Traffic edge** | particle density ∝ log(rps); error particles in `--state-saturated`; dashed for `async`; dotted for `replication` |
-| **Command bar** | idle · dictating (text changing) · hands-free countdown ring · thinking (✦ shimmer) · result badge |
+| **Command bar** | idle · dictating (text changing) · hands-free countdown ring · thinking (shimmer) · result badge |
 | **Clarify chips** | appear above the command bar; number keys `1`–`4` select |
 | **Confirm dialog** | names the count of affected nodes; destructive button on the right |
 | **Bottleneck callout** | anchored above the node (React Flow `NodeToolbar`), shows the full explanation with the formula; click-through so it never blocks the canvas; × hides it |
@@ -74,7 +103,7 @@ State colours must pass 3:1 contrast against `--surface-raised` **and** be paire
 
 | Where | Empty | Loading | Error |
 |-------|-------|---------|-------|
-| Board | hint + 3 example sentences | ✦ shimmer ghost on canvas during AI | toast + keep board |
+| Board | hint + 3 example sentences | shimmer ghost on canvas during AI | toast + keep board |
 | Metrics | "Set a workload: *send 10k rps*" | — | warnings list |
 | Home recent | "No boards yet. Start with a template." | skeleton rows | IndexedDB banner |
 | Evals | "No results yet. Run `npm run eval`." | — | — |
