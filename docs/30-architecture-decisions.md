@@ -87,3 +87,17 @@ Format: Context → Decision → Alternatives → Consequences. Status: `Accepte
 **Decision:** The main thread uses `elkjs/lib/elk-api.js` with a `workerFactory` that starts our worker, which only imports `elk-worker.min.js`. If ELK can't start, errors, or takes over 3 s, a longest-path layered fallback is used.
 **Alternatives:** dagre (weaker layering); ELK on the main thread.
 **Consequences:** Layout stays off the main thread and the canvas never stays empty.
+
+## ADR-013 · Success rate is computed exactly; Monte Carlo only for latency
+**Status:** Accepted · 2026-10-02 · refines ADR-007
+**Context:** A 10,000-sample Monte Carlo estimates the success rate with about ±0.5% noise, enough to make "96.3%" flicker between runs of different graphs and to fail exact golden tests.
+**Decision:** `reliability.ts` computes request failure probabilities exactly from the same fan-out plan the propagation and Monte Carlo use. Monte Carlo reports latency percentiles only.
+**Alternatives:** More samples (slower); Monte Carlo success plus an analytic cross-check (two numbers that can disagree).
+**Consequences:** Golden tests can pin success rates exactly (e.g. 96.29% for three-tier at 50k). Edge error rates come from the same function.
+
+## ADR-014 · Traffic particles use SVG `animateMotion`
+**Status:** Accepted · 2026-10-02 · amends docs/27
+**Context:** Doc 27 planned a canvas overlay with a JS animation loop. React Flow edges are already SVG paths.
+**Decision:** At most 5 `<circle>` particles per edge (log₁₀ of rps) animated by the browser along the edge path; failing share drawn red; none under `prefers-reduced-motion` (stroke width shows volume instead).
+**Alternatives:** Canvas overlay (extra coordinate syncing on pan/zoom); CSS offset-path.
+**Consequences:** No per-frame JavaScript, pan/zoom just works, and the particle count stays bounded.

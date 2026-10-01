@@ -23,6 +23,7 @@ test("empty board: insert template, undo, redo, delete selection (FR-010/012/013
 
   await page.getByRole("button", { name: "Insert Chat app" }).click();
   await expect(nodes(page)).toHaveCount(7);
+  await page.getByRole("tab", { name: "History" }).click();
   const history = page.getByRole("list", { name: "Change history" });
   await expect(history.getByRole("listitem")).toHaveCount(1);
 

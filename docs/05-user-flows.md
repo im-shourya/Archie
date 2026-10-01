@@ -33,19 +33,19 @@ Home ──► New board / Template ──► Describe ──► Load ──► 
 1. 🎙 *"Send fifty thousand requests a second, ninety percent reads."*
 2. Fast path hit → `setWorkload` → badge `⚡ local · 3 ms`.
 3. Simulation runs; particles flow; `postgres-primary` turns red.
-4. Bottleneck callout: *"pg: 1,500 reads/s + 5,000 writes/s on 1 shard (capacity 10,000/4,000) → ρ = 1.40 → 28.6% of requests dropped."*
-5. Metrics panel: p50/p99, success 71%, throughput.
+4. Bottleneck callout above the node: *"1,500 reads/s + 5,000 writes/s on 1 shard (capacity 10,000 reads / 4,000 writes per shard) → ρ = 1.40 → 28.6% of its requests dropped. Consider: shard the database, or reduce writes."*
+5. Metrics panel: success **96.3%** (every write and a third of cache-miss reads touch pg: 0.9 × 0.9905 + 0.1 × 0.7143), throughput 48.1k rps, p50/p95/p99 for reads and writes, cost.
 
 ## UF-04 · Fix it (F-02, F-05)
 
 1. 🎙 *"Shard Postgres into two."*
-2. AI → `updateNode {shards: 2}` → ρ drops to 0.70 and the node turns warm (amber), success 100%.
+2. Fast path → `updateNode {shards: 2}` → ρ drops to 0.70, the node turns warm (amber), success **100%**. The bottleneck moves to the API (ρ 0.83).
 3. The event log shows both utterances. **Undo** brings the red back (great for the demo).
 
 ## UF-05 · Break it (F-06)
 
 1. 🎙 *"Kill Redis."* → fast path → `fail redis` → node greyed with a ✕.
-2. Cache hit rate → 0, DB reads ×10, a replica goes hot, p99 jumps; the callout explains it.
+2. Cache hit rate → 0: reads to the Postgres cluster go from 4,500/s to 45,000/s (15,000 per pool member), both replicas saturate. The blast-radius panel shows success **96.3% → 54.5%**, read p99 ~0.6 s → ~1.3 s, and lists the newly hot replicas.
 3. 🎙 *"Bring it back."* → `recover redis` (the reference resolves from the last event).
 
 ## UF-06 · Clarify (F-07)
