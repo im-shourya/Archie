@@ -48,8 +48,9 @@ Measured with the scripts in this repository (`npm run bench:fast`, `npm run ben
 |------|--------|--------|
 | Voice command, parse + apply (fast path) | P50 0.006 ms · P100 0.138 ms over 14,000 runs | P50 < 10 ms |
 | Full simulation incl. 10,000-sample Monte Carlo, 100 components | P95 2.33 ms | P95 < 5 ms |
-| AI command understanding, held-out test split (12 cases, free-tier Gemini) | task accuracy 83.3% · warm P50 2.7 s, P95 3.65 s · 1 false action (out-of-bounds number) | ≥ 90% · P50 < 3 s · false actions ≤ 2% |
-| Unit, property and contract tests | 405 passing | — |
+| AI command understanding, held-out test split (12 cases, free-tier Gemini → Groq) | task accuracy 91.7% · kind accuracy 100% · **0 false actions** · warm P50 1.8 s | ≥ 90% · false actions ≤ 2% · P50 < 3 s |
+| AI command understanding, all 31 cases | 29/31 = 93.5% · 0 false actions | ≥ 85% (Phase 4) |
+| Unit, property and contract tests | 424 passing | — |
 | End-to-end tests (desktop + mobile Chromium) | 53 passing (AI responses mocked) | — |
 
 The simulator's headline numbers are golden-tested against hand calculations in [docs/10](docs/10-traffic-model.md). It is a teaching model (M/M/1 per replica, steady state), not a vendor benchmark; assumptions are listed in [docs/09](docs/09-simulation-engine.md).

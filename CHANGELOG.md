@@ -4,6 +4,10 @@ All notable user-visible changes. Format: [Keep a Changelog](https://keepachange
 
 ## [Unreleased]
 
+### Fixed
+- AI commands with numbers beyond the limits ("fifty million requests a second", "a billion replicas") now ask, stating the limit, instead of applying a silently capped value.
+- An AI request can no longer run past its 20-second budget when a provider stops responding.
+
 ### Changed
 - Command bar, history and node cards use icons instead of emoji.
 - Commands the fast path doesn't understand now go to the AI tier instead of showing a hint.
