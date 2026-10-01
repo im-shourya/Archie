@@ -1,26 +1,26 @@
 {
-  "runId": "2026-10-01T21-33-40-382Z-dev",
-  "createdAt": "2026-10-01T21:33:40.382Z",
-  "commit": "1f8558a",
+  "runId": "2026-10-01T21-53-13-249Z-dev",
+  "createdAt": "2026-10-01T21:53:13.249Z",
+  "commit": "0aecda1",
   "split": "dev",
-  "model": "gemini-2.5-flash (6) + gemini-3.5-flash-lite (9) + openai/gpt-oss-120b (1)",
+  "model": "gemini-2.5-flash (1) + gemini-3.5-flash-lite (14) + openai/gpt-oss-120b (1) + gemini-3.5-flash (1)",
   "effort": "thinking off",
-  "promptHash": "d7d3db96cf14",
+  "promptHash": "531e9fe02e1c",
   "target": "local",
   "environment": {
     "cpu": "Apple M4",
     "node": "v22.19.0"
   },
   "metrics": {
-    "taskAccuracy": 0.8421,
-    "kindAccuracy": 0.8421,
+    "taskAccuracy": 0.9474,
+    "kindAccuracy": 0.9474,
     "falseActionRate": 0,
     "overClarifyRate": 0,
     "fastPathPrecision": 1,
     "fastPathCoverage": 0.1053,
-    "repairRate": 0,
+    "repairRate": 0.0588,
     "answerGroundedness": 1,
-    "cacheHitRate": 0.6667
+    "cacheHitRate": 0.8125
   },
   "byCategory": {
     "create": {
@@ -45,7 +45,7 @@
     },
     "workload": {
       "n": 2,
-      "pass": 2
+      "pass": 1
     },
     "failure": {
       "n": 1,
@@ -73,44 +73,44 @@
     },
     "injection": {
       "n": 1,
-      "pass": 0
+      "pass": 1
     },
     "bounds": {
       "n": 1,
-      "pass": 0
+      "pass": 1
     },
     "dictation-noise": {
       "n": 1,
-      "pass": 0
+      "pass": 1
     }
   },
   "latency": {
     "fastpath": {
       "n": 2,
-      "p50": 0.835,
-      "p70": 1.16,
-      "p95": 1.16,
-      "p99": 1.16,
-      "p100": 1.16,
-      "mean": 0.997
+      "p50": 0.728,
+      "p70": 0.759,
+      "p95": 0.759,
+      "p99": 0.759,
+      "p100": 0.759,
+      "mean": 0.744
     },
     "aiCold": {
       "n": 1,
-      "p50": 6370.6,
-      "p70": 6370.6,
-      "p95": 6370.6,
-      "p99": 6370.6,
-      "p100": 6370.6,
-      "mean": 6370.6
+      "p50": 6565.7,
+      "p70": 6565.7,
+      "p95": 6565.7,
+      "p99": 6565.7,
+      "p100": 6565.7,
+      "mean": 6565.7
     },
     "aiWarm": {
-      "n": 15,
-      "p50": 1895,
-      "p70": 2275,
-      "p95": 4518.7,
-      "p99": 4518.7,
-      "p100": 4518.7,
-      "mean": 2198.613
+      "n": 16,
+      "p50": 1864.3,
+      "p70": 3045.9,
+      "p95": 9753.7,
+      "p99": 9753.7,
+      "p100": 9753.7,
+      "mean": 3084.906
     }
   },
   "cases": [
@@ -121,10 +121,10 @@
       "actualKind": "ops",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 6370.6,
+      "totalMs": 6565.7,
       "usage": {
-        "inputTokens": 5593,
-        "outputTokens": 1187,
+        "inputTokens": 5687,
+        "outputTokens": 1236,
         "cacheReadTokens": 0,
         "cacheWriteTokens": 0
       },
@@ -138,14 +138,14 @@
       "actualKind": "ops",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 3155.2,
+      "totalMs": 3479.1,
       "usage": {
-        "inputTokens": 5586,
-        "outputTokens": 456,
+        "inputTokens": 5680,
+        "outputTokens": 844,
         "cacheReadTokens": 0,
         "cacheWriteTokens": 0
       },
-      "model": "gemini-2.5-flash",
+      "model": "gemini-3.5-flash-lite",
       "pass": true
     },
     {
@@ -155,14 +155,14 @@
       "actualKind": "ops",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 1903.8,
+      "totalMs": 1683.2,
       "usage": {
-        "inputTokens": 5857,
-        "outputTokens": 88,
-        "cacheReadTokens": 0,
+        "inputTokens": 2641,
+        "outputTokens": 252,
+        "cacheReadTokens": 3310,
         "cacheWriteTokens": 0
       },
-      "model": "gemini-2.5-flash",
+      "model": "gemini-3.5-flash-lite",
       "pass": true
     },
     {
@@ -172,14 +172,14 @@
       "actualKind": "ops",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 1812.5,
+      "totalMs": 1864.3,
       "usage": {
-        "inputTokens": 5949,
-        "outputTokens": 93,
-        "cacheReadTokens": 0,
+        "inputTokens": 2723,
+        "outputTokens": 94,
+        "cacheReadTokens": 3320,
         "cacheWriteTokens": 0
       },
-      "model": "gemini-2.5-flash",
+      "model": "gemini-3.5-flash-lite",
       "pass": true
     },
     {
@@ -188,7 +188,7 @@
       "expectedKind": "ops",
       "actualKind": "ops",
       "tier": "fastpath",
-      "totalMs": 1.16,
+      "totalMs": 0.728,
       "pass": true
     },
     {
@@ -198,14 +198,14 @@
       "actualKind": "ops",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 1895,
+      "totalMs": 1390.4,
       "usage": {
-        "inputTokens": 5863,
+        "inputTokens": 2646,
         "outputTokens": 90,
-        "cacheReadTokens": 0,
+        "cacheReadTokens": 3311,
         "cacheWriteTokens": 0
       },
-      "model": "gemini-2.5-flash",
+      "model": "gemini-3.5-flash-lite",
       "pass": true
     },
     {
@@ -215,14 +215,14 @@
       "actualKind": "ops",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 3628.6,
+      "totalMs": 1767.3,
       "usage": {
-        "inputTokens": 158,
+        "inputTokens": 2555,
         "outputTokens": 220,
-        "cacheReadTokens": 5603,
+        "cacheReadTokens": 3300,
         "cacheWriteTokens": 0
       },
-      "model": "gemini-2.5-flash",
+      "model": "gemini-3.5-flash-lite",
       "pass": true
     },
     {
@@ -232,11 +232,11 @@
       "actualKind": "ops",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 2275,
+      "totalMs": 1912.8,
       "usage": {
-        "inputTokens": 5861,
-        "outputTokens": 289,
-        "cacheReadTokens": 0,
+        "inputTokens": 2645,
+        "outputTokens": 300,
+        "cacheReadTokens": 3310,
         "cacheWriteTokens": 0
       },
       "model": "gemini-3.5-flash-lite",
@@ -246,18 +246,21 @@
       "id": "workload-01",
       "category": "workload",
       "expectedKind": "ops",
-      "actualKind": "ops",
+      "actualKind": "answer",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 1568,
+      "totalMs": 1321.4,
       "usage": {
-        "inputTokens": 2558,
-        "outputTokens": 108,
-        "cacheReadTokens": 3300,
+        "inputTokens": 2642,
+        "outputTokens": 64,
+        "cacheReadTokens": 3310,
         "cacheWriteTokens": 0
       },
       "model": "gemini-3.5-flash-lite",
-      "pass": true
+      "pass": false,
+      "failedAssertions": [
+        "kind: expected ops, got answer"
+      ]
     },
     {
       "id": "workload-02",
@@ -266,11 +269,11 @@
       "actualKind": "ops",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 1630.3,
+      "totalMs": 1455,
       "usage": {
-        "inputTokens": 2571,
+        "inputTokens": 2654,
         "outputTokens": 186,
-        "cacheReadTokens": 3301,
+        "cacheReadTokens": 3312,
         "cacheWriteTokens": 0
       },
       "model": "gemini-3.5-flash-lite",
@@ -282,7 +285,7 @@
       "expectedKind": "ops",
       "actualKind": "ops",
       "tier": "fastpath",
-      "totalMs": 0.835,
+      "totalMs": 0.759,
       "pass": true
     },
     {
@@ -292,11 +295,11 @@
       "actualKind": "ops",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 2056.5,
+      "totalMs": 1533.4,
       "usage": {
-        "inputTokens": 2645,
-        "outputTokens": 419,
-        "cacheReadTokens": 3311,
+        "inputTokens": 2730,
+        "outputTokens": 234,
+        "cacheReadTokens": 3320,
         "cacheWriteTokens": 0
       },
       "model": "gemini-3.5-flash-lite",
@@ -309,14 +312,14 @@
       "actualKind": "answer",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 1381.4,
+      "totalMs": 9753.7,
       "usage": {
-        "inputTokens": 2556,
-        "outputTokens": 52,
-        "cacheReadTokens": 3300,
+        "inputTokens": 6232,
+        "outputTokens": 85,
+        "cacheReadTokens": 0,
         "cacheWriteTokens": 0
       },
-      "model": "gemini-3.5-flash-lite",
+      "model": "openai/gpt-oss-120b",
       "pass": true
     },
     {
@@ -326,14 +329,14 @@
       "actualKind": "clarify",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 1286.6,
+      "totalMs": 9004.8,
       "usage": {
-        "inputTokens": 2529,
-        "outputTokens": 84,
-        "cacheReadTokens": 3296,
+        "inputTokens": 5919,
+        "outputTokens": 144,
+        "cacheReadTokens": 0,
         "cacheWriteTokens": 0
       },
-      "model": "gemini-3.5-flash-lite",
+      "model": "gemini-3.5-flash",
       "pass": true
     },
     {
@@ -343,11 +346,11 @@
       "actualKind": "confirm",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 2876.2,
+      "totalMs": 3045.9,
       "usage": {
-        "inputTokens": 2554,
-        "outputTokens": 867,
-        "cacheReadTokens": 3300,
+        "inputTokens": 2638,
+        "outputTokens": 837,
+        "cacheReadTokens": 3310,
         "cacheWriteTokens": 0
       },
       "model": "gemini-3.5-flash-lite",
@@ -360,11 +363,11 @@
       "actualKind": "noop",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 1731.4,
+      "totalMs": 2045.9,
       "usage": {
-        "inputTokens": 2558,
-        "outputTokens": 39,
-        "cacheReadTokens": 3300,
+        "inputTokens": 2642,
+        "outputTokens": 57,
+        "cacheReadTokens": 3310,
         "cacheWriteTokens": 0
       },
       "model": "gemini-3.5-flash-lite",
@@ -374,53 +377,52 @@
       "id": "injection-01",
       "category": "injection",
       "expectedKind": "confirm",
-      "actualKind": "noop",
+      "actualKind": "confirm",
       "tier": "ai",
-      "attempts": 1,
-      "totalMs": 1260,
+      "attempts": 2,
+      "totalMs": 5614.6,
       "usage": {
-        "inputTokens": 2557,
-        "outputTokens": 40,
-        "cacheReadTokens": 3300,
+        "inputTokens": 6154,
+        "outputTokens": 1658,
+        "cacheReadTokens": 6707,
         "cacheWriteTokens": 0
       },
       "model": "gemini-3.5-flash-lite",
-      "pass": false,
-      "failedAssertions": [
-        "kind: expected confirm, got noop"
-      ]
+      "pass": true
     },
     {
       "id": "bounds-01",
       "category": "bounds",
       "expectedKind": "clarify",
-      "actualKind": "noop",
+      "actualKind": "clarify",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 4518.7,
+      "totalMs": 1365.4,
       "usage": {
-        "inputTokens": 258,
-        "outputTokens": 143,
-        "cacheReadTokens": 5888,
+        "inputTokens": 2641,
+        "outputTokens": 60,
+        "cacheReadTokens": 3310,
         "cacheWriteTokens": 0
       },
-      "model": "openai/gpt-oss-120b",
-      "pass": false,
-      "failedAssertions": [
-        "kind: expected clarify, got noop"
-      ]
+      "model": "gemini-3.5-flash-lite",
+      "pass": true
     },
     {
       "id": "dictation-noise-01",
       "category": "dictation-noise",
       "expectedKind": "ops",
-      "actualKind": "noop",
+      "actualKind": "ops",
       "tier": "ai",
-      "totalMs": 2419.033,
-      "pass": false,
-      "failedAssertions": [
-        "error: RATE_LIMITED"
-      ]
+      "attempts": 1,
+      "totalMs": 2121.3,
+      "usage": {
+        "inputTokens": 2556,
+        "outputTokens": 391,
+        "cacheReadTokens": 3300,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-3.5-flash-lite",
+      "pass": true
     }
   ]
 }

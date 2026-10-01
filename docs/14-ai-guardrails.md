@@ -10,7 +10,7 @@ Guardrails decide **when not to act**. They are enforced in code (`ai/src/llm/gu
 | G-02 | Unknown node referenced | `validateBatch` → `UNKNOWN_NODE` | 1 repair attempt → else `clarify` naming the closest matches | `repair` |
 | G-03 | Destructive bulk change | > 3 `removeNode`, or removal of ≥ 50% of nodes | Convert to `confirm` (ops held client-side) | `destructive` |
 | G-04 | Off-topic / not a design command | Model returns `noop` | Toast, board untouched | `off-topic` |
-| G-05 | Out-of-bounds numbers | `OUT_OF_BOUNDS` | Repair once → else `clarify` stating the limit | `bounds` |
+| G-05 | Out-of-bounds numbers | `OUT_OF_BOUNDS`; **and in code**: `findOutOfBounds(utterance)` (rps > 10M, replicas > 1,000, shards > 256, peak > 100×) when the model returns ops/confirm/noop, catching silent clamps | Repair once → else `clarify` stating the limit, with options "Use <max>" / "Cancel"; never act on a changed number | `bounds` |
 | G-06 | Too many ops | > 25 ops | Reject → `clarify` "That's a lot at once. Can we do it in parts?" | `bounds` |
 | G-07 | Prompt injection in the utterance or labels | Treated as data by design; output schema only allows ops/text | No special path; eval checks it never escapes the schema or acts outside the request | `injection` |
 | G-08 | Ungrounded answer | `focusNodeIds` not in graph | Filter unknown ids; answers must cite sim numbers present in the context | `question` |
@@ -26,6 +26,7 @@ Guardrails decide **when not to act**. They are enforced in code (`ai/src/llm/gu
 3. "Never remove components the user didn't refer to."
 4. "Only answer from the provided graph and simulation numbers. If the answer isn't in them, say what's missing."
 5. "Prefer the fewest ops that achieve the request."
+6. "If the user asks for a number outside the bounds, return clarify stating the limit. Never clamp, round or silently change a number the user said."
 
 ## Acting thresholds
 
