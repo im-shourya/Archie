@@ -4,7 +4,13 @@ All notable user-visible changes. Format: [Keep a Changelog](https://keepachange
 
 ## [Unreleased]
 
+### Changed
+- Command bar, history and node cards use icons instead of emoji.
+
 ### Added
+- Brand: logo (an "A" drawn as a three-node graph), favicon that adapts to dark mode, Apple touch icon, social preview image, web app manifest.
+- SEO: title template, description, Open Graph and Twitter cards, canonical URL, theme colours, JSON-LD, robots rules (boards and API not indexed) and sitemap.
+- Design system: semantic colour tokens for light and dark themes, IBM Plex Sans and Mono, Lucide icons (one per component kind), redesigned Home page.
 - Live simulation: per-component load, utilization and status, end-to-end success and p50/p95/p99 latency, throughput and monthly cost; cache-aside, read replicas, sharding, queues with backlog, failover and failure injection; every red component explains itself with the numbers.
 - Animated traffic on edges (failing requests in red), bottleneck callout, metrics panel with blast radius and component details.
 - `npm run bench:sim` latency benchmark.

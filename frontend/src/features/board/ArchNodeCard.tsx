@@ -2,7 +2,9 @@
 
 import { memo, useState } from "react";
 import { Handle, NodeToolbar, Position, type Node, type NodeProps } from "@xyflow/react";
-import { CATALOG, type ArchNode, type NodeKind, type NodeMetrics } from "@archie/simulator";
+import { X } from "lucide-react";
+import { CATALOG, type ArchNode, type NodeMetrics } from "@archie/simulator";
+import { KindIcon } from "@/components/icons/KindIcon";
 import { compact } from "@/lib/format";
 import styles from "./board.module.css";
 
@@ -10,23 +12,6 @@ export type ArchFlowNode = Node<
   { node: ArchNode; pulseKey: number | null; metrics: NodeMetrics | null; bottleneck: boolean },
   "arch"
 >;
-
-/** Short glyphs until the icon set is chosen (docs/06). */
-const GLYPH: Record<NodeKind, string> = {
-  client: "USR",
-  cdn: "CDN",
-  lb: "LB",
-  gateway: "GW",
-  service: "SVC",
-  worker: "WRK",
-  cache: "C$",
-  sql: "SQL",
-  nosql: "NoSQL",
-  queue: "Q",
-  objectstore: "OBJ",
-  search: "SRCH",
-  external: "EXT",
-};
 
 const STATUS_LABEL: Record<NodeMetrics["status"], string> = {
   healthy: "healthy",
@@ -66,7 +51,7 @@ function ArchNodeCardImpl({ data, selected }: NodeProps<ArchFlowNode>) {
           <div className={styles.calloutHead}>
             <strong>Bottleneck</strong>
             <button type="button" className={styles.calloutClose} onClick={() => setCalloutOpen(false)} aria-label="Hide bottleneck note">
-              ×
+              <X size={14} aria-hidden />
             </button>
           </div>
           <p>{metrics?.explanation}</p>
@@ -81,8 +66,8 @@ function ArchNodeCardImpl({ data, selected }: NodeProps<ArchFlowNode>) {
         aria-label={`${node.label}, ${subtitle(node)}, ${STATUS_LABEL[status]}${metrics && showBar ? `, utilization ${metrics.rho.toFixed(2)}` : ""}`}
       >
         <Handle type="target" position={Position.Left} className={styles.handle} />
-        <span className={styles.glyph} aria-hidden>
-          {GLYPH[node.kind]}
+        <span className={styles.glyph}>
+          <KindIcon kind={node.kind} />
         </span>
         <span className={styles.text}>
           <span className={styles.label}>{node.label}</span>
@@ -94,7 +79,7 @@ function ArchNodeCardImpl({ data, selected }: NodeProps<ArchFlowNode>) {
         {node.props.replicas > 1 && <span className={styles.badge}>×{node.props.replicas}</span>}
         {node.status === "down" && (
           <span className={styles.downMark} aria-hidden>
-            ✕
+            <X size={14} strokeWidth={2.25} />
           </span>
         )}
         {showBar && (

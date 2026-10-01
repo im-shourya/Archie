@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    .ink { stroke: #16181d; fill: #16181d; }
+    .apex { fill: #2a44c8; }
+    @media (prefers-color-scheme: dark) {
+      .ink { stroke: #ecedef; fill: #ecedef; }
+      .apex { fill: #93a5ff; }
+    }
+  </style>
+  <path class="ink" d="M16 8L7 24M16 8L25 24M10.4 18L21.6 18" fill="none" stroke-width="2.4" stroke-linecap="round"/>
+  <rect class="apex" x="12.5" y="4.5" width="7" height="7" rx="2"/>
+  <rect class="ink" x="3.5" y="20.5" width="7" height="7" rx="2"/>
+  <rect class="ink" x="21.5" y="20.5" width="7" height="7" rx="2"/>
+</svg>

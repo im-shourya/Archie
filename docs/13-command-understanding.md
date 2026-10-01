@@ -6,10 +6,10 @@ How an utterance becomes ops. Two tiers: **fast path** (deterministic, local) an
 utterance
    │ normalize
    ▼
-fast path ── confident match ──► ops / actions   (⚡ local)
+fast path ── confident match ──► ops / actions   (local)
    │ null
    ▼
-POST /api/command ──► CommandResult              (✦ AI)
+POST /api/command ──► CommandResult              (AI)
 ```
 
 ## 1. Normalization (`fastpath/normalize.ts`)

@@ -1,7 +1,7 @@
 .wrap {
   position: relative;
-  border-top: 1px solid var(--border-subtle);
-  background: var(--surface-panel);
+  border-top: 1px solid var(--color-border-subtle);
+  background: var(--color-surface);
   padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
 }
 
@@ -25,15 +25,15 @@
   max-width: min(640px, 100%);
   margin: 0;
   padding: 8px 12px;
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
-  background: var(--surface-panel);
-  box-shadow: 0 4px 16px rgb(0 0 0 / 0.08);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-overlay);
   font-size: 14px;
 }
 
 .hint {
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .toastButton {
@@ -41,7 +41,7 @@
   border: 0;
   border-radius: 4px;
   background: transparent;
-  color: var(--accent);
+  color: var(--color-primary);
   font: inherit;
   font-weight: 600;
   cursor: pointer;
@@ -54,18 +54,19 @@
   max-width: 1100px;
   margin: 0 auto;
   padding: 6px 8px 6px 12px;
-  border: 1px solid var(--border-subtle);
-  border-radius: 12px;
-  background: var(--surface-canvas);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--color-background);
 }
 
 .bar:focus-within {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 20%, transparent);
 }
 
 .mic {
-  font-size: 16px;
+  flex: none;
+  color: var(--color-primary);
 }
 
 .input {
@@ -76,7 +77,7 @@
   padding: 6px 0;
   border: 0;
   background: transparent;
-  color: var(--text-primary);
+  color: var(--color-text-primary);
   font: inherit;
   font-size: 16px;
   resize: none;
@@ -92,7 +93,7 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: conic-gradient(var(--accent) var(--p, 0%), var(--border-subtle) 0);
+  background: conic-gradient(var(--color-primary) var(--p, 0%), var(--color-border-subtle) 0);
   animation: fill 1200ms linear forwards;
 }
 
@@ -109,38 +110,44 @@
 }
 
 .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   flex: none;
-  font: 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  font: 12px/1 var(--font-mono), monospace;
   font-variant-numeric: tabular-nums;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
 .badge[data-tier="none"] {
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .handsFree {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   flex: none;
   padding: 6px 10px;
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
-  background: var(--surface-panel);
-  color: var(--text-secondary);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
   font: inherit;
   font-size: 13px;
   cursor: pointer;
 }
 
 .handsFree[aria-pressed="true"] {
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 14%, var(--surface-panel));
-  color: var(--text-primary);
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 14%, var(--color-surface));
+  color: var(--color-text-primary);
 }
 
 .handsFree:focus-visible,
 .toastButton:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
@@ -167,6 +174,6 @@
 @media (prefers-reduced-motion: reduce) {
   .ring {
     animation: none;
-    background: var(--accent);
+    background: var(--color-primary);
   }
 }

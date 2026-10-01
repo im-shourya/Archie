@@ -18,7 +18,7 @@
 
 | Package | What | Key cases |
 |---------|------|-----------|
-| simulator/graph | `applyBatch`, `validate`, ids | atomicity, exact inverse (undo restores a deep-equal graph), every error code, batch-local references |
+| simulator/graph | `applyBatch`, `validate`, ids | atomicity, input never mutated, every error code, batch-local references (undo is snapshot-based, ADR-011) |
 | simulator/sim | propagation, queueing, failures, Monte Carlo | **golden**: `three-tier-50k`, `three-tier-sharded`, `write-queue`, `cache-down`, `primary-failover`, `lb-reroute`; determinism |
 | simulator/interview | `sloChecks` | hand-computed pass/fail per check |
 | ai/fastpath | normalize, grammar, resolve | number words, aliases, pronouns, **returns null on ambiguity/leftovers/compounds** |
@@ -27,7 +27,6 @@
 
 ### Property tests (fast-check)
 
-- Random valid graphs: `applyBatch(ops)` then `applyBatch(inverse)` = original.
 - Simulator: conservation at routing nodes; ρ monotonic in rps; no NaN/Infinity in the output.
 - Fast path never throws on arbitrary strings.
 

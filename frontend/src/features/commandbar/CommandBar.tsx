@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useReactFlow } from "@xyflow/react";
+import { AudioLines, Mic, Zap } from "lucide-react";
 import { parseCommand, type FastPathAction } from "@archie/ai/fastpath";
 import { getRepository } from "@archie/database";
 import { recentNodeIds, useBoardStore } from "../store/board.store";
@@ -215,9 +216,7 @@ export function CommandBar() {
         {hint && <p className={styles.hint}>{hint}</p>}
       </div>
       <div className={styles.bar}>
-        <span className={styles.mic} aria-hidden>
-          🎙
-        </span>
+        <Mic className={styles.mic} size={18} strokeWidth={1.75} aria-hidden />
         <textarea
           ref={inputRef}
           className={styles.input}
@@ -240,7 +239,11 @@ export function CommandBar() {
         </span>
         {armed && <span key={text} className={styles.ring} aria-label="Sending when you stop talking" role="img" />}
         <span className={styles.badge} data-tier={badge?.tier ?? "idle"} data-testid="latency-badge">
-          {badge?.tier === "local" && `⚡ local · ${formatMs(badge.ms)}`}
+          {badge?.tier === "local" && (
+            <>
+              <Zap size={12} strokeWidth={2} aria-hidden /> local · {formatMs(badge.ms)}
+            </>
+          )}
           {badge?.tier === "none" && "— not understood"}
         </span>
         <button
@@ -250,7 +253,7 @@ export function CommandBar() {
           onClick={toggleHandsFree}
           title="Hands-free: send automatically when you stop talking (H)"
         >
-          ⌁ Hands-free
+          <AudioLines size={14} strokeWidth={2} aria-hidden /> Hands-free
         </button>
       </div>
     </footer>
