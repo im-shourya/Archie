@@ -24,6 +24,8 @@ export interface CaseResult {
   error?: string;
   /** B0 only: the fast path returned null and the AI was disabled. */
   abstained?: boolean;
+  /** The model that served the (last) AI call, so fallbacks are visible per case. */
+  model?: string;
 }
 
 export interface Metrics {

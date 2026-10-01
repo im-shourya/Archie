@@ -21,18 +21,28 @@ import {
  * Provider-agnostic: Gemini (default, free tier) or Claude, see client.ts.
  */
 
-export type HarnessErrorCode = "VALIDATION_ERROR" | "LLM_REFUSED" | "LLM_UPSTREAM" | "LLM_UNAVAILABLE";
+export type HarnessErrorCode =
+  | "VALIDATION_ERROR"
+  | "LLM_REFUSED"
+  | "LLM_UPSTREAM"
+  | "LLM_UNAVAILABLE"
+  | "RATE_LIMITED"
+  | "DAILY_CAP_REACHED";
 
 /** Typed failure. `message` is safe to show; provider details stay in `cause` (server logs only). */
 export class HarnessError extends Error {
   constructor(
     readonly code: HarnessErrorCode,
     message: string,
-    options?: { cause?: unknown },
+    options?: { cause?: unknown; retryAfterSeconds?: number },
   ) {
     super(message, options);
     this.name = "HarnessError";
+    this.retryAfterSeconds = options?.retryAfterSeconds;
   }
+
+  /** Set on RATE_LIMITED: when the free quota has room again. */
+  readonly retryAfterSeconds: number | undefined;
 }
 
 /** Total wall-clock budget per request, across SDK retries and the repair turn. */
@@ -59,8 +69,16 @@ function mapError(err: unknown, timedOut: boolean): HarnessError {
         return new HarnessError("LLM_UNAVAILABLE", "The AI is busy right now. Try again in a moment.", { cause: err.cause });
       case "connection":
         return new HarnessError("LLM_UNAVAILABLE", "Couldn't reach the AI.", { cause: err.cause });
+      case "overloaded":
       case "upstream":
         return new HarnessError("LLM_UPSTREAM", "The AI service returned an error.", { cause: err.cause });
+      case "quota_minute":
+        return new HarnessError("RATE_LIMITED", "The free AI quota is busy. Try again shortly.", {
+          cause: err.cause,
+          retryAfterSeconds: Math.max(1, Math.ceil((err.retryAfterMs ?? 60_000) / 1000)),
+        });
+      case "quota_day":
+        return new HarnessError("DAILY_CAP_REACHED", "The free AI quota for today is used up. Local commands still work.", { cause: err.cause });
     }
   }
   return new HarnessError("LLM_UPSTREAM", "The AI returned something unexpected.", { cause: err });
