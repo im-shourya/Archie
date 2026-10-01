@@ -350,6 +350,15 @@ describe("runCommand: errors", () => {
     }
   });
 
+  it("enforces the total budget even when a provider ignores the abort signal", async () => {
+    const stuck = { name: "gemini" as const, model: "stuck", effort: "low", complete: () => new Promise<never>(() => {}) };
+    const started = performance.now();
+    const err = await harnessError(runCommand(request("x"), { provider: stuck, budgetMs: 50 }));
+    expect(err.code).toBe("LLM_UNAVAILABLE");
+    expect(err.message).toMatch(/too long/);
+    expect(performance.now() - started).toBeLessThan(1_000);
+  });
+
   it("rejects an invalid request before calling the model", async () => {
     const { client, create } = mockClient();
     const err = await harnessError(runCommand({ utterance: "", graph: threeTier, baseVersion: 0 }, { provider: client }));

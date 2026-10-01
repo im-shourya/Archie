@@ -84,6 +84,21 @@ function mapError(err: unknown, timedOut: boolean): HarnessError {
   return new HarnessError("LLM_UPSTREAM", "The AI returned something unexpected.", { cause: err });
 }
 
+/**
+ * Settle with `work`, or reject as soon as `signal` aborts. SDKs don't all honour an abort signal
+ * at every stage (a live eval case hung for 96 s after a failover), so the budget is enforced here.
+ */
+function raceAbort<T>(work: Promise<T>, signal: AbortSignal): Promise<T> {
+  if (signal.aborted) return Promise.reject(new ProviderError("aborted"));
+  let onAbort = () => {};
+  const aborted = new Promise<never>((_, reject) => {
+    onAbort = () => reject(new ProviderError("aborted"));
+    signal.addEventListener("abort", onAbort, { once: true });
+  });
+  work.catch(() => {}); // a late rejection after we gave up must not be unhandled
+  return Promise.race([work, aborted]).finally(() => signal.removeEventListener("abort", onAbort));
+}
+
 function addUsage(total: CommandUsage, usage: CommandUsage): void {
   total.inputTokens += usage.inputTokens;
   total.outputTokens += usage.outputTokens;
@@ -151,13 +166,16 @@ export async function runCommand(input: unknown, options: RunOptions = {}): Prom
       const tLlm = performance.now();
       let completion: Completion;
       try {
-        completion = await provider.complete({
-          system: COMMAND_SYSTEM_PROMPT,
-          turns: [...turns],
-          tokenScale: truncations === 0 ? 1 : 2,
-          signal: controller.signal,
-          requestId: options.requestId,
-        });
+        completion = await raceAbort(
+          provider.complete({
+            system: COMMAND_SYSTEM_PROMPT,
+            turns: [...turns],
+            tokenScale: truncations === 0 ? 1 : 2,
+            signal: controller.signal,
+            requestId: options.requestId,
+          }),
+          controller.signal,
+        );
       } finally {
         llmMs += ms(tLlm);
       }

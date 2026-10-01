@@ -46,6 +46,7 @@ export function createChain(links: readonly ChainLink[], log: (event: Record<str
       let skipped = false;
 
       for (const link of links) {
+        if (req.signal.aborted) throw new ProviderError("aborted");
         const tokens = estimateTokens(chars, link.outputAllowance * req.tokenScale);
         const room = link.guard?.check(tokens) ?? { ok: true as const };
         if (!room.ok) {
