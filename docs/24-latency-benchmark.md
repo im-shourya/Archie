@@ -34,7 +34,7 @@ Written into `evals/results/latest.json` → `latency` ([`specs/evaluation-schem
 
 | Tier | N | P50 | P70 | P95 | P99 | P100 |
 |------|---|-----|-----|-----|-----|------|
-| ⚡ Fast path | — | — | — | — | — | — |
+| ⚡ Fast path (Apple M4, Node 22, `c055a5e`) | 14000 | 0.006 ms | 0.008 ms | 0.014 ms | 0.015 ms | 0.138 ms |
 | ✦ AI (warm) | — | — | — | — | — | — |
 | ✦ AI (cold) | — | — | — | — | — | — |
 | Simulator @100 | — | — | — | — | — | — |
