@@ -6,7 +6,7 @@ Every change to a graph, whether from the fast path, the AI, the inspector, a re
 
 | Op | Fields | Semantics |
 |----|--------|-----------|
-| `addNode` | `id?`, `kind`, `label`, `props?` | Adds a node with catalog defaults merged with `props`. If `id` is omitted, it's derived from the label |
+| `addNode` | `id?`, `kind`, `label`, `props?` | Adds a node storing `replicas: 1`, the kind's *initial* props (e.g. cache `hitRate 0.9`, sql primary `shards/role/failover`) and `props`. Capacity/latency/cost stay unset and resolve from the catalog at read time (`effectiveProps`). If `id` is omitted, it's derived from the label |
 | `removeNode` | `id` | Removes the node **and its edges** |
 | `updateNode` | `id`, `label?`, `props?` | Shallow-merges props; `null` resets a prop to the catalog default |
 | `connect` | `from`, `to`, `kind?='call'`, `traffic?='all'`, `weight?` | Adds an edge; error if it already exists |
@@ -20,20 +20,20 @@ Every change to a graph, whether from the fast path, the AI, the inspector, a re
 ## `applyBatch(graph, ops)`
 
 ```ts
-applyBatch(graph: Graph, ops: Op[]): { ok: true; graph: Graph; inverse: Op[] }
-                                   | { ok: false; errors: OpError[] }
+applyBatch(graph: Graph, ops: unknown[]): { ok: true; graph: Graph; changedNodeIds: string[] }
+                                        | { ok: false; errors: OpError[] }
 ```
 
-1. **Validate all ops first** against a working copy, in order. Later ops may reference ids created by earlier ops in the same batch.
-2. If any error → return `ok: false` with **every** error (not just the first). The graph is untouched.
-3. Apply to an immutable copy (structural sharing), then `version + 1`.
-4. Compute `inverse` (ops that restore the previous graph exactly, in reverse order). Example: `removeNode` → `addNode` (with the original props/status) + `connect` for each removed edge.
-5. Pure function: no I/O, no time, no randomness.
+1. Each op is parsed with Zod, then validated against the state produced by the ops before it. Later ops may reference ids created by earlier ops in the same batch.
+2. If any op fails, return `ok: false` with **every** error (not just the first). The input graph is untouched.
+3. Otherwise return a new graph with `version + 1` and the ids of nodes the batch touched (for the pulse animation).
+4. Pure function: no I/O, no time, no randomness. `validateBatch` runs the same checks without returning the graph.
 
 ## Validation errors
 
 | Code | When |
 |------|------|
+| `INVALID_OP` | op shape is wrong (unknown `type`, bad id format, extra fields) |
 | `UNKNOWN_NODE` | id not found (and not created earlier in the batch) |
 | `DUPLICATE_ID` | `addNode` id already exists |
 | `DUPLICATE_EDGE` / `UNKNOWN_EDGE` | connect existing / disconnect missing |
@@ -52,9 +52,12 @@ Messages are written for humans **and** for the repair prompt ([15](15-ai-retry-
 
 ## Undo / redo
 
-- Each applied batch pushes `{ ops, inverse }` to `undo[]` and clears `redo[]`.
-- Undo applies `inverse` (as a batch) and moves the entry to `redo[]`. Redo re-applies `ops`.
-- History depth: 200 batches. Undo/redo are themselves logged as events (`tier: 'local'`, `kind: 'undo'`).
+Undo restores **exact graph snapshots** ([ADR-011](30-architecture-decisions.md)), not inverse ops:
+
+- Each applied batch pushes the previous graph to `undo[]` and clears `redo[]`.
+- Undo swaps the current graph with the top of `undo[]`, redo does the reverse. The restored graph gets `version = current + 1` so versions only move forward (FR-035).
+- History depth: 200 graphs (structurally shared, so cheap). Undo/redo are logged as events (`source: 'undo' | 'redo'`, no ops).
+- Dragging a node (`pinned`) is a layout change: saved, but not an undo step.
 
 ## Event log
 
@@ -64,13 +67,13 @@ interface BoardEvent {
   at: number;                 // epoch ms
   utterance: string | null;   // null for inspector/drag edits
   source: 'fastpath' | 'ai' | 'inspector' | 'review-fix' | 'undo' | 'redo' | 'template';
-  ops: Op[]; inverse: Op[];
+  ops: Op[];                  // empty for undo/redo
   versionAfter: number;
   timings?: { totalMs: number; llmMs?: number };
 }
 ```
 
-Used by: undo/redo, session replay (F-13), "bring it back" style references, the design doc export, and debugging.
+Used by: session replay (F-13), "bring it back" style references, the design doc export, and debugging.
 
 ## Concurrency (AI responses)
 

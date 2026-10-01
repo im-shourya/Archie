@@ -1,2 +1,3 @@
-// IndexedDB repository and share codec. Implemented in Phase 1 (docs/17).
-export {};
+export * from "./schema";
+export * from "./repo";
+export * from "./share";
