@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://archie.dev/specs/command-schema.json",
+  "title": "Archie Command",
+  "description": "Ops, the /api/command request, and CommandResult. See docs/08-graph-operations.md, docs/13-command-understanding.md, docs/16-api.md.",
+  "$defs": {
+    "PartialProps": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "replicas": { "type": "integer", "minimum": 1, "maximum": 1000 },
+        "shards": { "type": "integer", "minimum": 1, "maximum": 256 },
+        "capacityRps": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+        "readCapacity": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+        "writeCapacity": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+        "latencyMs": { "type": ["number", "null"], "minimum": 0, "maximum": 60000 },
+        "hitRate": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "role": { "type": "string", "enum": ["primary", "replica"] },
+        "failover": { "type": "boolean" },
+        "costPerReplica": { "type": ["number", "null"], "minimum": 0 }
+      }
+    },
+    "AddNodeSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "label"],
+      "properties": {
+        "id": { "$ref": "graph-schema.json#/$defs/NodeId" },
+        "kind": { "$ref": "graph-schema.json#/$defs/NodeKind" },
+        "label": { "type": "string", "minLength": 1, "maxLength": 60 },
+        "props": { "$ref": "#/$defs/PartialProps" }
+      }
+    },
+    "Op": {
+      "oneOf": [
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["type", "kind", "label"],
+          "properties": {
+            "type": { "const": "addNode" },
+            "id": { "$ref": "graph-schema.json#/$defs/NodeId" },
+            "kind": { "$ref": "graph-schema.json#/$defs/NodeKind" },
+            "label": { "type": "string", "minLength": 1, "maxLength": 60 },
+            "props": { "$ref": "#/$defs/PartialProps" }
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false, "required": ["type", "id"],
+          "properties": { "type": { "const": "removeNode" }, "id": { "$ref": "graph-schema.json#/$defs/NodeId" } }
+        },
+        {
+          "type": "object", "additionalProperties": false, "required": ["type", "id"],
+          "properties": {
+            "type": { "const": "updateNode" },
+            "id": { "$ref": "graph-schema.json#/$defs/NodeId" },
+            "label": { "type": "string", "minLength": 1, "maxLength": 60 },
+            "props": { "$ref": "#/$defs/PartialProps" }
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false, "required": ["type", "from", "to"],
+          "properties": {
+            "type": { "const": "connect" },
+            "from": { "$ref": "graph-schema.json#/$defs/NodeId" },
+            "to": { "$ref": "graph-schema.json#/$defs/NodeId" },
+            "kind": { "type": "string", "enum": ["call", "async", "replication"] },
+            "traffic": { "type": "string", "enum": ["all", "read", "write"] },
+            "weight": { "type": "number", "exclusiveMinimum": 0 }
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false, "required": ["type", "from", "to"],
+          "properties": {
+            "type": { "const": "disconnect" },
+            "from": { "$ref": "graph-schema.json#/$defs/NodeId" },
+            "to": { "$ref": "graph-schema.json#/$defs/NodeId" }
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false, "required": ["type", "id", "replicas"],
+          "properties": {
+            "type": { "const": "replicate" },
+            "id": { "$ref": "graph-schema.json#/$defs/NodeId" },
+            "replicas": { "type": "integer", "minimum": 1, "maximum": 1000 }
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false, "required": ["type", "from", "to", "node"],
+          "properties": {
+            "type": { "const": "insertBetween" },
+            "from": { "$ref": "graph-schema.json#/$defs/NodeId" },
+            "to": { "$ref": "graph-schema.json#/$defs/NodeId" },
+            "node": { "$ref": "#/$defs/AddNodeSpec" }
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false, "required": ["type"],
+          "properties": {
+            "type": { "const": "setWorkload" },
+            "rps": { "type": "number", "minimum": 0, "maximum": 10000000 },
+            "readRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+            "peakMultiplier": { "type": "number", "minimum": 1, "maximum": 100 }
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false, "required": ["type", "id"],
+          "properties": { "type": { "const": "fail" }, "id": { "$ref": "graph-schema.json#/$defs/NodeId" } }
+        },
+        {
+          "type": "object", "additionalProperties": false, "required": ["type", "id"],
+          "properties": { "type": { "const": "recover" }, "id": { "$ref": "graph-schema.json#/$defs/NodeId" } }
+        }
+      ]
+    },
+    "CommandRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["utterance", "graph", "baseVersion"],
+      "properties": {
+        "utterance": { "type": "string", "minLength": 1, "maxLength": 4000 },
+        "graph": { "$ref": "graph-schema.json" },
+        "baseVersion": { "type": "integer", "minimum": 0 },
+        "selection": { "type": "array", "maxItems": 50, "items": { "$ref": "graph-schema.json#/$defs/NodeId" } },
+        "history": { "type": "array", "maxItems": 5, "items": { "type": "string", "maxLength": 4000 } },
+        "mode": { "type": "string", "enum": ["design", "interview"], "default": "design" }
+      }
+    },
+    "CommandResult": {
+      "description": "LLM structured output (the server adds the meta fields in CommandResponse).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "ops", "message", "options", "focusNodeIds"],
+      "properties": {
+        "kind": { "type": "string", "enum": ["ops", "clarify", "confirm", "answer", "noop"] },
+        "ops": { "type": "array", "maxItems": 25, "items": { "$ref": "#/$defs/Op" } },
+        "message": { "type": "string", "maxLength": 600 },
+        "options": { "type": "array", "maxItems": 4, "items": { "type": "string", "maxLength": 40 } },
+        "focusNodeIds": { "type": "array", "maxItems": 20, "items": { "$ref": "graph-schema.json#/$defs/NodeId" } }
+      }
+    },
+    "CommandResponse": {
+      "allOf": [
+        { "$ref": "#/$defs/CommandResult" },
+        {
+          "type": "object",
+          "required": ["baseVersion", "timings", "attempts", "model"],
+          "properties": {
+            "baseVersion": { "type": "integer" },
+            "attempts": { "type": "integer", "minimum": 1, "maximum": 2 },
+            "model": { "type": "string" },
+            "timings": {
+              "type": "object",
+              "required": ["totalMs"],
+              "properties": {
+                "contextMs": { "type": "number" },
+                "llmMs": { "type": "number" },
+                "validateMs": { "type": "number" },
+                "totalMs": { "type": "number" }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

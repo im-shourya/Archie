@@ -1,0 +1,252 @@
+openapi: 3.1.0
+info:
+  title: Archie API
+  version: 1.0.0
+  description: |
+    AI endpoints for Archie. Stateless: the client always sends the current graph.
+    Readable docs: docs/16-api.md. Errors and retries: docs/15-ai-retry-recovery.md.
+servers:
+  - url: /api
+security:
+  - {}
+  - accessCode: []
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      security: [{}]
+      responses:
+        "200":
+          description: Service health (never calls the LLM)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok, llm, model, version]
+                properties:
+                  ok: { type: boolean }
+                  llm: { type: string, enum: [configured, missing-key] }
+                  model: { type: string }
+                  version: { type: string, description: git sha }
+  /command:
+    post:
+      operationId: postCommand
+      summary: AI tier of the command bar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "command-schema.json#/$defs/CommandRequest" }
+      responses:
+        "200":
+          description: One of ops / clarify / confirm / answer / noop
+          headers:
+            X-Request-Id: { $ref: "#/components/headers/RequestId" }
+          content:
+            application/json:
+              schema: { $ref: "command-schema.json#/$defs/CommandResponse" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "413": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "502": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+  /review:
+    post:
+      operationId: postReview
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [graph]
+              additionalProperties: false
+              properties:
+                graph: { $ref: "graph-schema.json" }
+                requirements: { $ref: "#/components/schemas/Requirements" }
+      responses:
+        "200":
+          description: Review findings
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [findings]
+                properties:
+                  findings:
+                    type: array
+                    maxItems: 6
+                    items: { $ref: "#/components/schemas/Finding" }
+                  timings: { type: object }
+        "400": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "502": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+  /problems:
+    get:
+      operationId: getProblems
+      responses:
+        "200":
+          description: Interview problem bank
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/Problem" }
+  /interview/turn:
+    post:
+      operationId: postInterviewTurn
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InterviewRequest" }
+      responses:
+        "200":
+          description: Next interviewer question
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [question, focusNodeIds, checks, done]
+                properties:
+                  question: { type: string, maxLength: 600 }
+                  focusNodeIds: { type: array, items: { type: string } }
+                  checks: { type: array, items: { $ref: "#/components/schemas/SloCheck" } }
+                  done: { type: boolean }
+        "400": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "502": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+  /interview/score:
+    post:
+      operationId: postInterviewScore
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InterviewRequest" }
+      responses:
+        "200":
+          description: Scorecard
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Scorecard" }
+        "400": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "502": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+components:
+  securitySchemes:
+    accessCode:
+      type: apiKey
+      in: header
+      name: X-Archie-Code
+      description: Only enforced when ARCHIE_ACCESS_CODE is set (docs/18-authentication.md)
+  headers:
+    RequestId:
+      schema: { type: string, format: uuid }
+  responses:
+    Error:
+      description: Error
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    RateLimited:
+      description: Rate limited or daily cap reached
+      headers:
+        Retry-After: { schema: { type: integer } }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              enum: [VALIDATION_ERROR, ACCESS_CODE_REQUIRED, PAYLOAD_TOO_LARGE, LLM_REFUSED, RATE_LIMITED, DAILY_CAP_REACHED, LLM_UPSTREAM, LLM_UNAVAILABLE, INTERNAL]
+            message: { type: string }
+            details: { type: object }
+    Requirements:
+      type: object
+      required: [peakRps, readRatio, p99Ms, availability]
+      properties:
+        dau: { type: integer, minimum: 0 }
+        peakRps: { type: number, minimum: 0 }
+        readRatio: { type: number, minimum: 0, maximum: 1 }
+        p99Ms: { type: number, minimum: 1 }
+        availability: { type: number, minimum: 0, maximum: 1 }
+    Problem:
+      type: object
+      required: [id, title, difficulty, prompt, requirements]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        difficulty: { type: string, enum: [easy, medium, hard] }
+        prompt: { type: string }
+        requirements: { $ref: "#/components/schemas/Requirements" }
+    Finding:
+      type: object
+      required: [severity, nodeIds, title, detail]
+      properties:
+        severity: { type: string, enum: [high, medium, low] }
+        nodeIds: { type: array, items: { type: string } }
+        title: { type: string, maxLength: 120 }
+        detail: { type: string, maxLength: 600 }
+        fix:
+          type: object
+          required: [summary, ops]
+          properties:
+            summary: { type: string }
+            ops: { type: array, items: { $ref: "command-schema.json#/$defs/Op" } }
+    Turn:
+      type: object
+      required: [role, text]
+      properties:
+        role: { type: string, enum: [interviewer, candidate] }
+        text: { type: string, maxLength: 4000 }
+    InterviewRequest:
+      type: object
+      required: [problemId, graph, transcript]
+      additionalProperties: false
+      properties:
+        problemId: { type: string }
+        graph: { $ref: "graph-schema.json" }
+        transcript: { type: array, maxItems: 40, items: { $ref: "#/components/schemas/Turn" } }
+    SloCheck:
+      type: object
+      required: [id, label, pass, actual]
+      properties:
+        id: { type: string }
+        label: { type: string }
+        pass: { type: boolean }
+        actual: { type: string }
+    Scorecard:
+      type: object
+      required: [checks, rubric, overall, summary]
+      properties:
+        checks: { type: array, items: { $ref: "#/components/schemas/SloCheck" } }
+        rubric:
+          type: array
+          items:
+            type: object
+            required: [dimension, score, evidence]
+            properties:
+              dimension: { type: string, enum: [scalability, availability, data-modelling, trade-offs, communication] }
+              score: { type: integer, minimum: 1, maximum: 5 }
+              evidence: { type: string }
+              nodeIds: { type: array, items: { type: string } }
+        overall: { type: number, minimum: 1, maximum: 5 }
+        summary: { type: string }
