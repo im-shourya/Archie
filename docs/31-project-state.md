@@ -4,7 +4,7 @@ Where the project is **right now**. Update at the end of every phase (and whenev
 
 ## Current phase
 
-**Phase 0 · Setup**: scaffold built on `chore/scaffold` (PR pending). Next: Phase 1.
+**Phase 1 · Core graph + canvas**: built on `feat/core-graph` (PR pending, stacked on Phase 0 PR #2). Next: Phase 2 (fast path + command bar).
 
 ## Completed
 
@@ -19,7 +19,8 @@ Where the project is **right now**. Update at the end of every phase (and whenev
 
 - [ ] Wispr Flow signup via the referral link
 - [x] Phase 0 scaffold: workspaces, Next.js + Hono `/api`, health, lint, typecheck, Vitest, Playwright
-- [ ] Phase 1: core graph + canvas
+- [x] Phase 1: graph model, op engine (10 ops, 11 error codes), templates, contract tests vs `specs/`, IndexedDB repository + share codec, board store with snapshot undo, React Flow canvas with ELK worker layout, Home + `/b/new` + `/b/[id]`
+- [ ] Phase 2: fast path + command bar
 
 ## Blocked
 
@@ -27,7 +28,7 @@ _Nothing._
 
 ## Known bugs
 
-_None yet._
+- Wide graphs render small on phones (fit-to-view). Addressed in the Phase 5 mobile pass.
 
 ## Open questions
 
@@ -38,8 +39,8 @@ _None yet._
 
 1. Sign up for Wispr Flow via <https://ref.wisprflow.ai/hhg>
 2. Test screen recording with the Wispr overlay visible
-3. Merge the Phase 0 PR
-4. 🎙 Phase 1 prompt from [29](29-roadmap.md)
+3. Merge PR #2 (Phase 0), then the Phase 1 PR
+4. 🎙 Phase 2 prompt from [29](29-roadmap.md)
 
 ## Metrics snapshot
 
