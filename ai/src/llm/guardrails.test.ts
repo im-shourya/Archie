@@ -40,6 +40,25 @@ describe("guardrails", () => {
     expect(out.message.endsWith("…")).toBe(true);
   });
 
+  it("G-05: an out-of-bounds number becomes a clarify, even if the model clamped it", () => {
+    const clamped: CommandResult = { kind: "ops", ops: [{ type: "setWorkload", rps: 10_000_000 }], message: "Set to the max.", options: [], focusNodeIds: [] };
+    const out = applyGuardrails(clamped, threeTier, "send fifty million requests a second");
+    expect(out).toMatchObject({ kind: "clarify", ops: [], options: ["Use 10,000,000", "Cancel"] });
+    expect(out.message).toBe("50,000,000 requests per second is more than the simulator supports (the limit is 10,000,000). Should I use 10,000,000?");
+  });
+
+  it("G-05: a noop on an out-of-bounds request becomes a clarify too", () => {
+    const noop: CommandResult = { kind: "noop", ops: [], message: "Can't do that.", options: [], focusNodeIds: [] };
+    expect(applyGuardrails(noop, threeTier, "a billion replicas of the api").kind).toBe("clarify");
+  });
+
+  it("G-05: leaves answers alone and accepts the clarify answer", () => {
+    const answer: CommandResult = { kind: "answer", ops: [], message: "It would saturate.", options: [], focusNodeIds: [] };
+    expect(applyGuardrails(answer, threeTier, "what if we got fifty million rps").kind).toBe("answer");
+    const ops: CommandResult = { kind: "ops", ops: [{ type: "setWorkload", rps: 10_000_000 }], message: "ok", options: [], focusNodeIds: [] };
+    expect(applyGuardrails(ops, threeTier, "send fifty million rps (answer: Use 10,000,000)").kind).toBe("ops");
+  });
+
   it("repairMessage lists every error and the existing ids", () => {
     const msg = repairMessage([{ opIndex: 0, code: "UNKNOWN_NODE", message: 'op 0 (fail): node "x" not found', nodeId: "x" }], threeTier);
     expect(msg).toContain('- op 0 (fail): node "x" not found');
