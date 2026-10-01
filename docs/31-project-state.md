@@ -4,7 +4,7 @@ Where the project is **right now**. Update at the end of every phase (and whenev
 
 ## Current phase
 
-**Phase 4 built** on `feat/ai-harness` ([32-phase-4-plan.md](32-phase-4-plan.md)): schemas + context DSL, system prompt, harness with repair and guardrails, `/api/command` with rate limiting, the AI tier in the command bar, and the eval runner with 31 cases. All of it is tested with a mocked model. **The real-model checks are still open:** the structured-output schema call, the B1 eval and the AI latency, which need a model key. The default provider is now Gemini's free tier (`GEMINI_API_KEY`, [ADR-016](30-architecture-decisions.md)); Claude remains available with `ARCHIE_PROVIDER=anthropic`.
+**Phase 4 built** on `feat/ai-harness` ([32-phase-4-plan.md](32-phase-4-plan.md)): schemas + context DSL, system prompt, harness with repair and guardrails, `/api/command` with rate limiting, the AI tier in the command bar, and the eval runner with 31 cases. All of it is tested with a mocked model. Running on free tiers: a Gemini model ladder → Groq fallback with quota guards ([ADR-016/017](30-architecture-decisions.md)). **Real-model B1 (2026-10-02):** dev 84.2%, test 83.3% task accuracy, warm P50 1.9–2.7 s, but a **25% false-action rate on test (1 of 4: an out-of-bounds number was applied)**. Out-of-bounds handling is the next fix.
 
 ## Completed
 
@@ -24,11 +24,12 @@ Where the project is **right now**. Update at the end of every phase (and whenev
 - [x] Phase 3: simulation engine (propagation, cache-aside, SQL clusters + failover, queues, exact success, seeded Monte Carlo, explanations), golden + property + contract tests, `bench:sim`, board UI (status, ρ bars, animated traffic, bottleneck callout, metrics panel, blast radius)
 - [x] Brand and design system (logo, tokens, Plex, Lucide, light/dark), SEO (metadata, OG image, manifest, robots, sitemap, JSON-LD), README rewrite, docs audit (statuses, stale undo/emoji references)
 - [x] Phase 4 code: harness, `/api/command`, command bar AI tier, eval runner + 31 cases (mocked-model tests)
-- [ ] Phase 4 real-model checks: `npx tsx ai/scripts/try.ts`, `npm run eval` (dev, then test), acceptance criteria in doc 32
+- [x] Phase 4 real-model checks: schema accepted live, B1 dev + test run
+- [ ] Out-of-bounds numbers → clarify (bounds 0/2; test false action); then re-run dev, then test
 
 ## Blocked
 
-- Real-model verification of Phase 4: no `GEMINI_API_KEY` on the build machine yet (free at aistudio.google.com/apikey; add it to `.env.local`).
+_Nothing._ Free quotas are about 20 calls/day per Gemini model (4-model ladder) plus Groq. Eval runs are budgeted accordingly.
 
 ## Known bugs
 
@@ -45,19 +46,21 @@ Where the project is **right now**. Update at the end of every phase (and whenev
 1. Sign up for Wispr Flow via <https://ref.wisprflow.ai/hhg>
 2. Test screen recording with the Wispr overlay visible
 3. Make the repository public before submitting (it's private, so the repo link and README images won't open for judges)
-4. Add `GEMINI_API_KEY`, run `npx tsx ai/scripts/try.ts`, then `npm run eval -- --split dev` and record B1 in doc 22
-5. 🎙 Phase 5 per [29-roadmap.md](29-roadmap.md)
+4. Fix out-of-bounds → clarify (prompt rule + maybe a code check), re-run dev then test, and keep false actions ≤ 2%
+5. Rotate the Gemini and Groq keys (they were pasted in chat)
+6. 🎙 Phase 5 per [29-roadmap.md](29-roadmap.md)
 
 ## Metrics snapshot
 
 | Metric | Value |
 |--------|-------|
 | Eval cases | 31 / 92 (19 dev, 12 test) |
-| Task accuracy (test) | — |
+| Task accuracy (dev / test) | 84.2% / 83.3% |
+| False-action rate (dev / test) | 0% / 25% (1 of 4) |
 | Fast-path P50 / P100 | 0.006 ms / 0.138 ms |
 | Simulator P95 @ 100 nodes | 2.327 ms |
 | Fast path on eval cases (B0) | 2/31 handled, precision 100% |
-| AI P50 / P95 | — (pending API key) |
+| AI warm P50 / P95 (test) | 2.7 s / 3.65 s (free-tier Gemini) |
 
 ## Last updated
 

@@ -48,7 +48,8 @@ Measured with the scripts in this repository (`npm run bench:fast`, `npm run ben
 |------|--------|--------|
 | Voice command, parse + apply (fast path) | P50 0.006 ms · P100 0.138 ms over 14,000 runs | P50 < 10 ms |
 | Full simulation incl. 10,000-sample Monte Carlo, 100 components | P95 2.33 ms | P95 < 5 ms |
-| Unit, property and contract tests | 358 passing | — |
+| AI command understanding, held-out test split (12 cases, free-tier Gemini) | task accuracy 83.3% · warm P50 2.7 s, P95 3.65 s · 1 false action (out-of-bounds number) | ≥ 90% · P50 < 3 s · false actions ≤ 2% |
+| Unit, property and contract tests | 405 passing | — |
 | End-to-end tests (desktop + mobile Chromium) | 53 passing (AI responses mocked) | — |
 
 The simulator's headline numbers are golden-tested against hand calculations in [docs/10](docs/10-traffic-model.md). It is a teaching model (M/M/1 per replica, steady state), not a vendor benchmark; assumptions are listed in [docs/09](docs/09-simulation-engine.md).
@@ -60,7 +61,7 @@ flowchart LR
     V[Wispr Flow dictation] --> C[Command bar]
     C --> F{Fast path<br/>deterministic parser}
     F -- understood --> O[Validated graph ops]
-    F -- unsure --> A[AI tier · /api/command<br/>Gemini or Claude + validation + guardrails]
+    F -- unsure --> A[AI tier · /api/command<br/>Gemini → Groq fallback<br/>+ validation + guardrails]
     A -- ops --> O
     A -- clarify · confirm · answer · noop --> C
     O --> G[(Board graph)]
@@ -71,7 +72,7 @@ flowchart LR
 
 1. You speak a command; Wispr Flow types it into the command bar.
 2. The fast path matches it against an anchored grammar and resolves component names ("the db", "it", "postgres replica one"). It returns nothing unless it is certain.
-3. Otherwise `/api/command` sends the board (as a compact text form), the simulator summary and the utterance to the model (Gemini by default, Claude optional), which returns structured output: edits, a question, a confirmation request, an answer or a no-op. Edits are validated; invalid ones get one repair turn and then become a question.
+3. Otherwise `/api/command` sends the board (as a compact text form), the simulator summary and the utterance to the model (a ladder of Gemini free-tier models, each with its own daily quota, then Groq's free tier when Gemini is busy or out of quota; Claude optional), which returns structured output: edits, a question, a confirmation request, an answer or a no-op. Edits are validated; invalid ones get one repair turn and then become a question.
 4. The result is a batch of typed operations, validated as a whole and applied atomically, so one bad operation changes nothing.
 5. The simulator re-runs on the new graph in a few milliseconds, and the canvas, metrics and explanations update.
 
@@ -94,7 +95,7 @@ flowchart LR
 frontend/    Next.js app: pages, canvas, command bar, metrics panel
 backend/     Hono API: /api/health and /api/command (rate limit, optional access code)
 simulator/   graph model, operations and the simulation engine (pure TypeScript)
-ai/          fastpath/ command parser (browser-safe); llm/ server-only model harness (Gemini or Claude)
+ai/          fastpath/ command parser (browser-safe); llm/ server-only model harness (Gemini → Groq, or Claude) with quota guards
 database/    IndexedDB repository and share-link codec
 evals/       eval runner, cases, fixtures, benchmarks and results
 specs/       JSON Schemas, OpenAPI and fixtures (machine-readable contracts)
@@ -115,7 +116,7 @@ npm run dev
 
 Open <http://localhost:3000>, pick **Open the 50k rps demo**, and try saying *"Shard Postgres into two."*
 
-Local commands and the simulator need no environment variables. AI commands (anything the fast path doesn't understand) need a free `GEMINI_API_KEY` from [Google AI Studio](https://aistudio.google.com/apikey) in `.env.local`. Keys are server-only and never sent to the browser. To use Claude instead, set `ANTHROPIC_API_KEY` and `ARCHIE_PROVIDER=anthropic`. Note that Google may use prompts sent on its free tier to improve its products. [`.env.example`](.env.example) lists the optional ones: `ARCHIE_PROVIDER`, `ARCHIE_MODEL`, `ARCHIE_DAILY_CAP`, `ARCHIE_ACCESS_CODE`, `ARCHIE_IP_SALT` and `NEXT_PUBLIC_SITE_URL`.
+Local commands and the simulator need no environment variables. AI commands (anything the fast path doesn't understand) need a free `GEMINI_API_KEY` from [Google AI Studio](https://aistudio.google.com/apikey) in `.env.local`, plus an optional free `GROQ_API_KEY` from [Groq](https://console.groq.com/keys) as the fallback. Keys are server-only and never sent to the browser. Per-provider quota guards keep usage under the free tiers: when both are full, the API answers 429 rather than failing upstream. To use Claude instead, set `ANTHROPIC_API_KEY` and `ARCHIE_PROVIDER=anthropic`. Note that Google may use prompts sent on its free tier to improve its products. [`.env.example`](.env.example) lists the optional ones: `ARCHIE_PROVIDER`, `ARCHIE_FALLBACK`, `ARCHIE_MODEL`, the quota overrides (`GEMINI_RPM`, `GROQ_TPM`, …), `ARCHIE_DAILY_CAP`, `ARCHIE_ACCESS_CODE`, `ARCHIE_IP_SALT` and `NEXT_PUBLIC_SITE_URL`.
 
 ### Commands
 
@@ -127,7 +128,7 @@ Local commands and the simulator need no environment variables. AI commands (any
 | `npm test` | Unit, property and contract tests (Vitest) |
 | `npm run test:e2e` | End-to-end tests (run `npx playwright install chromium` once first) |
 | `npm run bench:fast` · `npm run bench:sim` | Latency benchmarks, written to `evals/results/` |
-| `npm run eval` | Command-understanding eval against the real model (needs `GEMINI_API_KEY`, or Claude via `ARCHIE_PROVIDER=anthropic`); `-- --fastpath-only` for the no-AI baseline, `-- --split test` for the held-out split |
+| `npm run eval` | Command-understanding eval against the real model (needs `GEMINI_API_KEY`; `GROQ_API_KEY` adds the fallback; paces itself to the free quotas); `-- --fastpath-only` for the no-AI baseline, `-- --split test` for the held-out split |
 | `npm run dev:backend` | The API alone on <http://localhost:8787/api> |
 
 ## Built with Wispr Flow
