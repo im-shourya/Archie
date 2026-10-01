@@ -38,3 +38,14 @@ body {
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   line-height: 1.5;
 }
+
+/* Smooth layout transitions for canvas nodes (docs/06 · Motion), not while dragging. */
+.react-flow__node:not(.dragging) {
+  transition: transform 250ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .react-flow__node {
+    transition: none !important;
+  }
+}
