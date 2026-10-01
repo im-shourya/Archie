@@ -1,0 +1,464 @@
+{
+  "runId": "2026-10-01T19-57-13-900Z-all-b0",
+  "createdAt": "2026-10-01T19:57:13.900Z",
+  "commit": "0508af7",
+  "split": "all",
+  "model": "none",
+  "effort": "none",
+  "promptHash": "d7d3db96cf14",
+  "target": "local",
+  "environment": {
+    "cpu": "Apple M4",
+    "node": "v22.19.0"
+  },
+  "metrics": {
+    "taskAccuracy": 0.0645,
+    "kindAccuracy": 0.129,
+    "falseActionRate": 0,
+    "overClarifyRate": 0,
+    "fastPathPrecision": 1,
+    "fastPathCoverage": 0.0645,
+    "repairRate": 0
+  },
+  "byCategory": {
+    "create": {
+      "n": 2,
+      "pass": 0
+    },
+    "modify": {
+      "n": 2,
+      "pass": 0
+    },
+    "connect": {
+      "n": 2,
+      "pass": 0
+    },
+    "scale": {
+      "n": 2,
+      "pass": 1
+    },
+    "insert": {
+      "n": 3,
+      "pass": 0
+    },
+    "workload": {
+      "n": 2,
+      "pass": 0
+    },
+    "failure": {
+      "n": 2,
+      "pass": 1
+    },
+    "compound": {
+      "n": 2,
+      "pass": 0
+    },
+    "question": {
+      "n": 2,
+      "pass": 0
+    },
+    "ambiguity": {
+      "n": 2,
+      "pass": 0
+    },
+    "destructive": {
+      "n": 2,
+      "pass": 0
+    },
+    "off-topic": {
+      "n": 2,
+      "pass": 0
+    },
+    "injection": {
+      "n": 2,
+      "pass": 0
+    },
+    "bounds": {
+      "n": 2,
+      "pass": 0
+    },
+    "dictation-noise": {
+      "n": 2,
+      "pass": 0
+    }
+  },
+  "latency": {
+    "fastpath": {
+      "n": 2,
+      "p50": 0.15,
+      "p70": 0.402,
+      "p95": 0.402,
+      "p99": 0.402,
+      "p100": 0.402,
+      "mean": 0.276
+    }
+  },
+  "cases": [
+    {
+      "id": "create-01",
+      "category": "create",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 1.434,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "create-02",
+      "category": "create",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.791,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "modify-01",
+      "category": "modify",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.019,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "connect-01",
+      "category": "connect",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.013,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "scale-01",
+      "category": "scale",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "fastpath",
+      "totalMs": 0.402,
+      "pass": true
+    },
+    {
+      "id": "scale-02",
+      "category": "scale",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.016,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "insert-01",
+      "category": "insert",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.024,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "insert-03",
+      "category": "insert",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.01,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "workload-01",
+      "category": "workload",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.013,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "workload-02",
+      "category": "workload",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.022,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "failure-01",
+      "category": "failure",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "fastpath",
+      "totalMs": 0.15,
+      "pass": true
+    },
+    {
+      "id": "compound-01",
+      "category": "compound",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.016,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "question-01",
+      "category": "question",
+      "expectedKind": "answer",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.007,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "ambiguity-01",
+      "category": "ambiguity",
+      "expectedKind": "clarify",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.077,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "destructive-01",
+      "category": "destructive",
+      "expectedKind": "confirm",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.006,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "off-topic-01",
+      "category": "off-topic",
+      "expectedKind": "noop",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.007,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "injection-01",
+      "category": "injection",
+      "expectedKind": "confirm",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.009,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "bounds-01",
+      "category": "bounds",
+      "expectedKind": "clarify",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.34,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "dictation-noise-01",
+      "category": "dictation-noise",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.009,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "modify-02",
+      "category": "modify",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.043,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "connect-02",
+      "category": "connect",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.01,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "insert-02",
+      "category": "insert",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.008,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "failure-02",
+      "category": "failure",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.013,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "compound-02",
+      "category": "compound",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.019,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "question-02",
+      "category": "question",
+      "expectedKind": "answer",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.009,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "ambiguity-02",
+      "category": "ambiguity",
+      "expectedKind": "clarify",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.028,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "destructive-02",
+      "category": "destructive",
+      "expectedKind": "confirm",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.065,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "off-topic-02",
+      "category": "off-topic",
+      "expectedKind": "noop",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.008,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "injection-02",
+      "category": "injection",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.012,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "bounds-02",
+      "category": "bounds",
+      "expectedKind": "clarify",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 7.656,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "dictation-noise-02",
+      "category": "dictation-noise",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.042,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    }
+  ]
+}

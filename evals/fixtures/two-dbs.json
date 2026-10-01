@@ -1,0 +1,123 @@
+{
+  "nodes": [
+    {
+      "id": "client",
+      "kind": "client",
+      "label": "Users",
+      "props": {
+        "replicas": 1
+      },
+      "status": "up"
+    },
+    {
+      "id": "gateway",
+      "kind": "gateway",
+      "label": "API gateway",
+      "props": {
+        "replicas": 1
+      },
+      "status": "up"
+    },
+    {
+      "id": "orders",
+      "kind": "service",
+      "label": "Orders service",
+      "props": {
+        "replicas": 4
+      },
+      "status": "up"
+    },
+    {
+      "id": "users",
+      "kind": "service",
+      "label": "Users service",
+      "props": {
+        "replicas": 4
+      },
+      "status": "up"
+    },
+    {
+      "id": "payments",
+      "kind": "service",
+      "label": "Payment service",
+      "props": {
+        "replicas": 2
+      },
+      "status": "up"
+    },
+    {
+      "id": "orders-db",
+      "kind": "sql",
+      "label": "Orders DB",
+      "props": {
+        "replicas": 1,
+        "shards": 1,
+        "role": "primary",
+        "failover": false
+      },
+      "status": "up"
+    },
+    {
+      "id": "users-db",
+      "kind": "sql",
+      "label": "Users DB",
+      "props": {
+        "replicas": 1,
+        "shards": 1,
+        "role": "primary",
+        "failover": false
+      },
+      "status": "up"
+    }
+  ],
+  "edges": [
+    {
+      "id": "client->gateway",
+      "from": "client",
+      "to": "gateway",
+      "kind": "call",
+      "traffic": "all"
+    },
+    {
+      "id": "gateway->orders",
+      "from": "gateway",
+      "to": "orders",
+      "kind": "call",
+      "traffic": "all"
+    },
+    {
+      "id": "gateway->users",
+      "from": "gateway",
+      "to": "users",
+      "kind": "call",
+      "traffic": "all"
+    },
+    {
+      "id": "gateway->payments",
+      "from": "gateway",
+      "to": "payments",
+      "kind": "call",
+      "traffic": "all"
+    },
+    {
+      "id": "orders->orders-db",
+      "from": "orders",
+      "to": "orders-db",
+      "kind": "call",
+      "traffic": "all"
+    },
+    {
+      "id": "users->users-db",
+      "from": "users",
+      "to": "users-db",
+      "kind": "call",
+      "traffic": "all"
+    }
+  ],
+  "workload": {
+    "rps": 5000,
+    "readRatio": 0.8,
+    "peakMultiplier": 1
+  },
+  "version": 0
+}

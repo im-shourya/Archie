@@ -46,6 +46,21 @@ Return the corrected full list of ops, not a diff.
 
 Total wall-clock budget per request: **20 s**. The client shows a "still thinking…" state after 4 s and cancels at 25 s (AbortController).
 
+## Provider fallback and quotas (ADR-017)
+
+Each model turn goes through a chain: a ladder of **Gemini** models (free quotas are per model: `gemini-2.5-flash` → `3.5-flash-lite` → `3.5-flash` → `3.8-flash`; one attempt each, 10 s timeout) → **Groq** `openai/gpt-oss-120b` (free; strict JSON schema). A per-day 429 cools a model down until Pacific midnight.
+
+```
+for provider in chain:
+  guard has no room (rpm/tpm/rpd/tpd or cooldown)?  → skip, don't spend a request
+  call → 429 / 5xx / timeout / network?             → cooldown (Retry-After or 30–60 s), try next
+       → bad request / refusal                      → surface as-is (a bug, not an outage)
+all skipped for the minute → RATE_LIMITED + Retry-After · all out for the day → DAILY_CAP_REACHED
+all tried and failed       → the real failure (502/503, counts toward degraded mode)
+```
+
+The repair turn goes through the same chain, so it can be served by the fallback. Responses report the model that actually answered.
+
 ## Error mapping (backend → client)
 
 | Source | Error code | HTTP | Client behaviour |
@@ -54,7 +69,8 @@ Total wall-clock budget per request: **20 s**. The client shows a "still thinkin
 | Body too large | `PAYLOAD_TOO_LARGE` | 413 | "Board too large for AI (≤ 200 nodes)" |
 | `stop_reason: refusal` | `LLM_REFUSED` | 422 | "I can't help with that one." |
 | Our rate limiter | `RATE_LIMITED` | 429 + `Retry-After` | countdown toast |
-| Daily cap | `DAILY_CAP_REACHED` | 429 | degraded-mode banner |
+| Every provider's free quota full this minute (quota guard, ADR-017) | `RATE_LIMITED` | 429 + `Retry-After` | countdown toast |
+| Daily cap, or every provider's free quota used for the day | `DAILY_CAP_REACHED` | 429 | degraded-mode banner |
 | `Anthropic.RateLimitError` after retries | `LLM_UNAVAILABLE` | 503 | toast + Retry |
 | `Anthropic.APIConnectionError` / timeout | `LLM_UNAVAILABLE` | 503 | toast + Retry |
 | other `Anthropic.APIError` | `LLM_UPSTREAM` | 502 | toast + Retry |

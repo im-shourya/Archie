@@ -1,8 +1,21 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { existsSync, readFileSync } from "node:fs";
+import { parseEnv } from "node:util";
 import type { NextConfig } from "next";
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
+
+// Env files live at the repo root (.env.example says so), but Next only reads the app's own
+// directory. Load the root .env.local and .env too, so `npm run dev` / `npm start` see
+// GEMINI_API_KEY etc. Values already set (hosted env vars) always win.
+for (const file of [".env.local", ".env"]) {
+  const full = path.join(root, file);
+  if (!existsSync(full)) continue;
+  for (const [key, value] of Object.entries(parseEnv(readFileSync(full, "utf8")))) {
+    if (process.env[key] === undefined) process.env[key] = value;
+  }
+}
 const isProd = process.env.NODE_ENV === "production";
 
 // docs/20-security.md: security headers. CSP only in production (dev needs eval for HMR).

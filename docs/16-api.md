@@ -189,10 +189,22 @@ Dimensions: `scalability · availability · data-modelling · trade-offs · comm
 ## `GET /api/health`
 
 ```json
-{ "ok": true, "llm": "configured", "model": "claude-opus-5-5" }
+{
+  "ok": true,
+  "llm": "configured",
+  "provider": "gemini",
+  "fallback": "groq",
+  "model": "gemini-2.5-flash",
+  "quota": {
+    "gemini:gemini-2.5-flash": { "minute": { "requests": 2, "tokens": 12400 }, "day": { "requests": 11, "tokens": 70100 }, "coolingDownMs": 0, "limits": { "rpm": 9, "rpd": 19 } },
+    "gemini:gemini-3.8-flash": { "minute": { "requests": 0, "tokens": 0 }, "day": { "requests": 19, "tokens": 121000 }, "coolingDownMs": 31500000, "limits": { "rpm": 9, "rpd": 19 } },
+    "groq:openai/gpt-oss-120b": { "minute": { "requests": 0, "tokens": 0 }, "day": { "requests": 3, "tokens": 21000 }, "coolingDownMs": 0, "limits": { "rpm": 28, "tpm": 7600 } }
+  },
+  "version": "dev"
+}
 ```
 
-Never calls the LLM.
+Never calls the LLM. `quota` is the in-memory guard state of this server instance (ADR-017).
 
 ---
 
