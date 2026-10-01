@@ -1,4 +1,5 @@
 import { applyBatch, type ArchNode, type Graph, type OpError } from "@archie/simulator";
+import { findOutOfBounds, isClarifyAnswer } from "./bounds";
 import { MAX_FOCUS, MAX_MESSAGE, MAX_OPTION_CHARS, MAX_OPTIONS, type CommandResult } from "./schemas";
 
 /**
@@ -38,14 +39,30 @@ const DEFAULT_MESSAGE: Record<CommandResult["kind"], string> = {
 
 /**
  * Apply the guardrails to a result whose ops already passed validateBatch.
+ * - G-05 a number beyond the op language's bounds → `clarify` stating the limit (never clamp)
  * - G-12 `ops`/`confirm` with no ops → `noop`
  * - G-03 destructive `ops` → `confirm`
  * - G-08 focus ids limited to nodes that exist (before or after the edit)
  * - fields that don't belong to the kind are cleared, and the spec limits are enforced
  */
-export function applyGuardrails(result: CommandResult, graph: Graph): CommandResult {
+const fmtNum = (n: number) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+export function applyGuardrails(result: CommandResult, graph: Graph, utterance = ""): CommandResult {
   let { kind, message } = result;
   let ops = kind === "ops" || kind === "confirm" ? result.ops : [];
+
+  // G-05: the model clamped or ignored an out-of-bounds number. Ask; don't act on a changed number.
+  const beyond = kind === "ops" || kind === "confirm" || kind === "noop" ? findOutOfBounds(utterance) : [];
+  if (beyond.length > 0 && !isClarifyAnswer(utterance)) {
+    const b = beyond[0]!;
+    return {
+      kind: "clarify",
+      ops: [],
+      message: clip(`${fmtNum(b.value)} ${b.noun} is more than the simulator supports (the limit is ${fmtNum(b.max)}). Should I use ${fmtNum(b.max)}?`, MAX_MESSAGE),
+      options: [clip(`Use ${fmtNum(b.max)}`, MAX_OPTION_CHARS), "Cancel"],
+      focusNodeIds: [],
+    };
+  }
 
   if ((kind === "ops" || kind === "confirm") && ops.length === 0) {
     kind = "noop";

@@ -203,7 +203,7 @@ export async function runCommand(input: unknown, options: RunOptions = {}): Prom
 
     tVal = performance.now();
     const result = "errors" in checked ? clarifyFromErrors(checked.errors, req.graph) : checked.result;
-    const guarded = applyGuardrails(result, req.graph);
+    const guarded = applyGuardrails(result, req.graph, req.utterance);
     validateMs += ms(tVal);
 
     return {
