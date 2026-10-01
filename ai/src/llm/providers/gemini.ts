@@ -25,19 +25,31 @@ export const WIRE_JSON_SCHEMA: Record<string, unknown> = (() => {
 /** Finish reasons that mean the model declined (safety / policy filters). */
 const REFUSALS = new Set(["SAFETY", "PROHIBITED_CONTENT", "BLOCKLIST", "SPII", "RECITATION", "IMAGE_SAFETY"]);
 
+/** One attempt, 10 s: the free tier is often slow or "high demand" (503), and the chain's fallback beats retrying. */
+export const GEMINI_TIMEOUT_MS = 10_000;
+
 let client: ModelsClient | null = null;
 function defaultClient(): ModelsClient {
-  // Per-attempt timeout 15 s, up to 3 attempts with backoff (the harness's 20 s budget caps the total).
   client ??= new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY,
-    httpOptions: { timeout: 15_000, retryOptions: { attempts: 3, initialDelay: 0.5, maxDelay: 4 } },
+    httpOptions: { timeout: GEMINI_TIMEOUT_MS, retryOptions: { attempts: 1 } },
   });
   return client;
 }
 
+/** Gemini 429 bodies say "Please retry in 37.5s". */
+function retryAfter(message: string): number | undefined {
+  const m = /retry in ([\d.]+)s/i.exec(message);
+  return m ? Math.ceil(Number(m[1]) * 1000) : undefined;
+}
+
 function classify(err: unknown): ProviderError {
   if (err instanceof Error && err.name === "AbortError") return new ProviderError("aborted", { cause: err });
-  if (err instanceof ApiError) return new ProviderError(err.status === 429 ? "rate_limit" : "upstream", { cause: err });
+  if (err instanceof ApiError) {
+    if (err.status === 429) return new ProviderError("rate_limit", { cause: err, retryAfterMs: retryAfter(err.message) });
+    if (err.status >= 500) return new ProviderError("overloaded", { cause: err });
+    return new ProviderError("upstream", { cause: err });
+  }
   // fetch() network failures surface as TypeError.
   if (err instanceof TypeError) return new ProviderError("connection", { cause: err });
   return new ProviderError("upstream", { cause: err });

@@ -2,11 +2,14 @@
  * npm run eval -- [--split dev|test|all] [--fastpath-only] [--only <id,id>] [--out <file>]
  *
  * Runs the full production path for each case (docs/22 · Pipeline under test):
- *   fixture + utterance → fast path → (null) → harness (real Claude) → guardrails → applyBatch → assertions
+ *   fixture + utterance → fast path → (null) → harness (real model) → guardrails → applyBatch → assertions
  * and writes a RunResult validated against specs/evaluation-schema.json.
  *
- * B0 = --fastpath-only (no AI). B1 = default config: Gemini (free tier, GEMINI_API_KEY) unless
- * ARCHIE_PROVIDER=anthropic. Keys are read from .env.local if present. Cases run sequentially so latency numbers aren't skewed by concurrency.
+ * B0 = --fastpath-only (no AI). B1 = default config: Gemini (free tier) with Groq as fallback
+ * (ADR-016, ADR-017). Keys are read from .env.local if present. Cases run sequentially so latency
+ * numbers aren't skewed by concurrency, and the runner waits for the primary's per-minute quota
+ * before each case so results come from one model where possible (fallbacks on real outages are
+ * still recorded, per case and in `model`).
  */
 import { createHash } from "node:crypto";
 import { execSync } from "node:child_process";
@@ -17,10 +20,15 @@ import { parseCommand } from "@archie/ai/fastpath";
 import {
   buildUserMessage,
   COMMAND_SYSTEM_PROMPT,
+  estimateTokens,
+  fallbackName,
   getProvider,
   HarnessError,
   isConfigured,
   keyEnv,
+  primaryWaitMs,
+  providerName,
+  quotaStatus,
   runCommand,
 } from "@archie/ai/llm";
 import { applyBatch, simulate, type Graph } from "@archie/simulator";
@@ -85,6 +93,7 @@ async function runCase(c: EvalCase): Promise<CaseResult> {
       totalMs: res.timings.totalMs,
       usage: res.usage,
       applied: applied?.ok ?? false,
+      model: res.model,
     };
     if (res.kind === "answer") {
       const context = buildUserMessage({ graph: before, sim: before.nodes.length ? simulate(before) : null, utterance: c.utterance });
@@ -105,12 +114,34 @@ function finish(c: EvalCase, r: Omit<CaseResult, "pass">, outcome: Outcome): Cas
 const pct = (x: number | undefined) => (x === undefined ? "—" : `${(x * 100).toFixed(1)}%`);
 const ms = (x: number | undefined) => (x === undefined ? "—" : x < 10 ? `${x.toFixed(2)} ms` : `${Math.round(x)} ms`);
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+/** About one call's worth of tokens: system prompt + a typical board + output. */
+const CALL_TOKENS = estimateTokens(COMMAND_SYSTEM_PROMPT.length + 3_000, 2_000);
+let warnedDay = false;
+
 const results: CaseResult[] = [];
 for (const c of cases) {
+  if (!fastpathOnly) {
+    const wait = primaryWaitMs(CALL_TOKENS);
+    if (wait === Infinity && !warnedDay) {
+      warnedDay = true;
+      console.log(`  (${providerName()} daily quota used: remaining cases go to ${fallbackName() ?? "no fallback"})`);
+    } else if (wait > 0 && wait !== Infinity) {
+      console.log(`  (waiting ${Math.ceil(wait / 1000)} s for ${providerName()} quota)`);
+      await sleep(wait + 250);
+    }
+  }
   const r = await runCase(c);
   results.push(r);
   const mark = r.pass ? "✓" : "✗";
-  console.log(`${mark} ${c.id.padEnd(20)} ${r.tier.padEnd(8)} ${r.actualKind.padEnd(7)} ${ms(r.totalMs).padStart(9)}  ${r.failedAssertions?.join(" | ") ?? ""}`);
+  const served = r.model ? ` [${r.model}]` : "";
+  console.log(`${mark} ${c.id.padEnd(20)} ${r.tier.padEnd(8)} ${r.actualKind.padEnd(7)} ${ms(r.totalMs).padStart(9)}${served}  ${r.failedAssertions?.join(" | ") ?? ""}`);
+}
+
+function servedModels(): string {
+  const counts = new Map<string, number>();
+  for (const r of results) if (r.model) counts.set(r.model, (counts.get(r.model) ?? 0) + 1);
+  return [...counts].map(([m, n]) => `${m} (${n})`).join(" + ");
 }
 
 const metrics = computeMetrics(results);
@@ -128,7 +159,8 @@ const run = {
   createdAt: new Date().toISOString(),
   commit,
   split,
-  model: fastpathOnly ? "none" : getProvider().model,
+  // Every model that served a case, with counts: fallbacks are part of the result, not hidden.
+  model: fastpathOnly ? "none" : servedModels() || getProvider().model,
   effort: fastpathOnly ? "none" : getProvider().effort,
   promptHash: createHash("sha256").update(COMMAND_SYSTEM_PROMPT).digest("hex").slice(0, 12),
   target: "local",
@@ -164,4 +196,5 @@ for (const [tier, s] of Object.entries(lat)) {
   console.log(`latency ${tier.padEnd(9)} n=${s.n} P50 ${ms(s.p50)} · P70 ${ms(s.p70)} · P95 ${ms(s.p95)} · P99 ${ms(s.p99)} · P100 ${ms(s.p100)}`);
 }
 console.log(`\nby category: ${Object.entries(run.byCategory).map(([k, v]) => `${k} ${v.pass}/${v.n}`).join(" · ")}`);
+if (!fastpathOnly) console.log(`quota after run: ${JSON.stringify(quotaStatus())}`);
 console.log(`wrote ${out}`);

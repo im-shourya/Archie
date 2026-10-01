@@ -340,6 +340,7 @@ describe("runCommand: errors", () => {
   it("fails fast with LLM_UNAVAILABLE when no API key is configured", async () => {
     vi.stubEnv("ANTHROPIC_API_KEY", "");
     vi.stubEnv("GEMINI_API_KEY", "");
+    vi.stubEnv("GROQ_API_KEY", "");
     try {
       const err = await harnessError(runCommand(request("x")));
       expect(err.code).toBe("LLM_UNAVAILABLE");

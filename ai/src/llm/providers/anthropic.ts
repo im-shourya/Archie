@@ -36,6 +36,7 @@ function classify(err: unknown): ProviderError {
   if (err instanceof Anthropic.APIUserAbortError) return new ProviderError("aborted", { cause: err });
   if (err instanceof Anthropic.RateLimitError) return new ProviderError("rate_limit", { cause: err });
   if (err instanceof Anthropic.APIConnectionError) return new ProviderError("connection", { cause: err });
+  if (err instanceof Anthropic.InternalServerError) return new ProviderError("overloaded", { cause: err });
   return new ProviderError("upstream", { cause: err });
 }
 

@@ -42,7 +42,7 @@ export const command = new Hono().post(
         // Provider details stay server-side, keyed by request id (docs/15).
         console.error(JSON.stringify({ level: "error", requestId: c.get("requestId"), code: err.code, cause: String(err.cause) }));
       }
-      throw new AppError(err.code, err.message);
+      throw new AppError(err.code, err.message, err.retryAfterSeconds ? { retryAfterSeconds: err.retryAfterSeconds } : undefined);
     }
   },
 );
