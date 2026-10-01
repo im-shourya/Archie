@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://archie.dev/specs/simulation-schema.json",
+  "title": "Archie SimResult",
+  "description": "Output of simulate(graph). See docs/09-simulation-engine.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["nodes", "edges", "e2e", "bottleneck", "costMonthly", "warnings", "seed"],
+  "properties": {
+    "nodes": { "type": "object", "additionalProperties": { "$ref": "#/$defs/NodeMetrics" } },
+    "edges": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["rps", "errorRps"],
+        "properties": { "rps": { "type": "number", "minimum": 0 }, "errorRps": { "type": "number", "minimum": 0 } }
+      }
+    },
+    "e2e": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["read", "write", "successRate", "throughput"],
+      "properties": {
+        "read": { "$ref": "#/$defs/Percentiles" },
+        "write": { "$ref": "#/$defs/Percentiles" },
+        "successRate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "throughput": { "type": "number", "minimum": 0 }
+      }
+    },
+    "bottleneck": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "rho", "explanation"],
+          "properties": { "id": { "type": "string" }, "rho": { "type": "number", "minimum": 0 }, "explanation": { "type": "string" } }
+        }
+      ]
+    },
+    "spof": { "type": "array", "items": { "type": "object", "required": ["id", "successRate"], "properties": { "id": { "type": "string" }, "successRate": { "type": "number" } } } },
+    "costMonthly": { "type": "number", "minimum": 0 },
+    "warnings": { "type": "array", "items": { "type": "string" } },
+    "seed": { "type": "integer" }
+  },
+  "$defs": {
+    "Percentiles": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["p50", "p95", "p99"],
+      "properties": {
+        "p50": { "type": ["number", "null"], "minimum": 0 },
+        "p95": { "type": ["number", "null"], "minimum": 0 },
+        "p99": { "type": ["number", "null"], "minimum": 0 }
+      }
+    },
+    "NodeMetrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lambdaRead", "lambdaWrite", "rho", "meanMs", "errorRate", "status", "explanation"],
+      "properties": {
+        "lambdaRead": { "type": "number", "minimum": 0 },
+        "lambdaWrite": { "type": "number", "minimum": 0 },
+        "rho": { "type": "number", "minimum": 0 },
+        "meanMs": { "type": ["number", "null"], "minimum": 0, "description": "null when saturated" },
+        "errorRate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "backlogGrowth": { "type": "number", "minimum": 0 },
+        "status": { "type": "string", "enum": ["healthy", "warm", "hot", "saturated", "down", "idle"] },
+        "promotedFrom": { "type": "string" },
+        "explanation": { "type": "string" }
+      }
+    }
+  }
+}
