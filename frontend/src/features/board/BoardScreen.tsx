@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ReactFlowProvider, useReactFlow } from "@xyflow/react";
-import { TEMPLATES, type TemplateId } from "@archie/simulator";
+import { TEMPLATES, type Graph, type TemplateId } from "@archie/simulator";
 import { CommandBar } from "../commandbar/CommandBar";
+import { MetricsPanel } from "../metrics/MetricsPanel";
 import { useBoardStore } from "../store/board.store";
 import { Canvas } from "./Canvas";
 import { EventLog } from "./EventLog";
+import { useSimulation } from "./useSimulation";
 import styles from "./board.module.css";
 
 function isTyping(target: EventTarget | null): boolean {
@@ -73,7 +75,54 @@ function EmptyBoard() {
   );
 }
 
+type PanelTab = "metrics" | "history";
+
+function PanelTabs({ tab, onChange }: { tab: PanelTab; onChange: (t: PanelTab) => void }) {
+  return (
+    <div className={styles.tabs} role="tablist" aria-label="Side panel">
+      {(["metrics", "history"] as const).map((t) => (
+        <button
+          key={t}
+          type="button"
+          role="tab"
+          aria-selected={tab === t}
+          aria-controls="side-panel-body"
+          className={styles.tab}
+          onClick={() => onChange(t)}
+        >
+          {t === "metrics" ? "Metrics" : "History"}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Canvas + side panel for a non-empty board; the simulation runs on every change. */
+function SimulatedBoard({ graph, tab, onTab }: { graph: Graph; tab: PanelTab; onTab: (t: PanelTab) => void }) {
+  const { sim, baseline } = useSimulation(graph);
+  const selection = useBoardStore((s) => s.selection);
+  const events = useBoardStore((s) => s.events);
+  return (
+    <>
+      <section className={styles.canvas} aria-label="Board">
+        <Canvas graph={graph} sim={sim} />
+      </section>
+      <aside className={styles.panel} aria-label="Side panel">
+        <PanelTabs tab={tab} onChange={onTab} />
+        <div id="side-panel-body" role="tabpanel">
+          {tab === "metrics" ? (
+            <MetricsPanel graph={graph} sim={sim} baseline={baseline} selection={selection} />
+          ) : (
+            <EventLog events={events} />
+          )}
+        </div>
+      </aside>
+    </>
+  );
+}
+
 export function BoardScreen({ id }: { id: string }) {
+  const [tab, setTab] = useState<PanelTab>("metrics");
   const { status, board, events, persistent, load, undo, redo, rename } = useBoardStore();
   const canUndo = useBoardStore((s) => s.undoStack.length > 0);
   const canRedo = useBoardStore((s) => s.redoStack.length > 0);
@@ -136,13 +185,19 @@ export function BoardScreen({ id }: { id: string }) {
           </p>
         )}
         <main className={styles.main}>
-          <section className={styles.canvas} aria-label="Board">
-            {board.graph.nodes.length === 0 ? <EmptyBoard /> : <Canvas graph={board.graph} />}
-          </section>
-          <aside className={styles.panel} aria-label="Side panel">
-            <h2 className={styles.panelTitle}>History</h2>
-            <EventLog events={events} />
-          </aside>
+          {board.graph.nodes.length === 0 ? (
+            <>
+              <section className={styles.canvas} aria-label="Board">
+                <EmptyBoard />
+              </section>
+              <aside className={styles.panel} aria-label="Side panel">
+                <h2 className={styles.panelTitle}>History</h2>
+                <EventLog events={events} />
+              </aside>
+            </>
+          ) : (
+            <SimulatedBoard graph={board.graph} tab={tab} onTab={setTab} />
+          )}
         </main>
         <CommandBar />
       </div>
