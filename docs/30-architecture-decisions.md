@@ -108,3 +108,11 @@ Format: Context → Decision → Alternatives → Consequences. Status: `Accepte
 **Decision:** Semantic CSS tokens (light warm paper / dark graphite), one cobalt primary for actions only, a WCAG-AA health ramp for simulation state, IBM Plex Sans + Mono via `next/font`, Lucide icons with one icon per component kind, and an "A as a graph" logo. Details in [06 · Design system](06-ui-ux.md#design-system).
 **Alternatives:** Inter + a default palette (generic); a blueprint-blue theme (cliché, competes with state colours); emoji icons (inconsistent rendering).
 **Consequences:** State colours never collide with the brand colour; every text role passes 4.5:1; fonts are self-hosted (no third-party origin in the CSP).
+
+## ADR-016 · Pluggable model provider; Gemini's free tier by default
+**Status:** Accepted · 2026-10-02 · amends ADR-008
+**Context:** The Anthropic API needs paid credits, and the project has no budget for them. The AI tier and the eval still need a real model.
+**Decision:** The harness calls an `LlmProvider` (`ai/src/llm/providers/`). It keeps the algorithm (repair turn, `max_tokens` retry, guardrails, budget, error mapping), and each provider turns one request into one model turn. The default is `gemini` (`@google/genai`, `gemini-3.8-flash`, JSON-schema structured output via `responseJsonSchema`, thinking `low`). `anthropic` keeps the ADR-008 path. Selection: `ARCHIE_PROVIDER`, else Claude when only `ANTHROPIC_API_KEY` is set. `ARCHIE_MODEL` overrides the model.
+**Alternatives:** Groq (free and fast, but JSON mode rather than schema-enforced output, so more repair turns); Ollama (free, but local only and won't run on the deployed demo).
+**Consequences:** It costs nothing to run. Free-tier prompts may be used by Google to improve its products; boards in the demo are public anyway, and the README says so. Thinking tokens count toward Gemini's output cap, so its cap is 8,000 (vs 4,000). Caching is implicit (`cachedContentTokenCount`); the system prompt stays byte-stable. Eval results record the provider's model, so B1 numbers name the model they came from.
+

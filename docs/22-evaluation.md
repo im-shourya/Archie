@@ -15,7 +15,7 @@ The **full** production path, not just the model:
 
 ```
 case.utterance + fixtures[case.fixture]
-  → fastpath.parse → (null) → harness.run (real Claude) → guardrails
+  → fastpath.parse → (null) → harness.run (real model: Gemini by default, Claude via ARCHIE_PROVIDER) → guardrails
   → applyBatch → simulate → assertions
 ```
 
@@ -77,7 +77,7 @@ Results table (filled by `npm run eval -- --report`):
 | Run | Task acc. | False-action | Over-clarify | AI P50 | AI P95 | Notes |
 |-----|-----------|--------------|--------------|--------|--------|-------|
 | B0 | 6.5% | 0% | 0% | — | — | 31 cases (all splits). Fast path handled 2/31 with precision 100%, abstaining on everything else. `evals/results/b0-fastpath.json` |
-| B1 | — | — | — | — | — | Pending: needs `ANTHROPIC_API_KEY` |
+| B1 | — | — | — | — | — | Pending: needs `GEMINI_API_KEY` (default `gemini-3.8-flash`, thinking low) |
 
 **Decision rule:** a change ships only if task accuracy doesn't drop, false-action stays ≤ 2%, and P95 latency doesn't regress > 20%. One metric improving isn't enough.
 
