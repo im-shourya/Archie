@@ -1,0 +1,13 @@
+{
+  "name": "@archie/evals",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Eval runner and latency benchmarks (docs/22-24).",
+  "scripts": {
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@archie/simulator": "0.1.0"
+  }
+}
