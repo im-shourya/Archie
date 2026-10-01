@@ -27,7 +27,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "bench:fast": "tsx evals/src/bench/fastpath.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

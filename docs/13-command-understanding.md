@@ -34,7 +34,8 @@ Ordered patterns, anchored (the whole utterance must match):
 | shards | `shard <ref> (into\|to) <n>` | `updateNode {shards}` |
 | hit rate | `(set )?<ref> hit rate (to )?<p>%` | `updateNode {hitRate}` |
 | workload | `send <n> (rps\|requests per second)( , <p>% reads)?` · `set (traffic\|load) to <n>` · `<p>% reads` · `peak (is )?<n>x` | `setWorkload` |
-| view / sim | `fit` · `zoom (in\|out)` · `run\|pause (the )?sim(ulation)?` · `export (mermaid\|png\|svg\|json\|doc)` · `review` · `share` | action |
+| view | `fit` · `fit the view` · `zoom (in\|out)` | action |
+| sim / export (later phases) | `run\|pause the sim` · `export …` · `review` · `share` | not yet: returns `null` |
 
 `<ref>` = a node reference (§3). `<n>` = integer. `<p>` = percentage.
 
@@ -42,12 +43,18 @@ Ordered patterns, anchored (the whole utterance must match):
 
 Candidates for a span of text, in order:
 
-1. Exact id or label (case-insensitive).
-2. **Pronouns**: `it`, `that`, `that one` → the single node in the selection, else the single node touched by the last event. Anything else is ambiguous.
-3. Kind words: `the cache` → the only `cache` node; `the database`/`the db` → the only `sql|nosql`; `the load balancer`/`lb`; `the api`/`the service`.
-4. Fuzzy: token-set similarity ≥ 0.8 against id/label (`postgres` → `postgres-primary` when unique).
+Stages run in order; the first stage with any candidate decides:
 
-**Result:** exactly one candidate → resolved. Zero or ≥ 2 → **ambiguous**.
+1. **Pronouns**: `it`, `that`, `that one`, `this` → the single selected node, else the node(s) referenced by the last change with ops (`kill redis` → `bring it back`).
+2. **Exact** id or label (case-insensitive, punctuation-insensitive).
+3. **Contains**: every spoken word (plural-insensitive) appears in the node's label or id (`chat` → "Chat service", `postgres replica 1` → `pg-r1`).
+4. **Kind words** from catalog aliases (`the cache`, `kafka`, `the load balancer`, `lb`) plus generic words (`database`/`db` → `sql|nosql`).
+
+Leading articles (`the`, `my`, …) and trailing generic words (`node`, `instance`) are ignored. A span containing `and`/`or`/`then` never resolves (two things were named).
+
+**Cluster rule:** a SQL primary and its read replicas count as one cluster. If several candidates remain and the user didn't say "replica", the replicas are dropped; one primary left → resolved, several → ambiguous with the primaries as candidates (for clarify chips). This is deterministic, not a guess.
+
+**Result:** exactly one candidate → resolved. Zero or ≥ 2 → **not resolved**, and the whole command returns `null`.
 
 ## 4. Confidence rule
 
@@ -59,6 +66,12 @@ The fast path returns `null` (defers to AI) if **any** of these hold:
 - A number is outside bounds.
 
 It **never guesses**. The eval category `fastpath-precision` asserts that the fast path is never *wrong* (it may abstain).
+
+## Implementation & measurements
+
+`ai/src/fastpath`: `normalize.ts`, `numbers.ts`, `resolve.ts`, `parse.ts` (rules in order, anchored; a rule whose builder can't resolve falls through to the next rule; every op batch must pass `validateBatch`). 84 unit tests cover understood commands **and** a negative suite of ambiguous, compound, unknown, leftover-word and invalid-op utterances that must return `null`.
+
+`npm run bench:fast` (normalize → grammar → resolve → validate → applyBatch, 14 dictated utterances × 1,000 iterations, Apple M4, Node 22, commit `c055a5e`): **P50 0.006 ms · P70 0.008 ms · P95 0.014 ms · P100 0.138 ms** (target P50 < 10 ms, P100 < 50 ms).
 
 ## 5. AI tier
 
