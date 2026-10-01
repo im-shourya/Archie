@@ -89,7 +89,7 @@ Full detail: [03-product-spec.md](03-product-spec.md).
 
 ## Project status
 
-**Planning** (docs and specs complete, implementation starts Phase 0). Live status: [31-project-state.md](31-project-state.md).
+**Development**: Phases 0–3 built (scaffold, graph engine + canvas, voice fast path, simulator). Live status: [31-project-state.md](31-project-state.md).
 
 ## Repository structure
 
@@ -119,7 +119,7 @@ archie/
 | **Security** | [18 authentication](18-authentication.md) · [19 authorization](19-authorization.md) · [20 security](20-security.md) |
 | **Quality** | [21 testing](21-testing.md) · [22 evaluation](22-evaluation.md) · [23 eval dataset](23-eval-dataset.md) · [24 latency benchmark](24-latency-benchmark.md) |
 | **Operations** | [25 deployment](25-deployment.md) · [26 monitoring](26-monitoring.md) · [27 performance](27-performance.md) · [28 disaster recovery](28-disaster-recovery.md) |
-| **Tracking** | [31 project state](31-project-state.md) · [99 challenge rules](99-challenge.md) |
+| **Tracking** | [31 project state](31-project-state.md) · [32 Phase 4 plan](32-phase-4-plan.md) · [99 challenge rules](99-challenge.md) |
 
 ## For AI agents building this repo
 

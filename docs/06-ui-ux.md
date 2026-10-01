@@ -57,8 +57,8 @@ State colours must pass 3:1 contrast against `--surface-raised` **and** be paire
 | **Command bar** | idle · dictating (text changing) · hands-free countdown ring · thinking (✦ shimmer) · result badge |
 | **Clarify chips** | appear above the command bar; number keys `1`–`4` select |
 | **Confirm dialog** | names the count of affected nodes; destructive button on the right |
-| **Bottleneck callout** | anchored to the node; one sentence + "Why?" expands the formula |
-| **Metrics panel** | p50/p95/p99 (read/write), success %, throughput, cost, warnings |
+| **Bottleneck callout** | anchored above the node (React Flow `NodeToolbar`), shows the full explanation with the formula; click-through so it never blocks the canvas; × hides it |
+| **Metrics panel** | workload, success %, throughput, cost, p50/p95/p99 (read/write), blast radius while something is down, bottleneck, the selected component's explanation, notes |
 | **Answer card** | slides above the command bar; node chips highlight on hover |
 | **Toast** | message + optional `Undo` (10 s) |
 | **Interview panel** | problem card · SLO checklist (live) · question bubble + 🔊 · answer transcript · Finish |
