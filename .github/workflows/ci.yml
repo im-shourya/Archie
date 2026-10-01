@@ -64,7 +64,7 @@ jobs:
       - name: Ensure no API key or LLM code in the client bundle
         if: steps.pkg.outputs.present == 'true'
         run: |
-          if grep -rqE 'sk-ant|ANTHROPIC_API_KEY|@anthropic-ai/sdk' frontend/.next/static; then
+          if grep -rqE 'sk-ant|gsk_|ANTHROPIC_API_KEY|GEMINI_API_KEY|GROQ_API_KEY|@anthropic-ai/sdk|@google/genai|groq-sdk' frontend/.next/static; then
             echo "::error::secret or server-only code found in client bundle"; exit 1; fi
       - name: E2E (AI mocked)
         if: steps.pkg.outputs.present == 'true'
@@ -76,6 +76,8 @@ jobs:
     if: github.event_name == 'workflow_dispatch' && inputs.run_evals
     runs-on: ubuntu-latest
     env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
     steps:
       - uses: actions/checkout@v4

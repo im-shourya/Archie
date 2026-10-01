@@ -35,11 +35,16 @@ test("dictated fast-path commands change the board instantly (F-01, F-02)", asyn
   await expect(page.getByTestId("node-api")).toContainText("×30");
 });
 
-test("unclear commands are not guessed: board unchanged, hint shown", async ({ page }) => {
+test("fast-path misses go to the AI instead of being guessed locally", async ({ page }) => {
+  const sent: string[] = [];
+  await page.route("**/api/command", async (route) => {
+    sent.push((route.request().postDataJSON() as { utterance: string }).utterance);
+    await route.fulfill({ status: 503, json: { error: { code: "LLM_UNAVAILABLE", message: "Couldn't reach the AI." } } });
+  });
   await openThreeTier(page);
   await say(page, "kill redis and postgres");
-  await expect(page.getByTestId("latency-badge")).toContainText("not understood");
-  await expect(page.getByText(/couldn’t match that to a command/)).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: "Couldn't reach the AI." })).toBeVisible();
+  expect(sent).toEqual(["kill redis and postgres"]);
   await expect(page.getByTestId("node-redis")).toHaveAttribute("data-status", "up");
   await expect(page.getByTestId("node-pg")).toHaveAttribute("data-status", "up");
   await expect(bar(page)).toHaveValue("kill redis and postgres");

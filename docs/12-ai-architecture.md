@@ -32,6 +32,8 @@ ai/src/
 
 ## Model configuration
 
+> **Provider (ADR-016, ADR-017):** the default is Gemini's free tier as a model ladder (`gemini-2.5-flash` with thinking off → `3.5-flash-lite` → `3.5-flash` → `3.8-flash`, JSON-schema output), failing over to Groq's free tier (`openai/gpt-oss-120b`, strict JSON schema, reasoning `low`). Each provider has a quota guard ([15](15-ai-retry-recovery.md#provider-fallback-and-quotas-adr-017)). The Claude settings below apply with `ARCHIE_PROVIDER=anthropic`.
+
 | Route | Model | Effort | max_tokens | Output |
 |-------|-------|--------|------------|--------|
 | `command` | `claude-opus-5-5` | `low` | 4,000 | `CommandResult` |

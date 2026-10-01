@@ -51,6 +51,9 @@ interface BoardState {
   /** Node ids selected on the canvas (mirrored from React Flow for the panels). */
   selection: string[];
   setSelection(ids: string[]): void;
+  /** Nodes an AI answer or question refers to, highlighted while the user looks at it. */
+  focus: string[];
+  setFocus(ids: string[]): void;
   load(id: string): Promise<void>;
   apply(ops: readonly unknown[], meta: ApplyMeta): ApplyResult;
   undo(): boolean;
@@ -98,6 +101,13 @@ export const useBoardStore = create<BoardState>()((set, get) => {
     redoStack: [],
     changed: { ids: [], at: 0 },
     selection: [],
+    focus: [],
+
+    setFocus(ids) {
+      const current = get().focus;
+      if (ids.length === current.length && ids.every((id, i) => id === current[i])) return;
+      set({ focus: ids });
+    },
 
     setSelection(ids) {
       const current = get().selection;
@@ -106,7 +116,7 @@ export const useBoardStore = create<BoardState>()((set, get) => {
     },
 
     async load(id) {
-      set({ status: "loading", board: null, events: [], undoStack: [], redoStack: [], selection: [] });
+      set({ status: "loading", board: null, events: [], undoStack: [], redoStack: [], selection: [], focus: [] });
       const repo = await getRepository();
       const [board, events] = await Promise.all([repo.getBoard(id), repo.listEvents(id)]);
       if (get().status !== "loading") return;

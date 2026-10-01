@@ -18,9 +18,9 @@
 
 ## Prerequisites (before 09:00)
 
-- [ ] `ANTHROPIC_API_KEY` in `.env.local` (never committed) and a **spend limit** in the Anthropic Console.
-- [ ] Repo secret `ANTHROPIC_API_KEY` for the manual eval workflow.
-- [ ] `npm install -w ai @anthropic-ai/sdk` (server-only package; ESLint already bans it from the frontend).
+- [x] ~~`ANTHROPIC_API_KEY`~~ → superseded by free tiers ([ADR-016/017](30-architecture-decisions.md)): `GEMINI_API_KEY` + `GROQ_API_KEY` in `.env.local` (never committed), with quota guards instead of a spend limit.
+- [ ] Repo secrets `GEMINI_API_KEY` + `GROQ_API_KEY` for the manual eval workflow (the workflow reads them; you add them in GitHub).
+- [x] `@anthropic-ai/sdk`, `@google/genai`, `groq-sdk` installed in `ai` (server-only; ESLint and the CI bundle grep ban them from the frontend).
 
 ## Model & API decisions (from the current Claude API docs)
 
@@ -147,13 +147,13 @@ Files: `evals/src/run.ts`, `evals/src/assertions.ts`, `evals/fixtures/*.json`, `
 
 ## Acceptance criteria (Phase 4 is done when)
 
-- [ ] "connect the payment service to the database" on the `two-dbs` fixture → **clarify** with `orders` / `users` options
-- [ ] "clear the board" → **confirm**; "what's the weather in Goa" → **noop**; board untouched in both
-- [ ] "add a cache in front of postgres" → `addNode cache` + `connect (read)` (cache-aside), and the simulator shows the DB read drop
-- [ ] "users hit two load balancers, thirty API servers, Postgres with two read replicas, and Redis" on an empty board → a graph equivalent to the `three-tier` template
-- [ ] First 30 eval cases: task accuracy ≥ 85%, **false-action rate 0**
-- [ ] AI P50 < 3 s warm (report the real number either way)
-- [ ] `npm test`, lint, typecheck, build, e2e green; `.claude/` untracked; no API key in the client bundle (CI grep)
+- [x] "connect the payment service to the database" on the `two-dbs` fixture → **clarify** with `orders` / `users` options (eval `ambiguity-01`, live)
+- [x] "clear the board" → **confirm**; "what's the weather in Goa" → **noop**; board untouched in both (`destructive-01`, `off-topic-01`)
+- [x] "add a cache in front of postgres" → `addNode cache` + `connect (read)` (cache-aside), and the simulator shows the DB read drop (`insert-01` with `loadDrops`)
+- [x] "users hit two load balancers, thirty API servers, Postgres with two read replicas, and Redis" on an empty board → a graph equivalent to the `three-tier` template (`create-01`)
+- [x] First 30 eval cases: task accuracy ≥ 85%, **false-action rate 0**: 31 cases, **29/31 = 93.5%, 0 false actions** (dev 94.7%, held-out test 91.7%; [22](22-evaluation.md))
+- [x] AI P50 < 3 s warm (report the real number either way): **1.9 s dev, 1.8 s test** on free-tier Gemini (P95 9.8–11.9 s, from fallback hops)
+- [x] `npm test`, lint, typecheck, build, e2e green; `.claude/` untracked; no API key in the client bundle (CI grep): 424 unit, 53 e2e, bundle grep clean
 
 ## Risks
 

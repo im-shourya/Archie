@@ -29,7 +29,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "bench:fast": "tsx evals/src/bench/fastpath.ts",
-    "bench:sim": "tsx evals/src/bench/simulator.ts"
+    "bench:sim": "tsx evals/src/bench/simulator.ts",
+    "eval": "tsx evals/src/run.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
