@@ -9,7 +9,7 @@
 | SPOF scan | < 1 s @ 200 nodes, off main thread | FR-027 | Web Worker, debounced 1 s |
 | Layout | < 100 ms @ 50 nodes, off main thread | NFR-004 | elkjs in a Web Worker; skip layout if only props changed |
 | AI command | P50 < 3 s, P95 < 6 s | NFR-002 | fast path first; effort `low`; cached static system prompt; compact DSL context; one repair max |
-| Canvas | ≥ 50 fps @ 50 nodes with particles | NFR-005 | ≤ 60 particles/edge; particles drawn on one canvas overlay, not DOM; paused when tab hidden |
+| Canvas | ≥ 50 fps @ 50 nodes with particles | NFR-005 | ≤ 5 particles per edge (log₁₀ of rps) animated with native SVG `animateMotion` (no JS per frame); none under reduced motion |
 | Board JS | < 300 KB gz initial | NFR-015 | elkjs + worker lazy; React Flow only on `/b/*`; no chart lib on board (SVG sparkline) |
 | First load (Home) | LCP < 2.0 s on 4G | — | Server Component, no canvas, system fonts or 1 subset webfont |
 | IndexedDB save | non-blocking | — | debounced 500 ms, `requestIdleCallback` |
@@ -19,7 +19,8 @@
 - Zustand selectors per component. Node cards subscribe to their own `SimResult.nodes[id]` only.
 - React Flow: `nodeTypes` defined once (module scope); `onlyRenderVisibleElements`.
 - Simulation result applied in one store update per batch (no cascade of renders).
-- The traffic animation runs in `requestAnimationFrame` on a canvas layer, reading edge rps from a ref (no React state per frame).
+- Traffic particles are SVG `animateMotion` elements: the browser animates them, React only re-renders when the simulation result changes.
+- The simulator runs synchronously on each graph change (~2 ms P95 at 100 nodes), memoized per graph.
 
 ## Backend
 

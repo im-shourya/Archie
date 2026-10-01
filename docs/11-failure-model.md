@@ -26,19 +26,20 @@ How `status: 'down'` changes the simulation, and how failure is injected and exp
 | Compute dependency (`service` → `external` …) | Requests that need it fail (fan-out = all-or-nothing per request class) | *"{dep} down: {λ} rps that depend on it fail."* |
 | `client` | No traffic from that client | — |
 
-A down node renders in `--state-down` with ✕ and its explanation. Error particles show where requests die.
+A down node renders dashed and dimmed with ✕ and its explanation. Red particles and "N% fail" edge labels show where requests die. The explanation strings above are golden-tested exactly (`sim.golden.test.ts`).
 
 ## Blast radius
 
 After `fail`, the metrics panel shows a diff against the pre-failure sim:
 
 ```
-success   100% → 71%   (−29 pts)
-read p99    38 ms → 410 ms
-hot nodes  +pg-r1, +pg-r2
+Blast radius · Redis down
+  Success  96.3% → 54.5%
+  Read p99 ~0.6 s → ~1.3 s
+  Now hot: Postgres replica 1, Postgres replica 2
 ```
 
-This is computed by keeping the last healthy `SimResult` and diffing.
+(three-tier at 50k rps). The "before" is the last `SimResult` of a graph with no failed components (`useSimulation`).
 
 ## SPOF scan (FR-027, P1)
 
