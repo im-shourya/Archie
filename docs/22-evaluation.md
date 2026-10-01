@@ -52,6 +52,18 @@ Structural, not exact-match, so different-but-correct op lists pass:
 { "focusIncludes": ["pg"] }
 ```
 
+Added in Phase 4 (needed by the acceptance criteria):
+
+```json
+{ "reachable": { "fromKind": "queue", "to": "pg" } }
+{ "optionsMention": ["orders", "users"] }
+{ "loadDrops": { "node": "pg", "class": "read" } }
+{ "nodeCount": { "kind": "sql", "role": "replica", "eq": 2 } }
+{ "nodeExists": { "id": "api", "labelIncludes": "checkout" } }
+```
+
+`reachable` accepts inline inserts that add hops. `optionsMention` checks that the clarify options name each candidate. `loadDrops` compares the simulator before and after (for example, a cache taking reads off the database).
+
 ## Baseline & comparisons
 
 | Run | Description |
@@ -64,8 +76,8 @@ Results table (filled by `npm run eval -- --report`):
 
 | Run | Task acc. | False-action | Over-clarify | AI P50 | AI P95 | Notes |
 |-----|-----------|--------------|--------------|--------|--------|-------|
-| B0 | — | — | — | — | — | |
-| B1 | — | — | — | — | — | |
+| B0 | 6.5% | 0% | 0% | — | — | 31 cases (all splits). Fast path handled 2/31 with precision 100%, abstaining on everything else. `evals/results/b0-fastpath.json` |
+| B1 | — | — | — | — | — | Pending: needs `ANTHROPIC_API_KEY` |
 
 **Decision rule:** a change ships only if task accuracy doesn't drop, false-action stays ≤ 2%, and P95 latency doesn't regress > 20%. One metric improving isn't enough.
 
