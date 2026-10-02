@@ -4,7 +4,7 @@ Where the project is **right now**. Update at the end of every phase (and whenev
 
 ## Current phase
 
-**Phase 4 built** on `feat/ai-harness` ([32-phase-4-plan.md](32-phase-4-plan.md)): schemas + context DSL, system prompt, harness with repair and guardrails, `/api/command` with rate limiting, the AI tier in the command bar, and the eval runner with 31 cases. All of it is tested with a mocked model. Running on free tiers: a Gemini model ladder → Groq fallback with quota guards ([ADR-016/017](30-architecture-decisions.md)). **Phase 4 acceptance criteria all met (2026-10-02):** 29/31 eval cases (93.5%), 0 false actions, warm P50 1.8–1.9 s. Out-of-bounds numbers are now caught in code (G-05). Not pushed yet.
+**Phase 4 done** (`feat/ai-harness`, merged in #7) ([32-phase-4-plan.md](32-phase-4-plan.md)): schemas + context DSL, system prompt, harness with repair and guardrails, `/api/command` with rate limiting, the AI tier in the command bar, and the eval runner with 31 cases. All of it is tested with a mocked model. Running on free tiers: a Gemini model ladder → Groq fallback with quota guards ([ADR-016/017](30-architecture-decisions.md)). **Phase 4 acceptance criteria all met (2026-10-02):** 29/31 eval cases (93.5%), 0 false actions, warm P50 1.8–1.9 s. Out-of-bounds numbers are now caught in code (G-05). **Merged in #7 (`727deeb`).**
 
 ## Completed
 
@@ -27,7 +27,7 @@ Where the project is **right now**. Update at the end of every phase (and whenev
 - [x] Phase 4 real-model checks: schema accepted live, B1 dev + test run
 - [x] Out-of-bounds numbers → clarify (G-05 in code + prompt); re-run dev 94.7%, test 91.7%, 0 false actions
 - [x] Request budget enforced even when an SDK ignores abort (a live case hung for 96 s)
-- [ ] Push `feat/ai-harness`, open the PR, squash-merge
+- [x] Merged in #7 (CI green; production build checked with `npm start` + a real `/api/command` call)
 
 ## Blocked
 
@@ -48,9 +48,8 @@ _Nothing._ Free quotas are about 20 calls/day per Gemini model (4-model ladder) 
 1. Sign up for Wispr Flow via <https://ref.wisprflow.ai/hhg>
 2. Test screen recording with the Wispr overlay visible
 3. Make the repository public before submitting (it's private, so the repo link and README images won't open for judges)
-4. Push `feat/ai-harness` and open the Phase 4 PR
-5. Rotate the Gemini and Groq keys (they were pasted in chat)
-6. 🎙 Phase 5 per [29-roadmap.md](29-roadmap.md)
+4. Rotate the Gemini and Groq keys (they were pasted in chat)
+5. 🎙 Phase 5 per [33-phase-5-plan.md](33-phase-5-plan.md)
 
 ## Metrics snapshot
 

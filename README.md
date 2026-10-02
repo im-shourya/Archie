@@ -17,7 +17,7 @@ Archie is a system-design board you talk to. You describe changes out loud ("fiv
 
 ![The three-tier template at 50,000 requests per second: Postgres is saturated at ρ 1.40 and the bottleneck note explains why](docs/assets/board-bottleneck.png)
 
-> Built by voice with [Wispr Flow](https://ref.wisprflow.ai/hhg) for Hacker House Goa 2026. **Status:** in development. Phases 0–3 of 8 are done and Phase 4 (the AI harness) is in review ([roadmap](docs/29-roadmap.md), [project state](docs/31-project-state.md)).
+> Built by voice with [Wispr Flow](https://ref.wisprflow.ai/hhg) for Hacker House Goa 2026. **Status:** in development. Phases 0–4 of 8 are done ([roadmap](docs/29-roadmap.md), [project state](docs/31-project-state.md)).
 
 ## What works today
 
@@ -35,7 +35,7 @@ Archie is a system-design board you talk to. You describe changes out loud ("fiv
 
 | Phase | Feature | Status |
 |-------|---------|--------|
-| 4 | AI tier: full descriptions ("users hit two load balancers…"), clarifying questions, confirmations, grounded answers ([plan](docs/32-phase-4-plan.md)) | 🚧 In review: built and tested with a mocked model; real-model eval numbers pending |
+| 4 | AI tier: full descriptions ("users hit two load balancers…"), clarifying questions, confirmations, grounded answers ([plan](docs/32-phase-4-plan.md)) | ✅ Done (#7) |
 | 5 | Design pass: inspector, mobile layout | 📋 Planned |
 | 6 | Interview mode with simulator-checked SLOs, design review | 📋 Planned |
 | 7 | Eval report, share links, exports, deployment | 📋 Planned |
