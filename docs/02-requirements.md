@@ -46,12 +46,12 @@ The master checklist. Every requirement has an ID, a priority, a phase, and a te
 
 | ID | Requirement | Pri | Phase | Status |
 |----|-------------|-----|-------|--------|
-| FR-030 | Ambiguous commands produce a clarifying question with selectable options | P0 | 4 | Planned |
-| FR-031 | Commands removing > 3 nodes or clearing the board require confirmation | P0 | 4 | Planned |
-| FR-032 | Off-topic input produces a no-op message and leaves the board unchanged | P0 | 4 | Planned |
-| FR-033 | Invalid AI ops trigger one repair attempt, then fall back to clarify | P0 | 4 | Planned |
-| FR-034 | Questions about the board are answered using the current graph + simulation, with highlighted nodes | P0 | 4 | Planned |
-| FR-035 | If the board changed while the AI was thinking, ops are re-validated before applying | P0 | 4 | Planned |
+| FR-030 | Ambiguous commands produce a clarifying question with selectable options | P0 | 4 | Done |
+| FR-031 | Commands removing > 3 nodes or clearing the board require confirmation | P0 | 4 | Done |
+| FR-032 | Off-topic input produces a no-op message and leaves the board unchanged | P0 | 4 | Done |
+| FR-033 | Invalid AI ops trigger one repair attempt, then fall back to clarify | P0 | 4 | Done |
+| FR-034 | Questions about the board are answered using the current graph + simulation, with highlighted nodes | P0 | 4 | Done |
+| FR-035 | If the board changed while the AI was thinking, ops are re-validated before applying | P0 | 4 | Done |
 
 ### Boards (F-09, F-12, F-13)
 
@@ -77,7 +77,7 @@ The master checklist. Every requirement has an ID, a priority, a phase, and a te
 
 | ID | Requirement | Pri | Phase | Status |
 |----|-------------|-----|-------|--------|
-| FR-060 | `npm run eval` runs every case end to end and writes a results JSON | P0 | 4 | Planned |
+| FR-060 | `npm run eval` runs every case end to end and writes a results JSON | P0 | 4 | Done |
 | FR-061 | `/evals` renders accuracy per category and latency percentiles per tier | P1 | 7 | Planned |
 | FR-062 | Mic button fallback (Web Speech API) for users without Wispr Flow | P1 | 5 | Planned |
 
@@ -94,13 +94,13 @@ The master checklist. Every requirement has an ID, a priority, a phase, and a te
 | NFR-007 | False-action rate (acted when it should have clarified/confirmed/noop'd) | ≤ 2% | eval report | Phase 4 |
 | NFR-008 | Simulator determinism (same graph → identical result) | 100% | unit test | ✅ unit test |
 | NFR-009 | Anthropic API key never reaches the browser | 0 occurrences in client bundle | CI grep on `.next/static` | ✅ CI grep (no LLM code yet) |
-| NFR-010 | All API input validated with size caps | 100% routes | contract tests | Partial: 256 KB body limit; route validation in Phase 4 |
-| NFR-011 | Rate limit on AI routes | 20/min/IP command, 6/min/IP interview/review | integration test | Phase 4 |
+| NFR-010 | All API input validated with size caps | 100% routes | contract tests | ✅ 256 KB body limit + Zod on `/api/command` (≤ 4,000-char utterance, ≤ 200 nodes) |
+| NFR-011 | Rate limit on AI routes | 20/min/IP command, 6/min/IP interview/review | integration test | ✅ command (integration tests); interview/review in Phase 6 |
 | NFR-012 | Accessibility | WCAG 2.2 AA contrast, full keyboard operation | axe + manual | Partial: token contrast ≥ 4.5:1 verified; axe pending |
 | NFR-013 | Responsive | usable from 360 px width | Playwright viewport tests | ✅ e2e on Pixel 7 viewport |
 | NFR-014 | Reduced motion | traffic animation off when `prefers-reduced-motion` | e2e test | Implemented (no particles, no pulse); e2e pending |
 | NFR-015 | Board route initial JS | < 300 KB gzipped (ELK lazy-loaded) | build report | Not yet measured |
-| NFR-016 | Graceful AI outage | fast path, simulator, undo, save keep working; banner shown | e2e with API mocked down | Phase 4 |
+| NFR-016 | Graceful AI outage | fast path, simulator, undo, save keep working; banner shown | e2e with API mocked down | ✅ degraded-mode e2e |
 | NFR-017 | Persistence | board survives refresh and browser restart | e2e test | ✅ e2e reload test |
 | NFR-018 | Repo hygiene | no secrets, `.claude/` never committed | CI + local hooks | ✅ hooks + CI guard |
 
