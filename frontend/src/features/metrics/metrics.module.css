@@ -113,3 +113,8 @@
   overflow: hidden;
   clip: rect(0 0 0 0);
 }
+
+.num {
+  font-family: var(--font-mono), monospace;
+  font-variant-numeric: tabular-nums;
+}
