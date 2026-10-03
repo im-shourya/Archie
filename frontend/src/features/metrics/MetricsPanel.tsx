@@ -134,13 +134,13 @@ export function MetricsPanel({ graph, sim, baseline, scan }: Props) {
           <ul className={styles.list} data-testid="spof-list">
             {scan.spofs.map((s) => (
               <li key={s.id}>
-                <strong>{label(s.id)}</strong> · success → <span className={styles.num}>{percent(s.successRate)}</span> if it
-                fails
+                <strong>{label(s.id)}</strong> · success → <span className={styles.num}>{percent(s.successRate)}</span> if one
+                instance fails
               </li>
             ))}
           </ul>
         ) : (
-          <p className={styles.hint}>None: losing any one component keeps success within 5 points.</p>
+          <p className={styles.hint}>None: losing any one instance keeps success within 5 points.</p>
         )}
       </section>
 

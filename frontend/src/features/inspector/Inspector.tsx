@@ -345,12 +345,12 @@ export const Inspector = forwardRef<HTMLHeadingElement, Props>(function Inspecto
   );
 });
 
-/** "If this fails: success 96.3% → 54.5%" (docs/design §5.8). Only SPOFs are listed by the scan. */
+/** "If one instance fails: success 96.3% → 54.5%" (docs/design §5.8). Only SPOFs are listed by the scan. */
 function FailureLine({ scan, id }: { scan: SpofScan; id: string }) {
   const spof = scan.spofs.find((s) => s.id === id);
   return (
     <p className={styles.failure} data-spof={spof ? true : undefined}>
-      If this fails:{" "}
+      If one instance fails:{" "}
       {spof ? (
         <>
           success {percent(scan.baseline)} → {percent(spof.successRate)}
