@@ -8,7 +8,6 @@ interface Props {
   graph: Graph;
   sim: SimResult;
   baseline: SimResult | null;
-  selection: string[];
 }
 
 const HOT = new Set(["hot", "saturated"]);
@@ -22,11 +21,9 @@ function Delta({ before, after, unit }: { before: string; after: string; unit?: 
   );
 }
 
-export function MetricsPanel({ graph, sim, baseline, selection }: Props) {
+export function MetricsPanel({ graph, sim, baseline }: Props) {
   const { workload } = graph;
   const label = (id: string) => graph.nodes.find((n) => n.id === id)?.label ?? id;
-  const selected = selection.length === 1 ? graph.nodes.find((n) => n.id === selection[0]) : undefined;
-  const selectedMetrics = selected ? sim.nodes[selected.id] : undefined;
   const down = graph.nodes.filter((n) => n.status === "down");
   const newlyHot = baseline
     ? Object.entries(sim.nodes)
@@ -125,29 +122,6 @@ export function MetricsPanel({ graph, sim, baseline, selection }: Props) {
           <p className={styles.hint}>None: every component has at least 30% headroom.</p>
         )}
       </section>
-
-      {selected && selectedMetrics && (
-        <section aria-labelledby="m-selected">
-          <h3 id="m-selected" className={styles.heading}>
-            Selected · {selected.label}
-          </h3>
-          <dl className={styles.stats}>
-            <div>
-              <dt>Load</dt>
-              <dd>{compact(selectedMetrics.lambdaRead + selectedMetrics.lambdaWrite)} rps</dd>
-            </div>
-            <div>
-              <dt>ρ</dt>
-              <dd>{selectedMetrics.rho.toFixed(2)}</dd>
-            </div>
-            <div>
-              <dt>Mean</dt>
-              <dd>{selectedMetrics.status === "saturated" ? "saturated" : ms(selectedMetrics.meanMs)}</dd>
-            </div>
-          </dl>
-          <p className={styles.explain}>{selectedMetrics.explanation}</p>
-        </section>
-      )}
 
       {sim.warnings.length > 0 && (
         <section aria-labelledby="m-warnings">

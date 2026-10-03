@@ -9,7 +9,9 @@
   position: absolute;
   left: 16px;
   right: 16px;
-  bottom: calc(100% + 8px);
+  /* Above the phone bottom sheet when there is one (--sheet-height is set by BottomSheet). */
+  bottom: calc(100% + 8px + var(--sheet-height, 0px));
+  z-index: 10;
   display: grid;
   gap: 8px;
   justify-items: start;
@@ -67,6 +69,36 @@
 .mic {
   flex: none;
   color: var(--color-primary);
+}
+
+.micButton {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  margin: -4px 0 -4px -6px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.micButton:hover {
+  background: var(--color-primary-subtle);
+}
+
+.micButton[aria-pressed="true"] {
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+  animation: listening 1.6s ease-in-out infinite;
+}
+
+@keyframes listening {
+  50% {
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-primary) 18%, transparent);
+  }
 }
 
 .input {
@@ -291,7 +323,45 @@
   gap: 8px;
 }
 
+.field {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.fieldLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.fieldInput {
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  font: inherit;
+}
+
+.fieldInput:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
+.fieldInput[aria-invalid="true"] {
+  border-color: var(--color-state-saturated);
+}
+
+.fieldError {
+  margin: -4px 0 16px;
+  font-size: 13px;
+  color: var(--color-state-saturated);
+}
+
 .secondaryButton,
+.primaryButton,
 .dangerButton {
   min-height: 36px;
   padding: 6px 14px;
@@ -306,6 +376,17 @@
   border: 1px solid var(--color-border-default);
   background: var(--color-surface);
   color: var(--color-text-primary);
+}
+
+.primaryButton {
+  border: 1px solid var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+}
+
+.primaryButton:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .dangerButton {
@@ -335,13 +416,15 @@
   color: var(--color-text-primary);
 }
 
+.micButton:focus-visible,
 .handsFree:focus-visible,
 .toastButton:focus-visible,
 .iconButton:focus-visible,
 .chip:focus-visible,
 .secondaryButton:focus-visible,
+.primaryButton:focus-visible,
 .dangerButton:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-focus);
   outline-offset: 2px;
 }
 
@@ -354,7 +437,7 @@
   white-space: nowrap;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767px), (max-height: 500px) {
   /* Keep "thinking…" visible on phones; latency badges are desktop detail. */
   .badge:not([data-tier="thinking"]) {
     display: none;
@@ -376,5 +459,9 @@
   .ring {
     animation: none;
     background: var(--color-primary);
+  }
+
+  .micButton[aria-pressed="true"] {
+    animation: none;
   }
 }

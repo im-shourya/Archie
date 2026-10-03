@@ -17,12 +17,13 @@ test("template board renders, survives reload, and appears on Home (FR-040/041, 
   await expect(page.getByRole("link", { name: /Three-tier web app.*7 components/ })).toBeVisible();
 });
 
-test("empty board: insert template, undo, redo, delete selection (FR-010/012/013)", async ({ page }) => {
+test("empty board: insert template, undo, redo, delete selection (FR-010/012/013)", async ({ page, isMobile }) => {
   await page.goto("/b/new");
   await expect(page.getByRole("heading", { name: "Describe your system" })).toBeVisible();
 
   await page.getByRole("button", { name: "Insert Chat app" }).click();
   await expect(nodes(page)).toHaveCount(7);
+  if (isMobile) await page.getByRole("button", { name: "Expand panel" }).click();
   await page.getByRole("tab", { name: "History" }).click();
   const history = page.getByRole("list", { name: "Change history" });
   await expect(history.getByRole("listitem")).toHaveCount(1);

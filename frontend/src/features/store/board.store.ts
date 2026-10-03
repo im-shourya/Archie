@@ -54,6 +54,9 @@ interface BoardState {
   /** Nodes an AI answer or question refers to, highlighted while the user looks at it. */
   focus: string[];
   setFocus(ids: string[]): void;
+  /** A toast raised outside the command bar (Inspector edits); the command bar shows it. */
+  notice: { id: number; message: string; undoable: boolean } | null;
+  notify(message: string, undoable: boolean): void;
   load(id: string): Promise<void>;
   apply(ops: readonly unknown[], meta: ApplyMeta): ApplyResult;
   undo(): boolean;
@@ -102,6 +105,11 @@ export const useBoardStore = create<BoardState>()((set, get) => {
     changed: { ids: [], at: 0 },
     selection: [],
     focus: [],
+    notice: null,
+
+    notify(message, undoable) {
+      set({ notice: { id: Date.now(), message, undoable } });
+    },
 
     setFocus(ids) {
       const current = get().focus;

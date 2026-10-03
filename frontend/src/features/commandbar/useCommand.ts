@@ -35,7 +35,9 @@ export type AiState =
   | { phase: "thinking"; utterance: string; slow: boolean }
   | { phase: "clarify"; utterance: string; message: string; options: string[] }
   | { phase: "confirm"; utterance: string; message: string; ops: Op[]; baseVersion: number; llmMs?: number; ms: number }
-  | { phase: "answer"; message: string; focus: string[] };
+  | { phase: "answer"; message: string; focus: string[] }
+  /** The server wants the demo access code (docs/18); the utterance is re-sent with it. */
+  | { phase: "code"; utterance: string; ctx: RunContext; error: string | null; retryAt: number | null };
 
 export type AiOutcome =
   | { type: "applied"; message: string; ms: number }
@@ -43,16 +45,26 @@ export type AiOutcome =
   | { type: "stale" }
   | { type: "error"; message: string; requestId: string | null; retry: string | null };
 
-interface RunContext {
+export interface RunContext {
   selection: string[];
   history: string[];
 }
 
+/** The code lives in sessionStorage only: never the URL, gone when the tab closes (docs/18). */
 function accessCode(): string | null {
   try {
     return sessionStorage.getItem(ACCESS_CODE_KEY);
   } catch {
     return null;
+  }
+}
+
+function storeAccessCode(code: string | null): void {
+  try {
+    if (code === null) sessionStorage.removeItem(ACCESS_CODE_KEY);
+    else sessionStorage.setItem(ACCESS_CODE_KEY, code);
+  } catch {
+    // Storage blocked: the code still works for this request, it just isn't remembered.
   }
 }
 
@@ -118,7 +130,7 @@ export function useCommand(onOutcome: (outcome: AiOutcome) => void) {
   }, []);
 
   const run = useCallback(
-    async (utterance: string, ctx: RunContext) => {
+    async (utterance: string, ctx: RunContext, opts: { code?: string } = {}) => {
       const graph = useBoardStore.getState().board?.graph;
       if (!graph) return;
       inflight.current?.abort();
@@ -138,7 +150,7 @@ export function useCommand(onOutcome: (outcome: AiOutcome) => void) {
       }, ABORT_MS);
 
       try {
-        const code = accessCode();
+        const code = opts.code ?? accessCode();
         const res = await fetch("/api/command", {
           method: "POST",
           headers: { "Content-Type": "application/json", ...(code ? { "X-Archie-Code": code } : {}) },
@@ -157,6 +169,23 @@ export function useCommand(onOutcome: (outcome: AiOutcome) => void) {
         if (!res.ok) {
           const body = (await res.json().catch(() => null)) as { error?: { code?: string; message?: string } } | null;
           const errCode = body?.error?.code;
+          if (errCode === "ACCESS_CODE_REQUIRED") {
+            if (code) storeAccessCode(null);
+            settle({
+              phase: "code",
+              utterance,
+              ctx,
+              error: code ? "That code didn’t work. Check it and try again." : null,
+              retryAt: null,
+            });
+            return;
+          }
+          if (res.status === 429 && opts.code !== undefined) {
+            // Too many wrong codes (T-12): keep the dialog, with a countdown.
+            const seconds = Number(res.headers.get("Retry-After")) || 60;
+            settle({ phase: "code", utterance, ctx, error: null, retryAt: Date.now() + seconds * 1000 });
+            return;
+          }
           settle({ phase: "idle" });
           if (errCode === "DAILY_CAP_REACHED") setDegraded(true);
           const retryable = res.status >= 500 || res.status === 429;
@@ -171,6 +200,7 @@ export function useCommand(onOutcome: (outcome: AiOutcome) => void) {
 
         const data = (await res.json()) as AiResponse;
         if (!isCurrent()) return;
+        if (opts.code !== undefined) storeAccessCode(opts.code);
         failures.current = 0;
         setDegraded(false);
         const ms = performance.now() - started;
@@ -233,6 +263,15 @@ export function useCommand(onOutcome: (outcome: AiOutcome) => void) {
     [run, state],
   );
 
+  /** Re-send the held utterance with the code the user typed. Stored only once it works. */
+  const submitCode = useCallback(
+    (code: string) => {
+      if (state.phase !== "code") return;
+      void run(state.utterance, state.ctx, { code: code.trim() });
+    },
+    [run, state],
+  );
+
   /** Apply the held ops locally. No second AI call. */
   const confirm = useCallback(() => {
     if (state.phase !== "confirm") return;
@@ -267,7 +306,7 @@ export function useCommand(onOutcome: (outcome: AiOutcome) => void) {
 
   // Stable identity, so callers can list it in effect deps without re-running on every render.
   return useMemo(
-    () => ({ state, degraded, run, choose, confirm, cancel, setFocus }),
-    [state, degraded, run, choose, confirm, cancel, setFocus],
+    () => ({ state, degraded, run, choose, confirm, cancel, submitCode, setFocus }),
+    [state, degraded, run, choose, confirm, cancel, submitCode, setFocus],
   );
 }

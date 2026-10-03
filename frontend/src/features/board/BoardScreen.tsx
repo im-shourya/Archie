@@ -3,14 +3,19 @@
 import Link from "next/link";
 import { ArrowLeft, Redo2, Undo2 } from "lucide-react";
 import { LogoMark } from "@/components/brand/LogoMark";
-import { useEffect, useState } from "react";
+import { percent } from "@/lib/format";
+import { useEffect, useRef, useState } from "react";
 import { ReactFlowProvider, useReactFlow } from "@xyflow/react";
 import { TEMPLATES, type Graph, type TemplateId } from "@archie/simulator";
 import { CommandBar } from "../commandbar/CommandBar";
+import { Inspector } from "../inspector/Inspector";
 import { MetricsPanel } from "../metrics/MetricsPanel";
 import { useBoardStore } from "../store/board.store";
 import { Canvas } from "./Canvas";
+import { BottomSheet, type Snap } from "./BottomSheet";
 import { EventLog } from "./EventLog";
+import { useCompactLayout } from "./useCompactLayout";
+import { useFit } from "./useFit";
 import { useSimulation } from "./useSimulation";
 import styles from "./board.module.css";
 
@@ -20,7 +25,8 @@ function isTyping(target: EventTarget | null): boolean {
 
 /** Board shortcuts (docs/05 · Keyboard). Lives inside the provider to read the selection. */
 function BoardKeyboard() {
-  const { getNodes, fitView } = useReactFlow();
+  const { getNodes } = useReactFlow();
+  const fit = useFit();
   const undo = useBoardStore((s) => s.undo);
   const redo = useBoardStore((s) => s.redo);
   const apply = useBoardStore((s) => s.apply);
@@ -45,12 +51,12 @@ function BoardKeyboard() {
           { utterance: null, source: "inspector" },
         );
       } else if (!mod && e.key.toLowerCase() === "f") {
-        void fitView({ padding: 0.2, duration: 250 });
+        void fit();
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [getNodes, fitView, undo, redo, apply]);
+  }, [getNodes, fit, undo, redo, apply]);
 
   return null;
 }
@@ -77,26 +83,45 @@ function EmptyBoard() {
   );
 }
 
-type PanelTab = "metrics" | "history";
+type PanelTab = "metrics" | "inspector" | "history";
+
+const TAB_LABEL: Record<PanelTab, string> = { metrics: "Metrics", inspector: "Inspector", history: "History" };
 
 function PanelTabs({ tab, onChange }: { tab: PanelTab; onChange: (t: PanelTab) => void }) {
   return (
     <div className={styles.tabs} role="tablist" aria-label="Side panel">
-      {(["metrics", "history"] as const).map((t) => (
+      {(["metrics", "inspector", "history"] as const).map((t) => (
         <button
           key={t}
           type="button"
           role="tab"
+          id={`tab-${t}`}
           aria-selected={tab === t}
           aria-controls="side-panel-body"
           className={styles.tab}
           onClick={() => onChange(t)}
         >
-          {t === "metrics" ? "Metrics" : "History"}
+          {TAB_LABEL[t]}
         </button>
       ))}
     </div>
   );
+}
+
+/** True while the last user input was the keyboard (so a selection can move focus, but a click doesn't). */
+function useLastInputWasKeyboard() {
+  const keyboard = useRef(false);
+  useEffect(() => {
+    const onKey = () => (keyboard.current = true);
+    const onPointer = () => (keyboard.current = false);
+    window.addEventListener("keydown", onKey, true);
+    window.addEventListener("pointerdown", onPointer, true);
+    return () => {
+      window.removeEventListener("keydown", onKey, true);
+      window.removeEventListener("pointerdown", onPointer, true);
+    };
+  }, []);
+  return keyboard;
 }
 
 /** Canvas + side panel for a non-empty board; the simulation runs on every change. */
@@ -104,21 +129,81 @@ function SimulatedBoard({ graph, tab, onTab }: { graph: Graph; tab: PanelTab; on
   const { sim, baseline } = useSimulation(graph);
   const selection = useBoardStore((s) => s.selection);
   const events = useBoardStore((s) => s.events);
+  const selected = selection.length === 1 ? graph.nodes.find((n) => n.id === selection[0]) : undefined;
+  const heading = useRef<HTMLHeadingElement>(null);
+  const keyboard = useLastInputWasKeyboard();
+
+  // Selecting one component opens the Inspector (FR-016); by keyboard, focus follows it.
+  const selectedId = selected?.id;
+  const pendingFocus = useRef(false);
+  const { compact } = useCompactLayout();
+  const [snap, setSnap] = useState<Snap>("peek");
+  useEffect(() => {
+    if (!selectedId) return;
+    onTab("inspector");
+    setSnap((s) => (s === "peek" ? "half" : s));
+    pendingFocus.current = keyboard.current;
+  }, [selectedId, onTab, keyboard]);
+  // Runs after the Inspector has mounted (the tab switch is a separate render).
+  useEffect(() => {
+    if (tab !== "inspector" || !pendingFocus.current || !heading.current) return;
+    pendingFocus.current = false;
+    heading.current.focus();
+  });
+
+  const label = (id: string) => graph.nodes.find((n) => n.id === id)?.label ?? id;
+  const body = (
+    <>
+      <PanelTabs tab={tab} onChange={onTab} />
+      <div id="side-panel-body" role="tabpanel" aria-labelledby={`tab-${tab}`}>
+        {tab === "metrics" && <MetricsPanel graph={graph} sim={sim} baseline={baseline} />}
+        {tab === "inspector" &&
+          (selected ? (
+            <Inspector
+              ref={heading}
+              graph={graph}
+              sim={sim}
+              node={selected}
+              onEscape={() =>
+                document.querySelector<HTMLElement>(`.react-flow__node[data-id="${CSS.escape(selected.id)}"]`)?.focus()
+              }
+            />
+          ) : (
+            <p className={styles.muted}>Select a component on the canvas to inspect and edit it.</p>
+          ))}
+        {tab === "history" && <EventLog events={events} />}
+      </div>
+    </>
+  );
+
   return (
     <>
       <section className={styles.canvas} aria-label="Board">
         <Canvas graph={graph} sim={sim} />
       </section>
-      <aside className={styles.panel} aria-label="Side panel">
-        <PanelTabs tab={tab} onChange={onTab} />
-        <div id="side-panel-body" role="tabpanel">
-          {tab === "metrics" ? (
-            <MetricsPanel graph={graph} sim={sim} baseline={baseline} selection={selection} />
-          ) : (
-            <EventLog events={events} />
-          )}
-        </div>
-      </aside>
+      {compact ? (
+        <BottomSheet
+          snap={snap}
+          onSnap={setSnap}
+          peek={
+            sim.bottleneck ? (
+              <>
+                <strong>Bottleneck</strong> · {label(sim.bottleneck.id)} · ρ {sim.bottleneck.rho.toFixed(2)}
+              </>
+            ) : (
+              <>
+                <strong>Success {percent(sim.e2e.successRate)}</strong> · no bottleneck
+              </>
+            )
+          }
+        >
+          {body}
+        </BottomSheet>
+      ) : (
+        <aside className={styles.panel} aria-label="Side panel">
+          {body}
+        </aside>
+      )}
     </>
   );
 }
@@ -156,7 +241,7 @@ export function BoardScreen({ id }: { id: string }) {
   return (
     <ReactFlowProvider>
       <BoardKeyboard />
-      <div className={styles.screen}>
+      <div className={styles.screen} data-screen>
         <header className={styles.topbar}>
           <Link href="/" className={styles.brand} aria-label="Archie home">
             <ArrowLeft size={16} aria-hidden />

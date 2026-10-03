@@ -30,9 +30,11 @@
     "format:check": "prettier --check .",
     "bench:fast": "tsx evals/src/bench/fastpath.ts",
     "bench:sim": "tsx evals/src/bench/simulator.ts",
-    "eval": "tsx evals/src/run.ts"
+    "eval": "tsx evals/src/run.ts",
+    "bundle:size": "tsx scripts/bundle-size.ts"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.63.0",
     "@types/node": "^22.20.4",
