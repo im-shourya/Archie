@@ -73,6 +73,9 @@ Where the project is going. Live status is in [31-project-state.md](31-project-s
 > 🎙 *"Phase 5. Use the design-system-decision skill, then frontend-quality, and update doc 06."*
 
 ## Phase 6 · Interview, review, SPOF, cost (F-10, F-11, F-15)
+
+**Detailed plan:** [34-phase-6-plan.md](34-phase-6-plan.md) (steps, files, tests, quota budget, cut order). Screens: [design/frontend-design.md](design/frontend-design.md).
+
 - [ ] problems + `sloChecks` (tests), SPOF worker, cost
 - [ ] `/api/interview/turn|score`, `/api/review`; interview panel + TTS + scorecard; review findings + apply fix
 

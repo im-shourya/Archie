@@ -150,7 +150,7 @@ Archie is being built for the Wispr Flow challenge: the coding agent receives it
 
 ## Documentation
 
-Start with the [overview](docs/00-overview.md). Product: [idea](docs/01-idea.md) · [requirements](docs/02-requirements.md) · [spec](docs/03-product-spec.md) · [roadmap](docs/29-roadmap.md). Engineering: [architecture](docs/04-system-architecture.md) · [simulator](docs/09-simulation-engine.md) · [commands](docs/13-command-understanding.md) · [AI plan](docs/32-phase-4-plan.md) · [design-pass plan](docs/33-phase-5-plan.md) · [security](docs/20-security.md) · [decisions](docs/30-architecture-decisions.md).
+Start with the [overview](docs/00-overview.md). Product: [idea](docs/01-idea.md) · [requirements](docs/02-requirements.md) · [spec](docs/03-product-spec.md) · [roadmap](docs/29-roadmap.md). Engineering: [architecture](docs/04-system-architecture.md) · [simulator](docs/09-simulation-engine.md) · [commands](docs/13-command-understanding.md) · [AI plan](docs/32-phase-4-plan.md) · [design-pass plan](docs/33-phase-5-plan.md) · [interview plan](docs/34-phase-6-plan.md) · [frontend design](docs/design/frontend-design.md) · [security](docs/20-security.md) · [decisions](docs/30-architecture-decisions.md).
 
 ## Contributing, security, license
 
