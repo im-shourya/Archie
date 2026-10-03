@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { ArrowLeft, Redo2, Undo2 } from "lucide-react";
 import { LogoMark } from "@/components/brand/LogoMark";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ReactFlowProvider, useReactFlow } from "@xyflow/react";
 import { TEMPLATES, type Graph, type TemplateId } from "@archie/simulator";
 import { CommandBar } from "../commandbar/CommandBar";
+import { Inspector } from "../inspector/Inspector";
 import { MetricsPanel } from "../metrics/MetricsPanel";
 import { useBoardStore } from "../store/board.store";
 import { Canvas } from "./Canvas";
@@ -77,26 +78,45 @@ function EmptyBoard() {
   );
 }
 
-type PanelTab = "metrics" | "history";
+type PanelTab = "metrics" | "inspector" | "history";
+
+const TAB_LABEL: Record<PanelTab, string> = { metrics: "Metrics", inspector: "Inspector", history: "History" };
 
 function PanelTabs({ tab, onChange }: { tab: PanelTab; onChange: (t: PanelTab) => void }) {
   return (
     <div className={styles.tabs} role="tablist" aria-label="Side panel">
-      {(["metrics", "history"] as const).map((t) => (
+      {(["metrics", "inspector", "history"] as const).map((t) => (
         <button
           key={t}
           type="button"
           role="tab"
+          id={`tab-${t}`}
           aria-selected={tab === t}
           aria-controls="side-panel-body"
           className={styles.tab}
           onClick={() => onChange(t)}
         >
-          {t === "metrics" ? "Metrics" : "History"}
+          {TAB_LABEL[t]}
         </button>
       ))}
     </div>
   );
+}
+
+/** True while the last user input was the keyboard (so a selection can move focus, but a click doesn't). */
+function useLastInputWasKeyboard() {
+  const keyboard = useRef(false);
+  useEffect(() => {
+    const onKey = () => (keyboard.current = true);
+    const onPointer = () => (keyboard.current = false);
+    window.addEventListener("keydown", onKey, true);
+    window.addEventListener("pointerdown", onPointer, true);
+    return () => {
+      window.removeEventListener("keydown", onKey, true);
+      window.removeEventListener("pointerdown", onPointer, true);
+    };
+  }, []);
+  return keyboard;
 }
 
 /** Canvas + side panel for a non-empty board; the simulation runs on every change. */
@@ -104,6 +124,25 @@ function SimulatedBoard({ graph, tab, onTab }: { graph: Graph; tab: PanelTab; on
   const { sim, baseline } = useSimulation(graph);
   const selection = useBoardStore((s) => s.selection);
   const events = useBoardStore((s) => s.events);
+  const selected = selection.length === 1 ? graph.nodes.find((n) => n.id === selection[0]) : undefined;
+  const heading = useRef<HTMLHeadingElement>(null);
+  const keyboard = useLastInputWasKeyboard();
+
+  // Selecting one component opens the Inspector (FR-016); by keyboard, focus follows it.
+  const selectedId = selected?.id;
+  const pendingFocus = useRef(false);
+  useEffect(() => {
+    if (!selectedId) return;
+    onTab("inspector");
+    pendingFocus.current = keyboard.current;
+  }, [selectedId, onTab, keyboard]);
+  // Runs after the Inspector has mounted (the tab switch is a separate render).
+  useEffect(() => {
+    if (tab !== "inspector" || !pendingFocus.current || !heading.current) return;
+    pendingFocus.current = false;
+    heading.current.focus();
+  });
+
   return (
     <>
       <section className={styles.canvas} aria-label="Board">
@@ -111,12 +150,23 @@ function SimulatedBoard({ graph, tab, onTab }: { graph: Graph; tab: PanelTab; on
       </section>
       <aside className={styles.panel} aria-label="Side panel">
         <PanelTabs tab={tab} onChange={onTab} />
-        <div id="side-panel-body" role="tabpanel">
-          {tab === "metrics" ? (
-            <MetricsPanel graph={graph} sim={sim} baseline={baseline} selection={selection} />
-          ) : (
-            <EventLog events={events} />
-          )}
+        <div id="side-panel-body" role="tabpanel" aria-labelledby={`tab-${tab}`}>
+          {tab === "metrics" && <MetricsPanel graph={graph} sim={sim} baseline={baseline} />}
+          {tab === "inspector" &&
+            (selected ? (
+              <Inspector
+                ref={heading}
+                graph={graph}
+                sim={sim}
+                node={selected}
+                onEscape={() =>
+                  document.querySelector<HTMLElement>(`.react-flow__node[data-id="${CSS.escape(selected.id)}"]`)?.focus()
+                }
+              />
+            ) : (
+              <p className={styles.muted}>Select a component on the canvas to inspect and edit it.</p>
+            ))}
+          {tab === "history" && <EventLog events={events} />}
         </div>
       </aside>
     </>

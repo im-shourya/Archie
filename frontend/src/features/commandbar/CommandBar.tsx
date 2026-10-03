@@ -71,6 +71,7 @@ export function CommandBar() {
   const apply = useBoardStore((s) => s.apply);
   const undo = useBoardStore((s) => s.undo);
   const redo = useBoardStore((s) => s.redo);
+  const notice = useBoardStore((s) => s.notice);
   const { getNodes, fitView, zoomIn, zoomOut } = useReactFlow();
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -125,6 +126,11 @@ export function CommandBar() {
     const id = setInterval(() => setExampleIndex((i) => (i + 1) % EXAMPLES.length), 4000);
     return () => clearInterval(id);
   }, []);
+
+  // Edits made elsewhere (the Inspector) report through the same toast, with Undo.
+  useEffect(() => {
+    if (notice) setToast({ id: notice.id, message: notice.message, undoable: notice.undoable });
+  }, [notice]);
 
   useEffect(() => {
     if (!toast) return;
