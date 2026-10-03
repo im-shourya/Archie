@@ -140,7 +140,7 @@ export function MetricsPanel({ graph, sim, baseline, scan }: Props) {
             ))}
           </ul>
         ) : (
-          <p className={styles.hint}>None: losing any one instance keeps success within 5 points.</p>
+          <p className={styles.hint}>None: losing any one instance keeps 95% of successful requests.</p>
         )}
       </section>
 

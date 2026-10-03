@@ -72,6 +72,19 @@ describe("spofScan (FR-027, docs/34 Step 1)", () => {
     expect(found).not.toContain("redis");
   });
 
+  it("a hopelessly overloaded one-box design still shows its SPOFs (proportional threshold)", () => {
+    const g = applyBatch(emptyGraph(), [
+      { type: "addNode", id: "client", kind: "client", label: "Users" },
+      { type: "addNode", id: "api", kind: "service", label: "API" },
+      { type: "connect", from: "client", to: "api" },
+      { type: "setWorkload", rps: 200_000, readRatio: 0.5 },
+    ]);
+    if (!g.ok) throw new Error("op failed");
+    const scan = spofScan(g.graph);
+    expect(scan.baseline).toBeLessThan(0.05);
+    expect(scan.spofs.map((s) => s.id)).toEqual(["api"]);
+  });
+
   it("an empty board, or one without clients, has no SPOFs", () => {
     expect(spofScan(emptyGraph()).spofs).toEqual([]);
     const g = applyBatch(emptyGraph(), [
@@ -100,7 +113,7 @@ describe("spofScan (FR-027, docs/34 Step 1)", () => {
     expect(spofScan(g.graph).spofs).toEqual([]);
   });
 
-  it("property: reported SPOFs lose ≥ 5 points when one instance fails, every other up node less", () => {
+  it("property: reported SPOFs lose ≥ 5% of successful requests when one instance fails; others less", () => {
     const graphs = (Object.keys(TEMPLATES) as TemplateId[]).map(template);
     fc.assert(
       fc.property(
@@ -121,7 +134,9 @@ describe("spofScan (FR-027, docs/34 Step 1)", () => {
             const failed = applyBatch(g.graph, [op]);
             if (!failed.ok) continue;
             const drop = scan.baseline - successRate(failed.graph);
-            expect(reported.has(node.id)).toBe(drop >= SPOF_DROP - 1e-12);
+            expect(reported.has(node.id)).toBe(
+              scan.baseline > 0 && drop / scan.baseline >= SPOF_DROP - 1e-12,
+            );
           }
         },
       ),

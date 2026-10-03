@@ -7,9 +7,10 @@ import { reliability } from "./reliability";
  * SPOF scan (FR-027, docs/11, docs/34 Step 1). A single failure is losing **one instance**, as in
  * the failure model ("kill one API server" = replicas − 1): a component with replicas ≥ 2 loses a
  * replica; a single-instance component goes down entirely (SQL failover still applies). It is a
- * single point of failure when that costs at least SPOF_DROP of end-to-end success relative to
- * the current board. Relative, not "below 99%": on an overloaded board every failure lands below
- * 99%. Per instance, not per component: compute nodes call every dependency (docs/10), so a
+ * single point of failure when that loses at least SPOF_DROP (5%) of the requests that succeed
+ * today: (baseline − after) / baseline. Relative, not "below 99%": on an overloaded board every
+ * failure lands below 99%. Proportional, not 5 points: a hopeless board at 1% success would
+ * otherwise never show a SPOF. Per instance, not per component: compute nodes call every dependency (docs/10), so a
  * whole-component outage of a 3-broker Kafka would always count, which no design could avoid.
  */
 export const SPOF_DROP = 0.05;
@@ -75,7 +76,8 @@ export function spofScan(graph: Graph): SpofScan {
     const rate = successRate(failed);
     runs += 1;
     const drop = baseline - rate;
-    if (drop >= SPOF_DROP - 1e-12) spofs.push({ id: node.id, successRate: rate, drop });
+    if (baseline > 0 && drop / baseline >= SPOF_DROP - 1e-12)
+      spofs.push({ id: node.id, successRate: rate, drop });
   }
   spofs.sort((a, b) => b.drop - a.drop || a.id.localeCompare(b.id));
   return { baseline, spofs, runs };
