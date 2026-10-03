@@ -70,7 +70,7 @@ function ArchNodeCardImpl({ data, selected }: NodeProps<ArchFlowNode>) {
       >
         <Handle type="target" position={vertical ? Position.Top : Position.Left} className={styles.handle} />
         {spof && (
-          <span className={styles.spof} data-testid={`spof-${node.id}`} title="Single point of failure: if this whole component fails, success drops by 5 points or more">
+          <span className={styles.spof} data-testid={`spof-${node.id}`} title="Single point of failure: losing one instance drops success by 5 points or more">
             <ShieldAlert size={11} strokeWidth={2.25} aria-hidden />
             SPOF
           </span>

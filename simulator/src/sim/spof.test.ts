@@ -2,7 +2,7 @@ import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { applyBatch, emptyGraph, TEMPLATES, type Graph, type TemplateId } from "../graph";
 import { simulate } from "./simulate";
-import { SPOF_DROP, spofScan, successRate } from "./spof";
+import { loseOneInstance, SPOF_DROP, spofScan, successRate } from "./spof";
 
 function template(id: TemplateId): Graph {
   const result = applyBatch(emptyGraph(), TEMPLATES[id].ops);
@@ -25,17 +25,27 @@ describe("successRate", () => {
 });
 
 describe("spofScan (FR-027, docs/34 Step 1)", () => {
-  it("three-tier: the LB, the API and Redis; not Postgres with failover, not the replicas", () => {
+  it("three-tier: only Redis; two LBs, 30 API servers and Postgres with failover survive one loss", () => {
     const scan = spofScan(template("three-tier"));
-    expect(scan.spofs.map((s) => s.id).sort()).toEqual(["api", "lb", "redis"]);
-    const redis = scan.spofs.find((s) => s.id === "redis")!;
-    expect(redis.successRate).toBeCloseTo(0.545, 3);
-    expect(redis.drop).toBeCloseTo(0.963 - 0.545, 2);
-    // Sorted by drop, largest first.
-    expect(scan.spofs.map((s) => s.drop)).toEqual(
-      [...scan.spofs.map((s) => s.drop)].sort((a, b) => b - a),
-    );
+    expect(scan.spofs.map((s) => s.id)).toEqual(["redis"]);
+    expect(scan.spofs[0]!.successRate).toBeCloseTo(0.546, 2);
     expect(scan.baseline).toBeCloseTo(0.963, 3);
+  });
+
+  it("a cluster is a SPOF when losing one replica overloads the rest (N+1)", () => {
+    // Chat runs 8 chat-service replicas near capacity: losing one costs ~6.7 points.
+    expect(ids(template("chat"))).toContain("chat");
+    const g = applyBatch(template("chat"), [{ type: "replicate", id: "chat", replicas: 12 }]);
+    if (!g.ok) throw new Error("op failed");
+    expect(ids(g.graph)).not.toContain("chat");
+  });
+
+  it("losing one instance: a replica of a cluster, or the whole single-instance component", () => {
+    const graph = template("three-tier");
+    const api = graph.nodes.find((n) => n.id === "api")!;
+    const redis = graph.nodes.find((n) => n.id === "redis")!;
+    expect(loseOneInstance(api)).toMatchObject({ status: "up", props: { replicas: 29 } });
+    expect(loseOneInstance(redis)).toMatchObject({ status: "down", props: { replicas: 1 } });
   });
 
   it("Postgres without failover becomes a SPOF", () => {
@@ -46,8 +56,8 @@ describe("spofScan (FR-027, docs/34 Step 1)", () => {
     expect(ids(g.graph)).toContain("pg");
   });
 
-  it("URL shortener: CDN, LB, API and the single datastore; the cache is not", () => {
-    expect(ids(template("url-shortener"))).toEqual(["cdn", "lb", "links", "shortener"]);
+  it("URL shortener: the single CDN, LB and datastore; 10 API servers and the cache are not", () => {
+    expect(ids(template("url-shortener"))).toEqual(["cdn", "links", "lb"].sort());
   });
 
   it("chat: gateway, chat service, Kafka and the message store; fan-out and presence are not", () => {
@@ -90,7 +100,7 @@ describe("spofScan (FR-027, docs/34 Step 1)", () => {
     expect(spofScan(g.graph).spofs).toEqual([]);
   });
 
-  it("property: reported SPOFs lose ≥ 5 points when failed, every other up node loses less", () => {
+  it("property: reported SPOFs lose ≥ 5 points when one instance fails, every other up node less", () => {
     const graphs = (Object.keys(TEMPLATES) as TemplateId[]).map(template);
     fc.assert(
       fc.property(
@@ -104,7 +114,11 @@ describe("spofScan (FR-027, docs/34 Step 1)", () => {
           const reported = new Set(scan.spofs.map((s) => s.id));
           for (const node of g.graph.nodes) {
             if (node.kind === "client" || node.status === "down") continue;
-            const failed = applyBatch(g.graph, [{ type: "fail", id: node.id }]);
+            const op =
+              node.props.replicas > 1
+                ? { type: "replicate", id: node.id, replicas: node.props.replicas - 1 }
+                : { type: "fail", id: node.id };
+            const failed = applyBatch(g.graph, [op]);
             if (!failed.ok) continue;
             const drop = scan.baseline - successRate(failed.graph);
             expect(reported.has(node.id)).toBe(drop >= SPOF_DROP - 1e-12);
