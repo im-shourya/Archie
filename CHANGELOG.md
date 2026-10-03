@@ -5,6 +5,10 @@ All notable user-visible changes. Format: [Keep a Changelog](https://keepachange
 ## [Unreleased]
 
 ### Fixed
+- Wide graphs no longer render tiny on phones and portrait tablets: they lay out top to bottom and stay legible after fit, also after rotating.
+- On phones, toasts and AI panels no longer overlap the side panel.
+- Canvas components show a visible focus ring when reached with the keyboard.
+- AI and microphone errors are announced immediately to screen readers.
 - AI commands with numbers beyond the limits ("fifty million requests a second", "a billion replicas") now ask, stating the limit, instead of applying a silently capped value.
 - An AI request can no longer run past its 20-second budget when a provider stops responding.
 
@@ -13,6 +17,11 @@ All notable user-visible changes. Format: [Keep a Changelog](https://keepachange
 - Commands the fast path doesn't understand now go to the AI tier instead of showing a hint.
 
 ### Added
+- Inspector: select a component to edit its label, replicas, shards, hit rate, capacity, latency, cost, role and failover, fail or recover it, see its live load, and disconnect its edges. Invalid values show the exact limit and change nothing; every edit can be undone.
+- Phone layout: the side panel becomes a bottom sheet that peeks with the bottleneck and expands to half or full.
+- Mic button for browsers with built-in speech recognition, as a fallback when Wispr Flow isn't installed.
+- Access-code dialog for demos that require a code; the code is kept for the current tab only.
+- Accessibility gate (axe, WCAG 2.2 A/AA) and keyboard, reduced-motion and phone end-to-end tests; `npm run bundle:size` for the board route's JS size.
 - AI tier: `POST /api/command` turns free-form design language into validated edits, clarifying questions (tappable answers, keys 1–4), confirmations for big deletions, answers grounded in the simulator's numbers (with the components highlighted), or a polite no-op.
 - Command harness: structured output, one repair turn for invalid edits, guardrails enforced in code, typed errors, timings and token usage; per-IP rate limit, daily cap and optional access code.
 - Command bar states for the AI: thinking / still thinking, AI latency badge, Retry with request id, degraded-mode banner when the AI is unavailable (local commands keep working).
