@@ -356,7 +356,7 @@ function FailureLine({ scan, id }: { scan: SpofScan; id: string }) {
           success {percent(scan.baseline)} → {percent(spof.successRate)}
         </>
       ) : (
-        <>success stays within 5 points of {percent(scan.baseline)}</>
+        <>success stays near {percent(scan.baseline)}</>
       )}
     </p>
   );

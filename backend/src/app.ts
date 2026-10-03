@@ -6,6 +6,7 @@ import { AppError, errorBody } from "./errors";
 import { logger } from "./middleware/logger";
 import { command } from "./routes/command";
 import { health } from "./routes/health";
+import { problems } from "./routes/problems";
 
 const MAX_BODY_BYTES = 256 * 1024;
 
@@ -22,6 +23,7 @@ app.use(
 
 app.route("/health", health);
 app.route("/command", command);
+app.route("/problems", problems);
 
 app.notFound((c) => c.json(errorBody("NOT_FOUND", `No route for ${c.req.method} ${c.req.path}`), 404));
 
