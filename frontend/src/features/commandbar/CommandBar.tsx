@@ -11,8 +11,10 @@ import { AnswerCard } from "./AnswerCard";
 import { ClarifyChips } from "./ClarifyChips";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { DegradedBanner } from "./DegradedBanner";
+import { MicButton } from "./MicButton";
 import styles from "./commandbar.module.css";
 import { useCommand, type AiOutcome } from "./useCommand";
+import { speechErrorMessage, useSpeech } from "./useSpeech";
 
 /** Hands-free submits once dictation has been still this long (docs/03 · F-01). */
 export const SETTLE_MS = 1200;
@@ -221,6 +223,28 @@ export function CommandBar() {
     [graph, events, apply, getNodes, runAction, ai, history],
   );
 
+  // Browser speech fallback (FR-062): interim text streams into the bar; the final result submits.
+  const speech = useSpeech({
+    onInterim: (interim) => {
+      setText(interim);
+      setHistoryIndex(null);
+    },
+    onFinal: (final) => {
+      setText(final);
+      submit(final);
+    },
+    onError: (error) => setToast({ id: Date.now(), message: speechErrorMessage(error), undoable: false }),
+  });
+
+  useEffect(() => {
+    if (!speech.listening) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") speech.stop();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [speech]);
+
   // Hands-free: submit once the dictated text stops changing (docs/03 · F-01).
   useEffect(() => {
     if (!handsFree || wordCount(text) < MIN_HANDS_FREE_WORDS || text === pausedText) {
@@ -256,6 +280,7 @@ export function CommandBar() {
   function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
+      speech.stop();
       submit(text);
     } else if (ai.state.phase === "clarify" && text === "" && /^[1-4]$/.test(e.key)) {
       const choice = ai.state.options[Number(e.key) - 1];
@@ -330,7 +355,11 @@ export function CommandBar() {
         {hint && <p className={styles.hint}>{hint}</p>}
       </div>
       <div className={styles.bar}>
-        <Mic className={styles.mic} size={18} strokeWidth={1.75} aria-hidden />
+        {speech.supported ? (
+          <MicButton listening={speech.listening} onToggle={speech.listening ? speech.stop : speech.start} />
+        ) : (
+          <Mic className={styles.mic} size={18} strokeWidth={1.75} aria-hidden />
+        )}
         <textarea
           ref={inputRef}
           className={styles.input}
