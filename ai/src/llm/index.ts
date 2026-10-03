@@ -12,6 +12,7 @@ export {
   type InterviewTurnResponse,
   type TranscriptTurn,
 } from "./interview";
+export { DIMENSIONS, runScore, ScoreRequestSchema, type Dimension, type RubricItem, type Scorecard } from "./score";
 export {
   DEFAULT_MODELS,
   DEFAULT_QUOTAS,
