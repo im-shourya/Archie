@@ -2,9 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { buildTemplate } from "@archie/simulator";
 
 const runInterviewTurn = vi.hoisted(() => vi.fn());
+const runScore = vi.hoisted(() => vi.fn());
 vi.mock("@archie/ai/llm", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@archie/ai/llm")>()),
   runInterviewTurn,
+  runScore,
 }));
 
 const { app } = await import("../app");
@@ -71,5 +73,32 @@ describe("POST /api/interview/turn", () => {
     expect(await res.json()).toEqual({
       error: { code: "LLM_UPSTREAM", message: "The AI service returned an error." },
     });
+  });
+});
+
+describe("POST /api/interview/score", () => {
+  it("returns the scorecard; 400 on an invalid body", async () => {
+    runScore.mockResolvedValue({
+      problemId: "url-shortener",
+      checks: [],
+      rubric: [],
+      overall: 3.4,
+      summary: "s",
+      model: "m",
+      timings: {},
+    });
+    const ok = await app.request("/api/interview/score", {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: { "Content-Type": "application/json", "X-Forwarded-For": "10.2.0.1" },
+    });
+    expect(ok.status).toBe(200);
+    expect(await ok.json()).toMatchObject({ overall: 3.4 });
+    const bad = await app.request("/api/interview/score", {
+      method: "POST",
+      body: JSON.stringify({ ...body, transcript: "nope" }),
+      headers: { "Content-Type": "application/json", "X-Forwarded-For": "10.2.0.2" },
+    });
+    expect(bad.status).toBe(400);
   });
 });
