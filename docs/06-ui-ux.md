@@ -60,6 +60,18 @@ Every text-bearing role (including all state colours, which colour ρ values and
 
 4 px spacing base · radius `--radius-sm` 4 / `--radius-md` 8 / `--radius-lg` 12 · elevation `--shadow-raised` (cards) and `--shadow-overlay` (toasts, callouts) · touch targets ≥ 44 px on Home actions.
 
+### Audit (2026-10-03, Phase 5)
+
+Checked the shipped CSS against this section. Drift found and fixed:
+
+| Drift | Fix |
+|-------|-----|
+| Node cards and the bottleneck callout used raw `rgb()` shadows that ignored dark mode | Now `--shadow-raised` / `--shadow-overlay` |
+| Focus rings mixed `--color-primary` and `--color-focus` (same value today, but two names for one role) | Every focus ring uses `--color-focus` |
+| This doc said the change pulse is 600 ms and the focus token is `--accent` | Corrected to the shipped 900 ms and `--color-focus` |
+
+Guarded by `tests/contracts/design-tokens.test.ts`: no raw colour literals in any `*.module.css`, and every `var(--color-*)` a module uses is defined in `globals.css`. The only hex values outside `globals.css` are in places CSS variables can't reach (`icon.svg`, `opengraph-image.tsx`, `site.ts` for the manifest), and they copy the token values.
+
 ## Layout
 
 ```
@@ -81,7 +93,7 @@ Every text-bearing role (including all state colours, which colour ρ values and
 
 | Component | States / notes |
 |-----------|----------------|
-| **Node card** | icon · label · `×N` badge · ρ bar · status colour · ✕ when down · pulse (600 ms) when changed · selected ring |
+| **Node card** | icon · label · `×N` badge · ρ bar · status colour · ✕ when down · pulse (900 ms) when changed · selected ring |
 | **Traffic edge** | particle density ∝ log(rps); error particles in `--state-saturated`; dashed for `async`; dotted for `replication` |
 | **Command bar** | idle · dictating (text changing) · hands-free countdown ring · thinking (shimmer) · result badge |
 | **Clarify chips** | appear above the command bar; number keys `1`–`4` select |
@@ -117,7 +129,7 @@ Every text-bearing role (including all state colours, which colour ρ values and
 
 ## Accessibility
 
-- All actions reachable by keyboard; visible focus rings (`--accent`, 2 px).
+- All actions reachable by keyboard; visible focus rings (`--color-focus`, 2 px solid, 2 px offset).
 - Canvas nodes are focusable (`Tab` cycles, `Enter` selects); the inspector mirrors the selection for screen readers.
 - `aria-live="polite"` on toasts, answers and the bottleneck callout; `assertive` only for errors.
 - Status conveyed by text + icon + colour. Contrast AA everywhere (NFR-012).
