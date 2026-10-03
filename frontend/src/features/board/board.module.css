@@ -90,6 +90,7 @@
 }
 
 .main {
+  position: relative;
   display: grid;
   flex: 1;
   grid-template-columns: 1fr 320px;
@@ -99,6 +100,11 @@
 .canvas {
   position: relative;
   min-height: 0;
+}
+
+.flow {
+  width: 100%;
+  height: 100%;
 }
 
 .panel {
@@ -427,19 +433,107 @@
   stroke-dasharray: 2 4;
 }
 
-@media (max-width: 767px) {
+/* Phone bottom sheet (docs/33 Step 3): overlays the canvas; only the handle takes drags. */
+.sheet {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  height: 88px;
+  border: 1px solid var(--color-border-subtle);
+  border-bottom: 0;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-overlay);
+  transition: height 200ms ease-out;
+}
+
+.sheet[data-snap="half"] {
+  height: 50%;
+}
+
+.sheet[data-snap="full"] {
+  height: calc(100% - 16px);
+}
+
+.sheet[data-dragging],
+.sheet[data-reduced] {
+  transition: none;
+}
+
+.sheetHandle {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 100%;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: transparent;
+  cursor: grab;
+  touch-action: none;
+}
+
+.sheetHandle:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: -2px;
+}
+
+.sheetGrip {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-border-strong);
+}
+
+.sheetPeek {
+  flex: none;
+  overflow: hidden;
+  padding: 0 16px 10px;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sheetPeek strong {
+  font-weight: 600;
+}
+
+.sheetBody {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 4px 16px 16px;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.sheet[data-snap="peek"] .sheetBody {
+  visibility: hidden;
+}
+
+@media (max-width: 767px), (max-height: 500px) {
   .main {
     grid-template-columns: 1fr;
-    grid-template-rows: 1fr 180px;
+    grid-template-rows: 1fr auto;
   }
 
+  /* Empty board only (the board with components uses the sheet). */
   .panel {
+    max-height: 180px;
     border-left: 0;
     border-top: 1px solid var(--color-border-subtle);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .sheet {
+    transition: none;
+  }
+
   .pulse {
     animation: none;
     outline: 2px solid var(--color-focus);
