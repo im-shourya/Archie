@@ -5,6 +5,7 @@ import { useReactFlow } from "@xyflow/react";
 import { AudioLines, Mic, Sparkles, Zap } from "lucide-react";
 import { parseCommand, type FastPathAction } from "@archie/ai/fastpath";
 import { getRepository } from "@archie/database";
+import { isTyping } from "@/lib/keyboard";
 import { useFit } from "../board/useFit";
 import { recentNodeIds, useBoardStore } from "../store/board.store";
 import { AccessCodeDialog } from "./AccessCodeDialog";
@@ -65,10 +66,6 @@ export function matchOption(text: string, options: readonly string[]): string | 
   if (exact) return exact;
   const partial = options.filter((o) => o.toLowerCase().includes(t) || t.includes(o.toLowerCase()));
   return t.length >= 2 && partial.length === 1 ? partial[0]! : null;
-}
-
-function isTyping(target: EventTarget | null): boolean {
-  return target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName));
 }
 
 export function CommandBar() {
