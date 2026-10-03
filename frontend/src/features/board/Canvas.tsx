@@ -28,8 +28,7 @@ function toEdges(graph: Graph, sim: SimResult): TrafficFlowEdge[] {
 }
 
 export function Canvas({ graph, sim }: { graph: Graph; sim: SimResult }) {
-  const { compact, portrait } = useCompactLayout();
-  const vertical = compact && portrait;
+  const { compact, vertical } = useCompactLayout();
   const positions = useLayout(graph, vertical ? "DOWN" : "RIGHT");
   const changed = useBoardStore((s) => s.changed);
   const setPinned = useBoardStore((s) => s.setPinned);

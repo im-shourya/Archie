@@ -92,3 +92,14 @@ test("graph labels stay legible after fit, also in landscape (known bug: tiny gr
   expect(await smallestLabelHeight(page)).toBeGreaterThanOrEqual(10);
   await expect(page.getByTestId("node-pg")).toBeInViewport();
 });
+
+test("portrait tablets also get the top-to-bottom layout (QA: tiny graph at 768 px)", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await openThreeTier(page);
+  expect(await smallestLabelHeight(page)).toBeGreaterThanOrEqual(10);
+  const client = (await page.getByTestId("node-client").boundingBox())!;
+  const lb = (await page.getByTestId("node-lb").boundingBox())!;
+  expect(lb.y).toBeGreaterThan(client.y + client.height);
+});
