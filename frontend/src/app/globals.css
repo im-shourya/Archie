@@ -117,6 +117,13 @@ body {
   transition: transform 250ms ease-out;
 }
 
+/* Keyboard focus on canvas nodes (doc 06 · Accessibility). React Flow's stylesheet removes it. */
+.react-flow .react-flow__node.selectable:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+  border-radius: var(--radius-md);
+}
+
 /* Bottleneck callouts are informational: clicks pass through to the canvas (close button opts back in). */
 .react-flow__node-toolbar {
   pointer-events: none;

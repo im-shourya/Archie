@@ -105,7 +105,7 @@ test("a blocked microphone explains itself and names Wispr Flow", async ({ page 
   await installFakeSpeech(page, { error: "not-allowed" });
   await openThreeTier(page);
   await mic(page).click();
-  const toast = page.getByRole("status").filter({ hasText: "Microphone access is blocked" });
+  const toast = page.getByRole("alert").filter({ hasText: "Microphone access is blocked" });
   await expect(toast).toBeVisible();
   await expect(toast).toContainText("Wispr Flow");
   await expect(mic(page)).toHaveAttribute("aria-pressed", "false");
