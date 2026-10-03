@@ -1,6 +1,5 @@
 import Groq from "groq-sdk";
-import { WireResultSchema } from "../schemas";
-import { z } from "zod";
+import { COMMAND_OUTPUT, jsonSchemaFor } from "./output";
 import { ProviderError, type Completion, type CompletionRequest, type LlmProvider } from "./types";
 
 /**
@@ -14,12 +13,6 @@ export const GROQ_DEFAULT_MODEL = "openai/gpt-oss-120b";
 export const GROQ_MAX_TOKENS = 4_000;
 
 export type ChatClient = Pick<Groq, "chat">;
-
-/** Strict mode needs every property required and closed objects: WireResult already is. */
-const SCHEMA: Record<string, unknown> = (() => {
-  const { $schema: _drop, ...schema } = z.toJSONSchema(WireResultSchema, { target: "draft-2020-12" }) as Record<string, unknown>;
-  return schema;
-})();
 
 let client: ChatClient | null = null;
 function defaultClient(): ChatClient {
@@ -61,7 +54,11 @@ export function createGroqProvider(options: { client?: ChatClient; model?: strin
               { role: "system", content: req.system },
               ...req.turns.map((t) => ({ role: t.role, content: t.text })),
             ],
-            response_format: { type: "json_schema", json_schema: { name: "command_result", strict: true, schema: SCHEMA } },
+            // Strict mode needs every property required and closed objects: the wire schemas are.
+            response_format: {
+              type: "json_schema",
+              json_schema: { name: (req.output ?? COMMAND_OUTPUT).name, strict: true, schema: jsonSchemaFor(req.output) },
+            },
           },
           { signal: req.signal },
         );
