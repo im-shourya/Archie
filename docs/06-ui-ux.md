@@ -1,5 +1,7 @@
 # 06 · UI / UX
 
+Screen-level layouts, states and wireframes (including Phase 6 interview, scorecard, review and `/design`) are in [design/frontend-design.md](design/frontend-design.md). This doc stays the source for principles, tokens, type, icons and the accessibility baseline.
+
 ## Design principles
 
 1. **The board is the product.** Chrome stays quiet. The canvas and its live state carry the attention.
