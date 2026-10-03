@@ -61,9 +61,9 @@ jobs:
         run: npm audit --audit-level=high
       - if: steps.pkg.outputs.present == 'true'
         run: npm run build
-      - name: Board route JS budget (NFR-015; ratchet until zod/mini, see doc 31)
+      - name: Board route JS budget (NFR-015)
         if: steps.pkg.outputs.present == 'true'
-        run: npm run bundle:size -- --budget-kb 320
+        run: npm run bundle:size
       - name: Ensure no API key or LLM code in the client bundle
         if: steps.pkg.outputs.present == 'true'
         run: |
