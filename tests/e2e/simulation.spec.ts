@@ -41,8 +41,8 @@ test("failure injection: killing Redis shows the blast radius (F-06)", async ({ 
   await expect(page.getByTestId("success-rate")).toHaveText("96.3%");
 });
 
-test("selecting a node shows its explanation", async ({ page }) => {
+test("selecting a node shows its explanation in the Inspector", async ({ page }) => {
   await openThreeTier(page);
   await page.getByTestId("node-redis").click();
-  await expect(page.getByTestId("metrics")).toContainText("Hit rate 90%: absorbs 40,500 of 45,000 reads/s");
+  await expect(page.getByTestId("inspector")).toContainText("Hit rate 90%: absorbs 40,500 of 45,000 reads/s");
 });
