@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod/mini";
 import { BoardEventSchema, GraphSchema } from "@archie/simulator";
 
 /** IndexedDB layout (docs/17). Bump DB_VERSION and add an upgrade step when stores change. */
@@ -8,20 +8,20 @@ export const BOARD_SCHEMA_VERSION = 1;
 export const MAX_EVENTS_PER_BOARD = 1000;
 
 export const BoardSchema = z.strictObject({
-  id: z.string().min(1),
-  name: z.string().min(1).max(80),
+  id: z.string().check(z.minLength(1)),
+  name: z.string().check(z.minLength(1), z.maxLength(80)),
   schemaVersion: z.literal(BOARD_SCHEMA_VERSION),
   graph: GraphSchema,
   mode: z.enum(["design", "interview"]),
-  problemId: z.string().nullable(),
-  interview: z.unknown().nullable(),
-  createdAt: z.number().int(),
-  updatedAt: z.number().int(),
+  problemId: z.nullable(z.string()),
+  interview: z.nullable(z.unknown()),
+  createdAt: z.number().check(z.int()),
+  updatedAt: z.number().check(z.int()),
 });
 
 export const StoredEventSchema = z.strictObject({
-  id: z.string().min(1),
-  boardId: z.string().min(1),
+  id: z.string().check(z.minLength(1)),
+  boardId: z.string().check(z.minLength(1)),
   event: BoardEventSchema,
 });
 
