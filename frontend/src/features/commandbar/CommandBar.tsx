@@ -5,6 +5,7 @@ import { useReactFlow } from "@xyflow/react";
 import { AudioLines, Mic, Sparkles, Zap } from "lucide-react";
 import { parseCommand, type FastPathAction } from "@archie/ai/fastpath";
 import { getRepository } from "@archie/database";
+import { useFit } from "../board/useFit";
 import { recentNodeIds, useBoardStore } from "../store/board.store";
 import { AnswerCard } from "./AnswerCard";
 import { ClarifyChips } from "./ClarifyChips";
@@ -72,7 +73,8 @@ export function CommandBar() {
   const undo = useBoardStore((s) => s.undo);
   const redo = useBoardStore((s) => s.redo);
   const notice = useBoardStore((s) => s.notice);
-  const { getNodes, fitView, zoomIn, zoomOut } = useReactFlow();
+  const { getNodes, zoomIn, zoomOut } = useReactFlow();
+  const fit = useFit();
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [text, setText] = useState("");
@@ -149,12 +151,12 @@ export function CommandBar() {
     (action: FastPathAction) => {
       if (action === "undo") return undo();
       if (action === "redo") return redo();
-      if (action === "fit") void fitView({ padding: 0.2, duration: 250 });
+      if (action === "fit") void fit();
       if (action === "zoomIn") void zoomIn({ duration: 200 });
       if (action === "zoomOut") void zoomOut({ duration: 200 });
       return true;
     },
-    [undo, redo, fitView, zoomIn, zoomOut],
+    [undo, redo, fit, zoomIn, zoomOut],
   );
 
   const submit = useCallback(

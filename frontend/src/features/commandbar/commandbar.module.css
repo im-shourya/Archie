@@ -9,7 +9,9 @@
   position: absolute;
   left: 16px;
   right: 16px;
-  bottom: calc(100% + 8px);
+  /* Above the phone bottom sheet when there is one (--sheet-height is set by BottomSheet). */
+  bottom: calc(100% + 8px + var(--sheet-height, 0px));
+  z-index: 10;
   display: grid;
   gap: 8px;
   justify-items: start;
@@ -354,7 +356,7 @@
   white-space: nowrap;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767px), (max-height: 500px) {
   /* Keep "thinking…" visible on phones; latency badges are desktop detail. */
   .badge:not([data-tier="thinking"]) {
     display: none;
