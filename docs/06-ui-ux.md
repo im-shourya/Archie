@@ -87,7 +87,7 @@ Guarded by `tests/contracts/design-tokens.test.ts`: no raw colour literals in an
 └───────────────────────────────────────────────────────────────┘
 ```
 
-**Mobile (< 768 px):** canvas full screen, side panel becomes a draggable bottom sheet (peek shows the bottleneck), command bar pinned above the safe area.
+**Mobile (< 768 px, or a landscape phone under 500 px tall):** canvas full screen, side panel becomes a draggable bottom sheet (peek shows the bottleneck), command bar pinned above the safe area. The bottleneck callout on the canvas is hidden there (the peek names it). **Portrait screens under 1280 px** lay the graph out top to bottom, and phone fit keeps zoom ≥ 0.5 so a node label renders ≥ 10 px.
 
 ## Components
 
@@ -99,7 +99,11 @@ Guarded by `tests/contracts/design-tokens.test.ts`: no raw colour literals in an
 | **Clarify chips** | appear above the command bar; number keys `1`–`4` select |
 | **Confirm dialog** | names the count of affected nodes; destructive button on the right |
 | **Bottleneck callout** | anchored above the node (React Flow `NodeToolbar`), shows the full explanation with the formula; click-through so it never blocks the canvas; × hides it |
-| **Metrics panel** | workload, success %, throughput, cost, p50/p95/p99 (read/write), blast radius while something is down, bottleneck, the selected component's explanation, notes |
+| **Metrics panel** | workload, success %, throughput, cost, p50/p95/p99 (read/write), blast radius while something is down, bottleneck, notes |
+| **Inspector** (FR-016) | opens when one node is selected. Header: kind icon, label, up/down, Fail/Recover. Fields: only the kind's catalog `allowedProps` (hit rate as %); commit on Enter or blur, Escape reverts; bounds come from the op schema, and a rejected edit shows the op engine's message plus the allowed range under the field. Live ρ / in / out / mean and the explanation. Connections with traffic class and Disconnect. Every edit is one op batch (`source: "inspector"`) with the usual Undo toast |
+| **Bottom sheet** (phones) | peek 88 px (bottleneck line, or success % when nothing is hot) · half · full. The handle is a button (tap cycles, Escape collapses) and is draggable; only the handle takes pointer events. Selecting a node opens it on the Inspector. Publishes `--sheet-height` so toasts stack above it |
+| **Mic button** (FR-062) | shown only where the Web Speech API exists; `aria-pressed`; interim text streams into the bar, the final result submits; stops on Escape, Enter, submit or tab hide; errors name Wispr Flow as the main path |
+| **Access-code dialog** | native `<dialog>` on 401 `ACCESS_CODE_REQUIRED`; code kept in sessionStorage only after it works; wrong code → inline error; 429 → countdown |
 | **Answer card** | slides above the command bar; node chips highlight on hover |
 | **Toast** | message + optional `Undo` (10 s) |
 | **Interview panel** | problem card · SLO checklist (live) · question bubble + 🔊 · answer transcript · Finish |
@@ -130,10 +134,11 @@ Guarded by `tests/contracts/design-tokens.test.ts`: no raw colour literals in an
 ## Accessibility
 
 - All actions reachable by keyboard; visible focus rings (`--color-focus`, 2 px solid, 2 px offset).
-- Canvas nodes are focusable (`Tab` cycles, `Enter` selects); the inspector mirrors the selection for screen readers.
-- `aria-live="polite"` on toasts, answers and the bottleneck callout; `assertive` only for errors.
+- Canvas nodes are focusable (`Tab` cycles, `Enter` selects) with a visible ring (React Flow's own CSS removes it; `globals.css` restores it). A keyboard selection moves focus to the Inspector heading; `Escape` returns it to the node. A mouse selection doesn't steal focus.
+- `aria-live="polite"` on toasts, answers and the bottleneck callout; errors (AI failures, mic errors, field errors) are `role="alert"`.
 - Status conveyed by text + icon + colour. Contrast AA everywhere (NFR-012).
 - Labels on every input; the mic button has an `aria-pressed` state.
+- **Measured (2026-10-03):** axe (WCAG 2.2 A/AA) reports 0 serious or critical violations across Home, the empty board, the three-tier board, the Inspector, clarify chips, the answer card, and the confirm and access-code dialogs, in light and dark, on desktop and Pixel 7 (`tests/e2e/a11y.spec.ts`).
 
 ## Responsive behaviour
 
@@ -141,4 +146,4 @@ Guarded by `tests/contracts/design-tokens.test.ts`: no raw colour literals in an
 |-------|-----------|
 | ≥ 1280 | panel open by default |
 | 768–1279 | panel collapsible (default open) |
-| < 768 | bottom sheet; top-bar actions move into a ⋯ menu; replay controls simplified |
+| < 768 | bottom sheet; replay controls simplified. The ⋯ menu for top-bar actions arrives with those actions (Phase 6); today the bar only holds rename, undo and redo, which fit at 360 px |

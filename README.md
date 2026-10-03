@@ -17,7 +17,7 @@ Archie is a system-design board you talk to. You describe changes out loud ("fiv
 
 ![The three-tier template at 50,000 requests per second: Postgres is saturated at ρ 1.40 and the bottleneck note explains why](docs/assets/board-bottleneck.png)
 
-> Built by voice with [Wispr Flow](https://ref.wisprflow.ai/hhg) for Hacker House Goa 2026. **Status:** in development. Phases 0–4 of 8 are done ([roadmap](docs/29-roadmap.md), [project state](docs/31-project-state.md)).
+> Built by voice with [Wispr Flow](https://ref.wisprflow.ai/hhg) for Hacker House Goa 2026. **Status:** in development. Phases 0–5 of 8 are done ([roadmap](docs/29-roadmap.md), [project state](docs/31-project-state.md)).
 
 ## What works today
 
@@ -27,16 +27,24 @@ Archie is a system-design board you talk to. You describe changes out loud ("fiv
 - **A live simulator.** Every change re-runs a queueing model: per-component load and utilization (ρ), cache-aside reads, read replicas, sharding, queues with backlog, failover, end-to-end success rate, p50/p95/p99 latency, throughput and a monthly cost estimate.
 - **Explanations with the math.** The bottleneck gets a note such as *"1,500 reads/s + 5,000 writes/s on 1 shard (capacity 10,000 reads / 4,000 writes per shard) → ρ = 1.40 → 28.6% of its requests dropped."*
 - **Failure injection and blast radius.** *"Kill Redis"* shows success falling from 96.3% to 54.5% and which components became hot.
+- **An Inspector for every component.** Select a node (click, or Tab + Enter) to edit its label, replicas, shards, hit rate, capacity, latency, role and failover, fail or recover it, and disconnect its edges. Every edit goes through the same validated operations as voice, so bad values show the exact limit and Undo always works.
+- **Works on phones, by keyboard and without Wispr Flow.** Under 768 px the panel becomes a bottom sheet that peeks with the bottleneck, and graphs lay out top to bottom so labels stay legible. Every action is keyboard-reachable, with visible focus. Browsers with the Web Speech API get a mic button as a fallback for Wispr Flow.
 - **Boards in your browser.** Templates (three-tier, URL shortener, chat), undo/redo, change history, automatic layout, light and dark themes. Boards are saved in IndexedDB and never leave your browser.
 
 ![After "Kill Redis": the blast radius panel shows success falling from 96.3% to 54.5% and both replicas saturating](docs/assets/board-blast-radius.png)
+
+<p align="center">
+  <img src="docs/assets/board-inspector.png" width="68%" alt="The Inspector on Redis while it is down: editable label, replicas, capacity, latency, cost and hit rate, a Recover button, live load and the simulator's explanation">
+  &nbsp;
+  <img src="docs/assets/board-phone.png" width="24%" alt="Archie on a phone: the graph laid out top to bottom and a bottom sheet showing the bottleneck line and metrics">
+</p>
 
 ### Planned
 
 | Phase | Feature | Status |
 |-------|---------|--------|
 | 4 | AI tier: full descriptions ("users hit two load balancers…"), clarifying questions, confirmations, grounded answers ([plan](docs/32-phase-4-plan.md)) | ✅ Done (#7) |
-| 5 | Design pass: inspector, mobile layout | 📋 Planned |
+| 5 | Design pass: Inspector, phone layout, mic fallback, access-code dialog, accessibility gate ([plan](docs/33-phase-5-plan.md)) | ✅ Done |
 | 6 | Interview mode with simulator-checked SLOs, design review | 📋 Planned |
 | 7 | Eval report, share links, exports, deployment | 📋 Planned |
 
@@ -50,8 +58,10 @@ Measured with the scripts in this repository (`npm run bench:fast`, `npm run ben
 | Full simulation incl. 10,000-sample Monte Carlo, 100 components | P95 2.33 ms | P95 < 5 ms |
 | AI command understanding, held-out test split (12 cases, free-tier Gemini → Groq) | task accuracy 91.7% · kind accuracy 100% · **0 false actions** · warm P50 1.8 s | ≥ 90% · false actions ≤ 2% · P50 < 3 s |
 | AI command understanding, all 31 cases | 29/31 = 93.5% · 0 false actions | ≥ 85% (Phase 4) |
-| Unit, property and contract tests | 424 passing | — |
-| End-to-end tests (desktop + mobile Chromium) | 53 passing (AI responses mocked) | — |
+| Unit, property and contract tests | 431 passing | — |
+| End-to-end tests (desktop + mobile Chromium) | 128 passing (AI responses mocked) | — |
+| Accessibility: axe, WCAG 2.2 A/AA, 9 states × light/dark × desktop/phone | **0 serious or critical** violations; keyboard-only journey passes | 0 |
+| Board route initial JS, gzipped (`npm run bundle:size`) | 318.7 KB (Home 238.6 KB) | < 300 KB · **not met yet**: 90 KB is zod's classic API in the browser; moving client validation to `zod/mini` is the fix ([doc 31](docs/31-project-state.md)) |
 
 The simulator's headline numbers are golden-tested against hand calculations in [docs/10](docs/10-traffic-model.md). It is a teaching model (M/M/1 per replica, steady state), not a vendor benchmark; assumptions are listed in [docs/09](docs/09-simulation-engine.md).
 
@@ -129,6 +139,8 @@ Local commands and the simulator need no environment variables. AI commands (any
 | `npm test` | Unit, property and contract tests (Vitest) |
 | `npm run test:e2e` | End-to-end tests (run `npx playwright install chromium` once first) |
 | `npm run bench:fast` · `npm run bench:sim` | Latency benchmarks, written to `evals/results/` |
+| `npm run bundle:size` | Gzipped initial JS of the board route, after `npm run build` (CI fails above 320 KB) |
+| `npx tsx scripts/screenshots.ts --base <url> [--readme]` | Visual QA screenshots at 360/768/1280/1440 px in light and dark; `--readme` refreshes `docs/assets` |
 | `npm run eval` | Command-understanding eval against the real model (needs `GEMINI_API_KEY`; `GROQ_API_KEY` adds the fallback; paces itself to the free quotas); `-- --fastpath-only` for the no-AI baseline, `-- --split test` for the held-out split |
 | `npm run dev:backend` | The API alone on <http://localhost:8787/api> |
 
