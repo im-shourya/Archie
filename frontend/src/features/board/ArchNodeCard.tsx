@@ -10,7 +10,7 @@ import { useBoardStore } from "../store/board.store";
 import styles from "./board.module.css";
 
 export type ArchFlowNode = Node<
-  { node: ArchNode; pulseKey: number | null; metrics: NodeMetrics | null; bottleneck: boolean },
+  { node: ArchNode; pulseKey: number | null; metrics: NodeMetrics | null; bottleneck: boolean; vertical: boolean; callout: boolean },
   "arch"
 >;
 
@@ -41,14 +41,14 @@ function load(node: ArchNode, m: NodeMetrics | null): string {
 }
 
 function ArchNodeCardImpl({ data, selected }: NodeProps<ArchFlowNode>) {
-  const { node, pulseKey, metrics, bottleneck } = data;
+  const { node, pulseKey, metrics, bottleneck, vertical, callout } = data;
   const [calloutOpen, setCalloutOpen] = useState(true);
   const focused = useBoardStore((s) => s.focus.includes(node.id));
   const status = node.status === "down" ? "down" : (metrics?.status ?? "idle");
   const showBar = metrics && node.kind !== "client" && status !== "down" && status !== "idle";
   return (
     <>
-      <NodeToolbar isVisible={bottleneck && calloutOpen && !!metrics} position={Position.Top} offset={12}>
+      <NodeToolbar isVisible={bottleneck && callout && calloutOpen && !!metrics} position={Position.Top} offset={12}>
         <div className={styles.callout} role="note" aria-label={`Bottleneck: ${node.label}`}>
           <div className={styles.calloutHead}>
             <strong>Bottleneck</strong>
@@ -68,12 +68,14 @@ function ArchNodeCardImpl({ data, selected }: NodeProps<ArchFlowNode>) {
         data-focus={focused || undefined}
         aria-label={`${node.label}, ${subtitle(node)}, ${STATUS_LABEL[status]}${metrics && showBar ? `, utilization ${metrics.rho.toFixed(2)}` : ""}`}
       >
-        <Handle type="target" position={Position.Left} className={styles.handle} />
+        <Handle type="target" position={vertical ? Position.Top : Position.Left} className={styles.handle} />
         <span className={styles.glyph}>
           <KindIcon kind={node.kind} />
         </span>
         <span className={styles.text}>
-          <span className={styles.label}>{node.label}</span>
+          <span className={styles.label} data-role="label">
+            {node.label}
+          </span>
           <span className={styles.subtitle}>{subtitle(node)}</span>
           <span className={styles.load} data-testid={`load-${node.id}`}>
             {load(node, metrics)}
@@ -90,7 +92,7 @@ function ArchNodeCardImpl({ data, selected }: NodeProps<ArchFlowNode>) {
             <span className={styles.rhoFill} style={{ width: `${Math.min(1, metrics.rho) * 100}%` }} />
           </span>
         )}
-        <Handle type="source" position={Position.Right} className={styles.handle} />
+        <Handle type="source" position={vertical ? Position.Bottom : Position.Right} className={styles.handle} />
       </div>
     </>
   );

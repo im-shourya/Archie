@@ -66,6 +66,7 @@ Where the project is going. Live status is in [31-project-state.md](31-project-s
 > 🎙 *"Phase 4. Build the harness from docs 12 to 15, then the eval runner from doc 22 with thirty cases."*
 
 ## Phase 5 · Design pass (doc 06)
+**Detailed plan:** [33-phase-5-plan.md](33-phase-5-plan.md) (steps, files, tests, acceptance criteria).
 - [ ] **design-system-decision** skill → fill the design-system section of doc 06
 - [ ] Tokens, light/dark, node cards, panels, mobile bottom sheet, reduced motion, axe pass
 - [ ] Mic fallback (FR-062)
