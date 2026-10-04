@@ -126,16 +126,19 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const CALL_TOKENS = estimateTokens(COMMAND_SYSTEM_PROMPT.length + 3_000, 2_000);
 let warnedDay = false;
 const MAX_RATE_LIMIT_RETRIES = 3;
+const MAX_PRIMARY_WAIT_MS = 65_000;
 let rateLimitWaitMs = 60_000;
 
 const results: CaseResult[] = [];
 for (const c of cases) {
   if (!fastpathOnly) {
     const wait = primaryWaitMs(CALL_TOKENS);
-    if (wait === Infinity && !warnedDay) {
+    // Waiting out a per-minute limit keeps results on one model. A longer wait (a daily 429 cools
+    // the model down until Pacific midnight) would stall the run for hours: let the fallbacks serve.
+    if (wait > MAX_PRIMARY_WAIT_MS && !warnedDay) {
       warnedDay = true;
-      console.log(`  (${providerName()} daily quota used: remaining cases go to ${fallbackName() ?? "no fallback"})`);
-    } else if (wait > 0 && wait !== Infinity) {
+      console.log(`  (${providerName()} is out for the day: remaining cases go to the ladder and ${fallbackName() ?? "no fallback"})`);
+    } else if (wait > 0 && wait <= MAX_PRIMARY_WAIT_MS) {
       console.log(`  (waiting ${Math.ceil(wait / 1000)} s for ${providerName()} quota)`);
       await sleep(wait + 250);
     }
