@@ -4,6 +4,10 @@ All notable user-visible changes. Format: [Keep a Changelog](https://keepachange
 
 ## [Unreleased]
 
+### Changed
+- Visual redesign: Geist type, Phosphor icons, a crisp neutral palette in light and dark (contrast-checked), sentence-case headings, quieter shadows and quick, reduced-motion-safe button feedback.
+- A new home page: a two-line headline, the real board front and centre (a close-up on phones), the three spoken steps, real measured numbers from the evals, and templates as a simple list.
+
 ### Added
 - **Add ▾**: put any component type on the board by hand (a 44 px button on phones). The new component opens in the Inspector.
 - Connect and disconnect on the canvas: drag from one component's handle to another; select a connection and press × or Delete to remove it. Invalid connections (a loop of synchronous calls) explain why.
