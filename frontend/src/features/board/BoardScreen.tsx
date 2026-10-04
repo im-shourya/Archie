@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Flag, PencilLine, Redo2, ScanSearch, Undo2 } from "lucide-react";
+import { ArrowLeft, Flag, PencilLine, Redo2, ScanSearch, Share2, Undo2 } from "lucide-react";
 import { LogoMark } from "@/components/brand/LogoMark";
 import { percent } from "@/lib/format";
 import { isTyping } from "@/lib/keyboard";
@@ -30,6 +30,7 @@ import { useSimulation } from "./useSimulation";
 import { useSpofScan } from "./useSpofScan";
 import { readInterview, type InterviewState } from "../interview/state";
 import { passing, useSloChecks } from "../interview/useSloChecks";
+import { copyShareLink, shareUrl } from "../share/share";
 
 const ReviewPanel = dynamic(() => import("../review/ReviewPanel").then((m) => m.ReviewPanel), {
   ssr: false,
@@ -335,6 +336,16 @@ export function BoardScreen({ id }: { id: string }) {
     setTab("interview");
     requestFinish();
   };
+  const notify = useBoardStore((s) => s.notify);
+  // FR-042: a read-only link with the design in the hash. Too large → point at the JSON export.
+  const share = async () => {
+    const { board: current } = useBoardStore.getState();
+    if (!current) return;
+    const url = shareUrl(current, window.location.origin);
+    if (!url.ok) return notify(url.error, false);
+    if ((await copyShareLink(url.value)) === "copied")
+      notify("Link copied. Anyone with it sees a read-only copy.", false);
+  };
   const canUndo = useBoardStore((s) => s.undoStack.length > 0);
   const canRedo = useBoardStore((s) => s.redoStack.length > 0);
 
@@ -398,6 +409,11 @@ export function BoardScreen({ id }: { id: string }) {
             }}
           />
           <div className={styles.topActions}>
+            {!compact && board.graph.nodes.length > 0 && (
+              <button type="button" className={styles.textButton} onClick={share}>
+                <Share2 size={16} aria-hidden /> Share
+              </button>
+            )}
             {!compact && problem && (
               <button type="button" className={styles.textButton} onClick={finish}>
                 <Flag size={16} aria-hidden /> Finish
@@ -453,6 +469,9 @@ export function BoardScreen({ id }: { id: string }) {
                           },
                         ]
                       : []),
+                  ...(board.graph.nodes.length > 0
+                    ? [{ label: "Share link", icon: <Share2 size={16} aria-hidden />, onSelect: share }]
+                    : []),
                   {
                     label: "Rename board",
                     icon: <PencilLine size={16} aria-hidden />,
