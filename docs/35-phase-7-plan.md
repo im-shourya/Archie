@@ -223,3 +223,27 @@ Files: `frontend/src/app/b/[id]/replay/page.tsx`, `features/replay/{Replay,useRe
 ## Out of scope
 
 Interview and review eval cases (their deterministic parts are unit- and golden-tested; an AI-judged suite would cost quota the demo needs), multiplayer, accounts, a custom domain (optional, doc 31), `docker-compose` export (F-17), and a shared counter store for scaling past one instance.
+
+## Progress (Sun 4 Oct 2026)
+
+Built on `chore/evals-deploy`, one commit per step plus fix commits. Validation on the branch: 577 unit/property/contract tests, 240 e2e (desktop + Pixel 7), lint, typecheck, build, board route 263.8 KB.
+
+| Step | State |
+|------|-------|
+| 1 Dataset | ✅ 92 cases (58 dev / 34 test), `interview-feed` fixture, dataset test with a sha256 per line (`cases/frozen.json`) |
+| 2 Baselines | ✅ B0: the fast path handles 8/92, precision 100%. Benches refreshed. First dev run on the 39 new cases |
+| 3 Fixes | ✅ Prompt: "kill/crash/take down = fail" (compound-03). Chain: keeps 7 s for the next provider when a model hangs. Runner: retries a full quota, doesn't sleep for a day-long cooldown, `--show` |
+| 4 `/evals` | ✅ Static page from the committed results, with answered vs. no-answer counts |
+| 5 Share | ✅ `/s`, Duplicate, EF-05 for six kinds of broken link |
+| 6 Export | ✅ JSON, Mermaid, design doc, SVG, PNG; Open file |
+| 7 Deploy | 🚧 Code done (`render.yaml`, build arg, client-IP header, version fallback, `deploy-smoke.sh` passing against a local production build, keep-warm). **The Render service needs the owner's account and the rotated keys** |
+| 8 Final runs | ⏳ Mon 5 Oct after 12:30 IST |
+| 9 Replay | ✅ `/b/[id]/replay` |
+| 10 Release | 🚧 Docs and README updated for what is built; the CHANGELOG `v1.0.0`, screenshots, history scan and going public come after Step 8 |
+
+Deviations, all measured:
+
+- **Fewer Wispr-dictated cases than planned.** The plan asked for at least 15 new utterances dictated with Wispr Flow; the 61 new cases were written to dictation style (fillers, mis-heard words) instead. The owner can append dictated cases before the test run (new ids, then refresh `frozen.json`).
+- **Dev wasn't re-run on the final harness.** A second full dev run was stopped at 28/58 when a runner bug slept for a day-long cooldown (now fixed), and the day's Gemini quota and Groq's 190K-token daily cap couldn't cover a third. The published dev number is the run on the final prompt but before the chain fix: 48/48 answered cases correct, 10 timeouts.
+- **Free-tier availability shows up in the numbers.** On 4 Oct the free tier was slow (warm P50 4.4 s vs 1.8 s on 2 Oct). `/evals` now reports "no answer from any provider" apart from wrong answers.
+- **`toSvg` lives in the simulator, not the frontend.** It only needs the laid-out boxes, so it is pure and unit-tested; the browser passes React Flow's positions.
