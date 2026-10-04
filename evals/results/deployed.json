@@ -1,0 +1,176 @@
+{
+  "runId": "2026-10-04T14-49-18-591Z-test",
+  "createdAt": "2026-10-04T14:49:18.592Z",
+  "commit": "0f1483f",
+  "split": "test",
+  "model": "gemini-3.5-flash-lite (6)",
+  "effort": "server config",
+  "promptHash": "8259bf6e5201",
+  "target": "deployed",
+  "environment": {
+    "cpu": "Apple M4",
+    "node": "v22.19.0",
+    "region": "render-singapore"
+  },
+  "metrics": {
+    "taskAccuracy": 1,
+    "kindAccuracy": 1,
+    "falseActionRate": 0,
+    "overClarifyRate": 0,
+    "fastPathPrecision": 1,
+    "fastPathCoverage": 0,
+    "repairRate": 0,
+    "answerGroundedness": 1,
+    "cacheHitRate": 1
+  },
+  "byCategory": {
+    "create": {
+      "n": 1,
+      "pass": 1
+    },
+    "connect": {
+      "n": 1,
+      "pass": 1
+    },
+    "insert": {
+      "n": 1,
+      "pass": 1
+    },
+    "question": {
+      "n": 1,
+      "pass": 1
+    },
+    "ambiguity": {
+      "n": 1,
+      "pass": 1
+    },
+    "destructive": {
+      "n": 1,
+      "pass": 1
+    }
+  },
+  "latency": {
+    "aiCold": {
+      "n": 1,
+      "p50": 6727.228,
+      "p70": 6727.228,
+      "p95": 6727.228,
+      "p99": 6727.228,
+      "p100": 6727.228,
+      "mean": 6727.228
+    },
+    "aiWarm": {
+      "n": 5,
+      "p50": 2429.723,
+      "p70": 2456.511,
+      "p95": 3921.593,
+      "p99": 3921.593,
+      "p100": 3921.593,
+      "mean": 2543.86
+    }
+  },
+  "cases": [
+    {
+      "id": "create-07",
+      "category": "create",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 6727.228,
+      "usage": {
+        "inputTokens": 2480,
+        "outputTokens": 1715,
+        "cacheReadTokens": 3290,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-3.5-flash-lite",
+      "pass": true
+    },
+    {
+      "id": "connect-06",
+      "category": "connect",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 2429.723,
+      "usage": {
+        "inputTokens": 2792,
+        "outputTokens": 166,
+        "cacheReadTokens": 3328,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-3.5-flash-lite",
+      "pass": true
+    },
+    {
+      "id": "insert-06",
+      "category": "insert",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 2456.511,
+      "usage": {
+        "inputTokens": 2683,
+        "outputTokens": 395,
+        "cacheReadTokens": 3315,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-3.5-flash-lite",
+      "pass": true
+    },
+    {
+      "id": "question-06",
+      "category": "question",
+      "expectedKind": "answer",
+      "actualKind": "answer",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 2117.925,
+      "usage": {
+        "inputTokens": 2711,
+        "outputTokens": 35,
+        "cacheReadTokens": 3318,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-3.5-flash-lite",
+      "pass": true
+    },
+    {
+      "id": "ambiguity-07",
+      "category": "ambiguity",
+      "expectedKind": "clarify",
+      "actualKind": "clarify",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 1793.546,
+      "usage": {
+        "inputTokens": 2682,
+        "outputTokens": 83,
+        "cacheReadTokens": 3315,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-3.5-flash-lite",
+      "pass": true
+    },
+    {
+      "id": "destructive-05",
+      "category": "destructive",
+      "expectedKind": "confirm",
+      "actualKind": "confirm",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 3921.593,
+      "usage": {
+        "inputTokens": 2691,
+        "outputTokens": 773,
+        "cacheReadTokens": 3316,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-3.5-flash-lite",
+      "pass": true
+    }
+  ]
+}
