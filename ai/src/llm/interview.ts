@@ -122,7 +122,8 @@ export function groundTurn(
   const target = wire.targetsCheck ? checks.find((c) => c.id === wire.targetsCheck) : undefined;
   const question = wire.question.trim().replace(/\s+/g, " ");
   if (!question || question.length > MAX_QUESTION_CHARS) return null;
-  if (focus.length === 0 && target?.pass !== false) return null;
+  // On an empty board there is nothing to cite: a general question is fine.
+  if (focus.length === 0 && target?.pass !== false && graph.nodes.length > 0) return null;
   return { question, focusNodeIds: focus };
 }
 

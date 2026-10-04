@@ -218,4 +218,20 @@ describe("interview turn (FR-052, docs/34 Step 3)", () => {
     expect(INTERVIEW_SYSTEM_PROMPT).toContain("Ask exactly one question");
     expect(INTERVIEW_SYSTEM_PROMPT.length).toBeLessThan(6000);
   });
+
+  it("empty board: a general question counts as grounded, and the fallback asks general questions first", async () => {
+    const empty = emptyGraph();
+    const checks = sloChecks(empty, PROBLEMS["news-feed"]);
+    expect(
+      groundTurn(
+        { question: "Where would you start?", focusNodeIds: [], targetsCheck: null },
+        empty,
+        checks,
+      ),
+    ).not.toBeNull();
+    const first = fallbackQuestion(PROBLEMS["news-feed"], checks, []);
+    expect(PROBLEMS["news-feed"].hints.find((h) => h.question === first.question)?.check).toBe(
+      "general",
+    );
+  });
 });
