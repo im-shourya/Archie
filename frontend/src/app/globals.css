@@ -49,3 +49,29 @@ body {
     transition: none !important;
   }
 }
+
+/* Simulation state colours (docs/06). Placeholder ramp until the Phase 5 design pass. */
+:root {
+  --state-healthy: #2b8a6e;
+  --state-warm: #b7791f;
+  --state-hot: #c05621;
+  --state-saturated: #c53030;
+  --state-down: #718096;
+  --edge-stroke: #a0aab8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --state-healthy: #4fd1a5;
+    --state-warm: #f6c35b;
+    --state-hot: #f6925b;
+    --state-saturated: #fc8181;
+    --state-down: #a0aec0;
+    --edge-stroke: #56606e;
+  }
+}
+
+/* Bottleneck callouts are informational: clicks pass through to the canvas (close button opts back in). */
+.react-flow__node-toolbar {
+  pointer-events: none;
+}

@@ -1,13 +1,17 @@
 "use client";
 
-import { memo } from "react";
-import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
-import { CATALOG, type ArchNode, type NodeKind } from "@archie/simulator";
+import { memo, useState } from "react";
+import { Handle, NodeToolbar, Position, type Node, type NodeProps } from "@xyflow/react";
+import { CATALOG, type ArchNode, type NodeKind, type NodeMetrics } from "@archie/simulator";
+import { compact } from "@/lib/format";
 import styles from "./board.module.css";
 
-export type ArchFlowNode = Node<{ node: ArchNode; pulseKey: number | null }, "arch">;
+export type ArchFlowNode = Node<
+  { node: ArchNode; pulseKey: number | null; metrics: NodeMetrics | null; bottleneck: boolean },
+  "arch"
+>;
 
-/** Short glyphs until the icon set is chosen in Phase 5 (docs/06). */
+/** Short glyphs until the icon set is chosen (docs/06). */
 const GLYPH: Record<NodeKind, string> = {
   client: "USR",
   cdn: "CDN",
@@ -24,6 +28,15 @@ const GLYPH: Record<NodeKind, string> = {
   external: "EXT",
 };
 
+const STATUS_LABEL: Record<NodeMetrics["status"], string> = {
+  healthy: "healthy",
+  warm: "warm",
+  hot: "hot",
+  saturated: "saturated",
+  down: "down",
+  idle: "idle",
+};
+
 function subtitle(node: ArchNode): string {
   const parts = [CATALOG[node.kind].displayName];
   if (node.kind === "sql" && node.props.role) parts.push(node.props.role);
@@ -32,35 +45,66 @@ function subtitle(node: ArchNode): string {
   return parts.join(" · ");
 }
 
+function load(node: ArchNode, m: NodeMetrics | null): string {
+  if (!m) return "";
+  const rps = m.lambdaRead + m.lambdaWrite;
+  if (node.kind === "client") return `${compact(rps)} rps out`;
+  if (m.status === "down") return "down";
+  if (m.status === "idle") return "idle";
+  return `ρ ${m.rho.toFixed(2)}`;
+}
+
 function ArchNodeCardImpl({ data, selected }: NodeProps<ArchFlowNode>) {
-  const { node, pulseKey } = data;
-  const down = node.status === "down";
+  const { node, pulseKey, metrics, bottleneck } = data;
+  const [calloutOpen, setCalloutOpen] = useState(true);
+  const status = node.status === "down" ? "down" : (metrics?.status ?? "idle");
+  const showBar = metrics && node.kind !== "client" && status !== "down" && status !== "idle";
   return (
-    <div
-      key={pulseKey ?? "static"}
-      className={[styles.node, down && styles.down, selected && styles.selected, pulseKey !== null && styles.pulse]
-        .filter(Boolean)
-        .join(" ")}
-      data-testid={`node-${node.id}`}
-      data-status={node.status}
-      aria-label={`${node.label}, ${subtitle(node)}${down ? ", down" : ""}`}
-    >
-      <Handle type="target" position={Position.Left} className={styles.handle} />
-      <span className={styles.glyph} aria-hidden>
-        {GLYPH[node.kind]}
-      </span>
-      <span className={styles.text}>
-        <span className={styles.label}>{node.label}</span>
-        <span className={styles.subtitle}>{subtitle(node)}</span>
-      </span>
-      {node.props.replicas > 1 && <span className={styles.badge}>×{node.props.replicas}</span>}
-      {down && (
-        <span className={styles.downMark} aria-hidden>
-          ✕
+    <>
+      <NodeToolbar isVisible={bottleneck && calloutOpen && !!metrics} position={Position.Top} offset={12}>
+        <div className={styles.callout} role="note" aria-label={`Bottleneck: ${node.label}`}>
+          <div className={styles.calloutHead}>
+            <strong>Bottleneck</strong>
+            <button type="button" className={styles.calloutClose} onClick={() => setCalloutOpen(false)} aria-label="Hide bottleneck note">
+              ×
+            </button>
+          </div>
+          <p>{metrics?.explanation}</p>
+        </div>
+      </NodeToolbar>
+      <div
+        key={pulseKey ?? "static"}
+        className={[styles.node, selected && styles.selected, pulseKey !== null && styles.pulse].filter(Boolean).join(" ")}
+        data-testid={`node-${node.id}`}
+        data-status={node.status}
+        data-sim={status}
+        aria-label={`${node.label}, ${subtitle(node)}, ${STATUS_LABEL[status]}${metrics && showBar ? `, utilization ${metrics.rho.toFixed(2)}` : ""}`}
+      >
+        <Handle type="target" position={Position.Left} className={styles.handle} />
+        <span className={styles.glyph} aria-hidden>
+          {GLYPH[node.kind]}
         </span>
-      )}
-      <Handle type="source" position={Position.Right} className={styles.handle} />
-    </div>
+        <span className={styles.text}>
+          <span className={styles.label}>{node.label}</span>
+          <span className={styles.subtitle}>{subtitle(node)}</span>
+          <span className={styles.load} data-testid={`load-${node.id}`}>
+            {load(node, metrics)}
+          </span>
+        </span>
+        {node.props.replicas > 1 && <span className={styles.badge}>×{node.props.replicas}</span>}
+        {node.status === "down" && (
+          <span className={styles.downMark} aria-hidden>
+            ✕
+          </span>
+        )}
+        {showBar && (
+          <span className={styles.rhoTrack} aria-hidden>
+            <span className={styles.rhoFill} style={{ width: `${Math.min(1, metrics.rho) * 100}%` }} />
+          </span>
+        )}
+        <Handle type="source" position={Position.Right} className={styles.handle} />
+      </div>
+    </>
   );
 }
 

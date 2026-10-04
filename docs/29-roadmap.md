@@ -22,6 +22,8 @@ Where the project is going. Live status is in [31-project-state.md](31-project-s
 ---
 
 ## Phase 0 · Setup
+
+**Status:** ✅ merged in #2 (Wispr Flow signup and recording are on you).
 - [ ] Wispr Flow account via <https://ref.wisprflow.ai/hhg> (screenshot)
 - [ ] Recording test: screen + mic + Wispr overlay
 - [ ] npm workspaces: `frontend backend simulator ai database evals`, TS project references, shared `tsconfig.base.json`, ESLint (with the `ai/llm` import ban), Prettier, Vitest
@@ -30,6 +32,8 @@ Where the project is going. Live status is in [31-project-state.md](31-project-s
 > 🎙 *"Read docs 00, 04 and 29. Do Phase 0: set up the npm workspaces monorepo exactly as in 04-system-architecture. Don't touch .claude."*
 
 ## Phase 1 · Core graph + canvas (F-03, F-04, F-09)
+
+**Status:** ✅ merged in #3.
 - [ ] `simulator/graph`: types (match `specs/graph-schema.json`), catalog, ops, validate, ids, inverse
 - [ ] Tests first: atomicity, inverse, every error code; contract test vs specs
 - [ ] `database`: repo + schema + share codec; fake-indexeddb tests
@@ -37,18 +41,24 @@ Where the project is going. Live status is in [31-project-state.md](31-project-s
 > 🎙 *"Phase 1. Follow docs 07, 08 and 17 exactly. Write the applyBatch tests first."*
 
 ## Phase 2 · Fast path + command bar (F-01, F-02)
+
+**Status:** ✅ merged in #4.
 - [ ] normalize, grammar, resolve per doc 13; abstain rule
 - [ ] Command bar: history, tier/latency badge, hands-free 1.2 s, toasts with Undo
 - [ ] `bench:fast`
 > 🎙 *"Phase 2, doc 13. The fast path must return null instead of guessing."*
 
 ## Phase 3 · Simulator (F-05, F-06)
+
+**Status:** ✅ built on `feat/simulator`.
 - [ ] propagate, queueing, failures, montecarlo, explain per docs 09–11
 - [ ] Golden tests (`three-tier-50k`, `three-tier-sharded`, `write-queue`, `cache-down`, `primary-failover`, `lb-reroute`) + property tests + `bench:sim`
 - [ ] UI: status colours, particle overlay, bottleneck callout, metrics panel, blast-radius diff
 > 🎙 *"Phase 3. Implement docs 09, 10 and 11. Golden tests with the numbers from doc 10 first."*
 
 ## Phase 4 · AI harness (F-02, F-07, F-08)
+
+**Detailed plan:** [32-phase-4-plan.md](32-phase-4-plan.md) (steps, files, contracts, tests, acceptance criteria).
 - [ ] `ai/llm`: client, prompts (12 worked examples), context DSL, schemas, harness, guardrails
 - [ ] Backend routes + middleware (requestId, logger, rateLimit, accessCode, errors)
 - [ ] Client: `useCommand` (fast path → API → 5 kinds), clarify chips, confirm dialog, answer card, degraded banner

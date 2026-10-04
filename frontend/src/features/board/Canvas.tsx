@@ -1,43 +1,36 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import {
-  Background,
-  Controls,
-  MarkerType,
-  ReactFlow,
-  useNodesState,
-  useReactFlow,
-  type Edge,
-} from "@xyflow/react";
+import { Background, Controls, MarkerType, ReactFlow, useNodesState, useReactFlow } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import type { Graph } from "@archie/simulator";
+import type { Graph, SimResult } from "@archie/simulator";
 import { useBoardStore } from "../store/board.store";
 import { ArchNodeCard, type ArchFlowNode } from "./ArchNodeCard";
+import { TrafficEdge, type TrafficFlowEdge } from "./TrafficEdge";
 import { useLayout } from "./useLayout";
-import styles from "./board.module.css";
 
 const nodeTypes = { arch: ArchNodeCard };
+const edgeTypes = { traffic: TrafficEdge };
 const PULSE_MS = 900;
 
-function toEdges(graph: Graph): Edge[] {
+function toEdges(graph: Graph, sim: SimResult): TrafficFlowEdge[] {
   return graph.edges.map((e) => ({
     id: e.id,
     source: e.from,
     target: e.to,
-    type: "smoothstep",
-    className: styles[`edge-${e.kind}`],
+    type: "traffic",
     markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16 },
-    label: e.traffic === "all" ? undefined : e.traffic,
+    data: { rps: sim.edges[e.id]?.rps ?? 0, errorRps: sim.edges[e.id]?.errorRps ?? 0, kind: e.kind, traffic: e.traffic },
   }));
 }
 
-export function Canvas({ graph }: { graph: Graph }) {
+export function Canvas({ graph, sim }: { graph: Graph; sim: SimResult }) {
   const positions = useLayout(graph);
   const changed = useBoardStore((s) => s.changed);
   const setPinned = useBoardStore((s) => s.setPinned);
   const [nodes, setNodes, onNodesChange] = useNodesState<ArchFlowNode>([]);
-  const edges = useMemo(() => toEdges(graph), [graph]);
+  const setSelection = useBoardStore((s) => s.setSelection);
+  const edges = useMemo(() => toEdges(graph, sim), [graph, sim]);
   const { fitView } = useReactFlow();
 
   useEffect(() => {
@@ -52,11 +45,16 @@ export function Canvas({ graph }: { graph: Graph }) {
           position: position ?? { x: 0, y: 0 },
           hidden: !position,
           selected: selected.has(node.id),
-          data: { node, pulseKey: pulsing.has(node.id) ? changed.at : null },
+          data: {
+            node,
+            pulseKey: pulsing.has(node.id) ? changed.at : null,
+            metrics: sim.nodes[node.id] ?? null,
+            bottleneck: sim.bottleneck?.id === node.id,
+          },
         };
       });
     });
-  }, [graph, positions, changed, setNodes]);
+  }, [graph, sim, positions, changed, setNodes]);
 
   // Re-fit when the topology layout changes so new components are in view.
   const layoutKey = positions ? Object.keys(positions).sort().join(",") : "";
@@ -65,11 +63,13 @@ export function Canvas({ graph }: { graph: Graph }) {
   }, [layoutKey, fitView]);
 
   return (
-    <ReactFlow<ArchFlowNode>
+    <ReactFlow<ArchFlowNode, TrafficFlowEdge>
       nodes={nodes}
       edges={edges}
       nodeTypes={nodeTypes}
+      edgeTypes={edgeTypes}
       onNodesChange={onNodesChange}
+      onSelectionChange={({ nodes: selected }) => setSelection(selected.map((n) => n.id))}
       onNodeDragStop={(_e, node) => setPinned(node.id, node.position)}
       deleteKeyCode={null}
       nodesConnectable={false}
