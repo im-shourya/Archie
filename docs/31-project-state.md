@@ -57,12 +57,14 @@ _None open._ Fixed in Phase 5: wide graphs rendered tiny on phones and portrait 
 
 ## Next tasks
 
-1. Sign up for Wispr Flow via <https://ref.wisprflow.ai/hhg>
-2. Test screen recording with the Wispr overlay visible
-3. Make the repository public before submitting (it's private, so the repo link and README images won't open for judges)
-4. Rotate the Gemini and Groq keys (they were pasted in chat). **Before** the Phase 7 deploy: the live service only gets the new keys
-5. Create a Render account (free web service) for the Phase 7 deploy
-6. 🎙 Phase 7 from [doc 35](35-phase-7-plan.md): evals to 92 cases, share/export, deploy the Docker image (ADR-018) on Render
+Phase 8 from [doc 36](36-phase-8-plan.md):
+
+1. Confirm the Wispr Flow signup via <https://ref.wisprflow.ai/hhg> (the submission doesn't count otherwise)
+2. Rotate the Gemini and Groq keys used for the test deploy; update Render and `.env.local`; redeploy and smoke
+3. Set the repository variable `ARCHIE_URL` (keep-warm)
+4. Optional, cut in order: ambiguous-reference guard + test re-run (both runs published) · CHANGELOG `v1.0.0` · dev re-run
+5. Rehearse and record the demo (doc 36 script); add the video link to the README
+6. Make the repository public, check the README logged-out, submit the form by 21:00 IST
 
 ## Metrics snapshot
 
