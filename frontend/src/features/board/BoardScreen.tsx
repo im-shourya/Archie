@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Redo2, Undo2 } from "lucide-react";
+import { ArrowLeft, Flag, Redo2, Undo2 } from "lucide-react";
 import { LogoMark } from "@/components/brand/LogoMark";
 import { percent } from "@/lib/format";
 import { isTyping } from "@/lib/keyboard";
@@ -255,6 +255,7 @@ function SimulatedBoard({ graph, tab, onTab, problem, interview }: BoardProps) {
 export function BoardScreen({ id }: { id: string }) {
   const [tab, setTab] = useState<PanelTab>("metrics");
   const { status, board, events, persistent, load, undo, redo, rename } = useBoardStore();
+  const requestFinish = useBoardStore((s) => s.requestFinish);
   const canUndo = useBoardStore((s) => s.undoStack.length > 0);
   const canRedo = useBoardStore((s) => s.redoStack.length > 0);
 
@@ -314,6 +315,18 @@ export function BoardScreen({ id }: { id: string }) {
             }}
           />
           <div className={styles.topActions}>
+            {problem && (
+              <button
+                type="button"
+                className={styles.textButton}
+                onClick={() => {
+                  setTab("interview");
+                  requestFinish();
+                }}
+              >
+                <Flag size={16} aria-hidden /> Finish
+              </button>
+            )}
             <button type="button" className={styles.iconButton} onClick={undo} disabled={!canUndo} aria-label="Undo" title="Undo (⌘Z)">
               <Undo2 size={16} aria-hidden />
             </button>

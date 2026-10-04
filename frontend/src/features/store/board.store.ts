@@ -65,6 +65,13 @@ interface BoardState {
   rename(name: string): void;
   /** Interview mode: replace the board's interview state (transcript, scorecard) and save it. */
   setInterview(interview: unknown): void;
+  /**
+   * Set by the top bar's Finish button and consumed by the Interview panel, which opens its
+   * confirm dialog. A flag rather than an event: the panel may mount after the click (lazy, tab switch).
+   */
+  finishPending: boolean;
+  requestFinish(): void;
+  consumeFinish(): void;
 }
 
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
@@ -108,6 +115,15 @@ export const useBoardStore = create<BoardState>()((set, get) => {
     selection: [],
     focus: [],
     notice: null,
+    finishPending: false,
+
+    requestFinish() {
+      set({ finishPending: true });
+    },
+
+    consumeFinish() {
+      set({ finishPending: false });
+    },
 
     notify(message, undoable) {
       set({ notice: { id: Date.now(), message, undoable } });
