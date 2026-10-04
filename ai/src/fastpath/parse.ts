@@ -1,6 +1,6 @@
-import { validateBatch, type ArchNode, type Graph, type Op } from "@archie/simulator";
+import { CATALOG, validateBatch, type ArchNode, type Graph, type NodeKind, type Op } from "@archie/simulator";
 import { normalize } from "./normalize";
-import { resolveRef, type ResolveContext } from "./resolve";
+import { kindsOf, resolveRef, type ResolveContext } from "./resolve";
 
 /**
  * Tier-1 command parser (docs/13 §2–4, ADR-006). Deterministic and local.
@@ -100,6 +100,22 @@ export const RULES: readonly Rule[] = [
     build: (m, g, c) => {
       const node = ref(m.a, g, c);
       return node && { ops: [{ type: "recover", id: node.id }], summary: `Brought back ${node.label}` };
+    },
+  },
+  {
+    // "add a redis cache", "add an orders service", "add kafka called order events". Placement
+    // ("in front of", "for the writes") and ambiguous kinds ("a database") go to the AI.
+    name: "add",
+    pattern:
+      /^(?:add|create|spin up|stand up|put in|throw in)(?: me)? (?:a new |an |a |another |one more |new )?(?<k>[a-z0-9]+(?: [a-z0-9]+){0,2}?)(?: (?:called|named) (?<label>[a-z0-9][a-z0-9 ]{0,58}))?$/,
+    build: (m, g) => {
+      const kind = addedKind(m.k ?? "");
+      if (!kind) return null;
+      const label = uniqueLabel(m.label ? titleCase(m.label) : addedLabel(m.k!, kind), g);
+      return {
+        ops: [{ type: "addNode", kind, label }],
+        summary: `Added ${label} (not connected yet)`,
+      };
     },
   },
   {
@@ -217,6 +233,58 @@ function connectOp(
  * Parse an utterance against the current graph. Returns null when unsure; the caller then
  * defers to the AI tier (Phase 4).
  */
+/** Words that place or qualify a component: the AI wires those, the fast path doesn't. */
+const PLACEMENT = new Set(["in", "front", "of", "for", "to", "from", "behind", "between", "and", "with", "on", "the", "that", "which", "before", "after", "into", "at", "or"]);
+
+/**
+ * The one kind a spoken noun phrase names, or null. "redis cache" → cache (both words agree);
+ * "orders service" → service (a name, then a kind word); "database" → null (SQL or NoSQL).
+ */
+function addedKind(phrase: string): NodeKind | null {
+  const words = phrase.split(" ");
+  if (words.some((w) => PLACEMENT.has(w) || /^\d+$/.test(w))) return null;
+  const whole = kindsOf(phrase);
+  if (whole.length === 1) return whole[0]!;
+  if (whole.length > 1 || words.length === 1) return null;
+  // The last word (or two) names the kind; anything before it must agree or be a name.
+  for (const tail of [words.slice(-2).join(" "), words.at(-1)!]) {
+    const kinds = kindsOf(tail);
+    if (kinds.length === 0 || tail === phrase) continue;
+    const head = words.slice(0, words.length - tail.split(" ").length).join(" ");
+    const headKinds = kindsOf(head);
+    const agreed = headKinds.length ? kinds.filter((k) => headKinds.includes(k)) : kinds;
+    return agreed.length === 1 ? agreed[0]! : null;
+  }
+  return null;
+}
+
+/** Spoken words as a label: "redis cache" → "Redis cache"; known names keep their casing. */
+const CASING: Record<string, string> = {
+  api: "API", db: "DB", cdn: "CDN", lb: "LB", s3: "S3", sqs: "SQS", elb: "ELB", alb: "ALB", rds: "RDS",
+  mongodb: "MongoDB", dynamodb: "DynamoDB", postgresql: "PostgreSQL", mysql: "MySQL",
+  rabbitmq: "RabbitMQ", opensearch: "OpenSearch", cloudfront: "CloudFront",
+};
+function titleCase(text: string): string {
+  return text
+    .trim()
+    .split(/\s+/)
+    .map((w, i) => CASING[w] ?? (i === 0 ? w[0]!.toUpperCase() + w.slice(1) : w))
+    .join(" ");
+}
+
+/** The catalog's name for a bare kind word ("a cache" → "Cache"), else the words as spoken. */
+function addedLabel(phrase: string, kind: NodeKind): string {
+  const generic = new Set([kind, "service", "server", "cache", "queue", "worker", "workers", "gateway", "search", "lb", "load balancer", "balancer", "client"]);
+  return generic.has(phrase) ? CATALOG[kind].displayName : titleCase(phrase);
+}
+
+/** "Redis" → "Redis 2" when the board already has one, so the new component can be referred to. */
+function uniqueLabel(label: string, graph: Graph): string {
+  const taken = new Set(graph.nodes.map((n) => n.label.toLowerCase()));
+  if (!taken.has(label.toLowerCase())) return label;
+  for (let n = 2; ; n++) if (!taken.has(`${label} ${n}`.toLowerCase())) return `${label} ${n}`;
+}
+
 export function parseCommand(utterance: string, graph: Graph, ctx: ResolveContext = {}): FastPathResult | null {
   const normalized = normalize(utterance);
   if (!normalized) return null;
