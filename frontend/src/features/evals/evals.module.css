@@ -142,6 +142,10 @@
   font-size: 14px;
 }
 
+.factRow {
+  display: contents;
+}
+
 .facts dt {
   color: var(--color-text-secondary);
 }

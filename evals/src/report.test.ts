@@ -38,6 +38,20 @@ describe("buildReport", () => {
     expect(total).toBe(runs[0]!.cases.length + runs[1]!.cases.length);
   });
 
+  it("separates 'no answer from any provider' from 'wrong answer'", () => {
+    const r = buildReport(committed());
+    const dev = file("b1-dev.json") as { cases: { pass: boolean; failedAssertions?: string[] }[] };
+    const errors = dev.cases.filter((c) => c.failedAssertions?.[0]?.startsWith("error:")).length;
+    const answered = dev.cases.length - errors;
+    expect(r.availability.dev).toEqual({
+      cases: dev.cases.length,
+      noAnswer: errors,
+      answered,
+      correct: dev.cases.filter((c) => c.pass).length,
+    });
+    expect(r.availability.test.cases).toBe((file("latest.json") as { cases: unknown[] }).cases.length);
+  });
+
   it("rejects a malformed file instead of rendering a wrong number", () => {
     const broken = structuredClone(committed().test) as { metrics: Record<string, unknown> };
     broken.metrics.taskAccuracy = "91%";
