@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import Ajv2020 from "ajv/dist/2020";
 import { describe, expect, it } from "vitest";
 import { NODE_KINDS, validateBatch } from "@archie/simulator";
+import { ambiguousRefs } from "@archie/ai/llm";
 import { CATEGORIES, loadCases, loadFixtures } from "./cases";
 
 /** The dataset rules from docs/22 (acceptance) and docs/23 (labelling), enforced. */
@@ -84,6 +85,19 @@ describe("dataset", () => {
         for (const id of named) if (id !== undefined) expect(ids.has(id), `${c.id} names "${id}"`).toBe(true);
       }
     }
+  });
+
+  it("G-13 sees an ambiguous reference only where the case expects a question or a confirmation", () => {
+    // Guards the guard: on a case whose right answer is an edit, a flagged reference could turn
+    // that edit into a needless question (offline, no model calls).
+    for (const c of cases) {
+      if (ambiguousRefs(c.utterance, fixtures[c.fixture]!).length > 0) {
+        expect(["clarify", "confirm"], c.id).toContain(c.expect.kind);
+      }
+    }
+    // …and it does see every "the database"-style ambiguity case.
+    const flagged = cases.filter((c) => c.category === "ambiguity" && ambiguousRefs(c.utterance, fixtures[c.fixture]!).length > 0);
+    expect(flagged.length).toBeGreaterThanOrEqual(7);
   });
 
   it("hold-back cases assert the board is untouched", () => {

@@ -55,6 +55,11 @@ const KIND_WORDS: Map<string, readonly NodeKind[]> = (() => {
   return map;
 })();
 
+/** A word or two that names a kind of component ("database", "load balancer", "kafka"), not a node. */
+export function isKindWord(phrase: string): boolean {
+  return KIND_WORDS.has(tokens(phrase).join(" "));
+}
+
 function decide(candidates: ArchNode[], spanTokens: readonly string[]): Resolution | null {
   if (candidates.length === 0) return null;
   if (candidates.length === 1) return { kind: "ok", node: candidates[0]! };
