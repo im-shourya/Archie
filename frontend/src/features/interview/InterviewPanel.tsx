@@ -18,7 +18,9 @@ import { compact } from "@/lib/format";
 import { isTyping } from "@/lib/keyboard";
 import { useBoardStore } from "../store/board.store";
 import { INTERVIEW_TURN_CAP, type InterviewState, type Turn } from "./state";
+import { Scorecard } from "./Scorecard";
 import { useInterview } from "./useInterview";
+import { useScore } from "./useScore";
 import { passing } from "./useSloChecks";
 import { useTts } from "./useTts";
 import styles from "./interview.module.css";
@@ -204,7 +206,96 @@ function Provenance({ turn }: { turn: Turn }) {
   );
 }
 
-export function InterviewPanel({ graph, problem, interview, checks, pending }: Props) {
+/** "End the interview?" (docs/design §5.6). Native dialog: focus trap, Escape and backdrop for free. */
+function FinishDialog({ onConfirm, onCancel }: { onConfirm(): void; onCancel(): void }) {
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const dialog = ref.current;
+    if (dialog && !dialog.open) dialog.showModal();
+    return () => dialog?.close();
+  }, []);
+  return (
+    <dialog
+      ref={ref}
+      className={styles.dialog}
+      aria-labelledby="finish-title"
+      aria-describedby="finish-text"
+      onCancel={(e) => {
+        e.preventDefault();
+        onCancel();
+      }}
+    >
+      <h2 id="finish-title" className={styles.dialogTitle}>
+        End the interview?
+      </h2>
+      <p id="finish-text" className={styles.brief}>
+        You’ll get a scorecard. You can keep editing the board afterwards.
+      </p>
+      <div className={styles.answerActions}>
+        <button type="button" className={styles.secondary} onClick={onCancel} autoFocus>
+          Keep going
+        </button>
+        <button type="button" className={styles.primary} onClick={onConfirm}>
+          Finish
+        </button>
+      </div>
+    </dialog>
+  );
+}
+
+export function InterviewPanel(props: Props) {
+  const { graph, problem, interview, checks } = props;
+  const finishPending = useBoardStore((s) => s.finishPending);
+  const consumeFinish = useBoardStore((s) => s.consumeFinish);
+  const { state: scoreState, score } = useScore(problem);
+  const [view, setView] = useState<"panel" | "scorecard">(
+    interview.scorecard ? "scorecard" : "panel",
+  );
+  const [confirming, setConfirming] = useState(false);
+  const heading = useRef<HTMLHeadingElement>(null);
+
+  // The top bar's Finish button sets finishPending; take it whenever we see it (also on mount).
+  useEffect(() => {
+    if (!finishPending) return;
+    consumeFinish();
+    setConfirming(true);
+  }, [finishPending, consumeFinish]);
+
+  useEffect(() => {
+    if (view === "scorecard") heading.current?.focus();
+  }, [view]);
+
+  return (
+    <>
+      {view === "scorecard" ? (
+        <Scorecard
+          graph={graph}
+          problem={problem}
+          card={interview.scorecard}
+          checks={checks}
+          state={scoreState === "scoring" ? "scoring" : scoreState === "error" ? "error" : "done"}
+          onRetry={() => void score()}
+          onResume={() => setView("panel")}
+          headingRef={heading}
+        />
+      ) : (
+        <InterviewBody {...props} />
+      )}
+      {confirming && (
+        <FinishDialog
+          onCancel={() => setConfirming(false)}
+          onConfirm={() => {
+            setConfirming(false);
+            setView("scorecard");
+            void score();
+          }}
+        />
+      )}
+    </>
+  );
+}
+
+function InterviewBody({ graph, problem, interview, checks, pending }: Props) {
   const { ask, askNext, answer } = useInterview(problem, checks);
   const tts = useTts();
   const [text, setText] = useState("");

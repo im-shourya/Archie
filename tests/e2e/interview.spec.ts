@@ -163,3 +163,121 @@ test("phones: the sheet's peek shows the SLO count", async ({ page, isMobile }) 
   await start(page);
   await expect(page.getByTestId("sheet-peek")).toContainText("SLOs 0 of 6 passing");
 });
+
+const RUBRIC = [
+  {
+    dimension: "scalability",
+    score: 4,
+    evidence: "Eight API replicas at rho 0.60 leave headroom at peak.",
+    nodeIds: ["api"],
+    unsupported: false,
+  },
+  {
+    dimension: "availability",
+    score: 5,
+    evidence: "Every tier survives losing an instance.",
+    nodeIds: ["cache", "db"],
+    unsupported: false,
+  },
+  { dimension: "data-modelling", score: 3, evidence: "", nodeIds: [], unsupported: true },
+  {
+    dimension: "trade-offs",
+    score: 3,
+    evidence: "Chose a CDN over more API replicas; cost is $1,740.",
+    nodeIds: ["cdn"],
+    unsupported: false,
+  },
+  {
+    dimension: "communication",
+    score: 4,
+    evidence: "Answered each question directly.",
+    nodeIds: [],
+    unsupported: false,
+  },
+];
+
+function mockScore(page: Page, status = 200) {
+  const calls: unknown[] = [];
+  void page.route("**/api/interview/score", (route) => {
+    const body = route.request().postDataJSON() as { graph: unknown };
+    calls.push(body);
+    if (status !== 200)
+      return route.fulfill({ status, json: { error: { code: "LLM_UPSTREAM", message: "x" } } });
+    return route.fulfill({
+      json: {
+        problemId: "url-shortener",
+        checks: [],
+        rubric: RUBRIC,
+        overall: 3.8,
+        summary: "Strong read path. Discuss the data model.",
+        model: "t",
+        timings: {},
+      },
+    });
+  });
+  return calls;
+}
+
+async function finish(page: Page) {
+  await page.getByRole("button", { name: "Finish" }).first().click();
+  const dialog = page.getByRole("dialog", { name: "End the interview?" });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "Finish" }).click();
+}
+
+test("Finish → scorecard: checks, five rubric rows, overall, saved across reload", async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(isMobile, "Finish moves into the ⋯ menu on phones (Step 8)");
+  const calls = mockScore(page);
+  await start(page);
+  await buildReference(page);
+  await finish(page);
+  const card = page.getByTestId("scorecard");
+  await expect(card.getByTestId("overall")).toContainText("3.8");
+  await expect(card).toContainText("6 of 6 SLOs passed");
+  await expect(card.getByRole("meter")).toHaveCount(5);
+  await expect(card.getByTestId("rubric-data-modelling")).toContainText("not enough evidence");
+  await expect(card.getByRole("heading", { name: /Scorecard/ })).toBeFocused();
+  expect(calls).toHaveLength(1);
+
+  await page.waitForTimeout(700);
+  await page.reload();
+  await expect(page.getByTestId("scorecard").getByTestId("overall")).toContainText("3.8");
+  await page.getByRole("button", { name: "Resume editing" }).click();
+  await expect(panel(page)).toBeVisible();
+});
+
+test("if scoring fails, the computed checks still show, with Retry", async ({ page, isMobile }) => {
+  test.skip(isMobile, "Finish moves into the ⋯ menu on phones (Step 8)");
+  mockScore(page, 502);
+  await start(page);
+  await finish(page);
+  const card = page.getByTestId("scorecard");
+  await expect(card.getByRole("alert")).toContainText("Rubric unavailable");
+  await expect(card).toContainText("0 of 6 SLOs passed");
+  await expect(card.getByRole("button", { name: "Retry" })).toBeVisible();
+});
+
+test("Keep going cancels without scoring", async ({ page, isMobile }) => {
+  test.skip(isMobile, "Finish moves into the ⋯ menu on phones (Step 8)");
+  const calls = mockScore(page);
+  await start(page);
+  await page.getByRole("button", { name: "Finish" }).first().click();
+  await page.getByRole("dialog").getByRole("button", { name: "Keep going" }).click();
+  await expect(panel(page)).toBeVisible();
+  expect(calls).toHaveLength(0);
+});
+
+test("Finish works from another tab (the panel mounts after the click)", async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(isMobile, "Finish moves into the ⋯ menu on phones (Step 8)");
+  mockScore(page);
+  await start(page);
+  await page.getByRole("tab", { name: "Metrics" }).click();
+  await page.getByRole("button", { name: "Finish" }).first().click();
+  await expect(page.getByRole("dialog", { name: "End the interview?" })).toBeVisible();
+});
