@@ -207,3 +207,11 @@ describe("templates", () => {
     expect(g.nodes.length).toBeGreaterThan(3);
   });
 });
+
+describe("uniqueLabel", () => {
+  it("numbers a label already on the board, ignoring case", async () => {
+    const { uniqueLabel } = await import("./ids");
+    expect(uniqueLabel("Cache", ["API"])).toBe("Cache");
+    expect(uniqueLabel("Redis", ["redis", "Redis 2"])).toBe("Redis 3");
+  });
+});

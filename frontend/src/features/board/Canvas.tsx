@@ -45,6 +45,8 @@ export function Canvas({
   const setPinned = useBoardStore((s) => s.setPinned);
   const [nodes, setNodes, onNodesChange] = useNodesState<ArchFlowNode>([]);
   const setSelection = useBoardStore((s) => s.setSelection);
+  const selectRequest = useBoardStore((s) => s.selectRequest);
+  const requestSelect = useBoardStore((s) => s.requestSelect);
   const edges = useMemo(() => toEdges(graph, sim), [graph, sim]);
   const fit = useFit();
   const wrapper = useRef<HTMLDivElement>(null);
@@ -65,7 +67,7 @@ export function Canvas({
           type: "arch",
           position: position ?? { x: 0, y: 0 },
           hidden: !position,
-          selected: old?.selected ?? false,
+          selected: selectRequest && position ? node.id === selectRequest : (old?.selected ?? false),
           data: {
             node,
             pulseKey: pulsing.has(node.id) ? changed.at : null,
@@ -79,7 +81,15 @@ export function Canvas({
         };
       });
     });
-  }, [graph, sim, spofs, positions, changed, setNodes, vertical, compact]);
+  }, [graph, sim, spofs, positions, changed, setNodes, vertical, compact, selectRequest]);
+
+  // A select request is applied once the node has a position (the layout runs after an add).
+  useEffect(() => {
+    if (selectRequest && positions?.[selectRequest]) {
+      setSelection([selectRequest]);
+      requestSelect(null);
+    }
+  }, [selectRequest, positions, setSelection, requestSelect]);
 
   // Re-fit when the topology layout changes so new components are in view.
   const layoutKey = positions ? `${vertical}|${Object.keys(positions).sort().join(",")}` : "";
