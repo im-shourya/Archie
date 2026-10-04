@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Copy, RotateCcw, Sparkles } from "lucide-react";
+import { ArrowCounterClockwise, Cloud, Copy } from "@phosphor-icons/react/dist/ssr";
 import type { Graph, Problem, SloCheck } from "@archie/simulator";
 import { useBoardStore } from "../store/board.store";
 import { SloChecklist } from "./InterviewPanel";
@@ -117,7 +117,7 @@ export function Scorecard({
 
       <section className={styles.rubric} aria-labelledby="rubric-heading">
         <h3 id="rubric-heading" className={styles.heading}>
-          <Sparkles size={12} strokeWidth={2} aria-hidden className={styles.aiIcon} /> AI · Rubric
+          <Cloud size={12} weight="bold" aria-hidden className={styles.aiIcon} /> AI · Rubric
         </h3>
         {state === "scoring" && <p className={styles.thinking}>scoring…</p>}
         {state === "error" && (
@@ -190,7 +190,7 @@ export function Scorecard({
           </button>
         )}
         <Link href="/interview" className={styles.secondary}>
-          <RotateCcw size={16} aria-hidden /> Practice again
+          <ArrowCounterClockwise size={16} aria-hidden /> Practice again
         </Link>
         <button type="button" className={styles.linkButton} onClick={onResume}>
           Resume editing

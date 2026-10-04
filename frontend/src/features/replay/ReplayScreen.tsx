@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Pause, Play, SkipBack, SkipForward } from "lucide-react";
+import { ArrowLeft, Pause, Play, SkipBack, SkipForward } from "@phosphor-icons/react/dist/ssr";
 import { ReactFlowProvider } from "@xyflow/react";
 import { replay, sameDesign, type BoardEvent } from "@archie/simulator";
 import { getRepository, type Board } from "@archie/database";

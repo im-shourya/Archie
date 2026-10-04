@@ -2,7 +2,7 @@
 
 import { memo, useState } from "react";
 import { Handle, NodeToolbar, Position, type Node, type NodeProps } from "@xyflow/react";
-import { ShieldAlert, X } from "lucide-react";
+import { ShieldWarning, X } from "@phosphor-icons/react/dist/ssr";
 import { CATALOG, type ArchNode, type NodeMetrics } from "@archie/simulator";
 import { KindIcon } from "@/components/icons/KindIcon";
 import { compact } from "@/lib/format";
@@ -71,7 +71,7 @@ function ArchNodeCardImpl({ data, selected }: NodeProps<ArchFlowNode>) {
         <Handle type="target" position={vertical ? Position.Top : Position.Left} className={editable ? styles.handleEditable : styles.handle} isConnectable={editable} />
         {spof && (
           <span className={styles.spof} data-testid={`spof-${node.id}`} title="Single point of failure: losing one instance loses 5% or more of successful requests">
-            <ShieldAlert size={11} strokeWidth={2.25} aria-hidden />
+            <ShieldWarning size={11} aria-hidden />
             SPOF
           </span>
         )}
@@ -90,7 +90,7 @@ function ArchNodeCardImpl({ data, selected }: NodeProps<ArchFlowNode>) {
         {node.props.replicas > 1 && <span className={styles.badge}>×{node.props.replicas}</span>}
         {node.status === "down" && (
           <span className={styles.downMark} aria-hidden>
-            <X size={14} strokeWidth={2.25} />
+            <X size={14} />
           </span>
         )}
         {showBar && (
