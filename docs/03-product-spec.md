@@ -15,8 +15,8 @@ What we're building, feature by feature, and in what order. Priority: **P0** mus
 | F-07 | AI guardrails | P0 | 4 | FR-030–033, 035 | Planned |
 | F-08 | Ask the board | P0 | 4 | FR-034 | Planned |
 | F-09 | Local boards + templates | P0 | 1 | FR-040, 041 | Done |
-| F-10 | Interview mode | P1 | 6 | FR-050–053 | Planned |
-| F-11 | Design review | P1 | 6 | FR-054 | Planned |
+| F-10 | Interview mode | P1 | 6 | FR-050–053 | Done |
+| F-11 | Design review | P1 | 6 | FR-054 | Done |
 | F-12 | Share + export | P1 | 7 | FR-042, 043 | Planned |
 | F-13 | Session replay | P1 | 7 | FR-044 | Planned |
 | F-14 | Eval report page | P1 | 7 | FR-060, 061 | Planned |
@@ -72,11 +72,11 @@ Auto-saved to IndexedDB; Home lists recent boards (name, node count, updated). T
 
 ## F-10 · Interview mode
 
-Six problems: URL shortener, news feed, chat, rate limiter, ride dispatch, video streaming. Requirements set the workload automatically. A live SLO checklist (computed), one interviewer question per turn (TTS optional), and a final scorecard (checks + rubric over scalability, availability, data modelling, trade-offs and communication).
+Six problems: URL shortener, rate limiter, chat, news feed, ride dispatch, video streaming, each with a reference design golden-tested to pass every check. Requirements set the workload automatically. A live SLO checklist computed by the simulator at the problem's peak (availability, read/write p99, headroom, single-failure survival, cost), one interviewer question per turn (grounded in a node or a failing check, deterministic hints when the AI is unavailable, at most 8 AI turns, TTS optional), and a final scorecard (computed checks + an evidence-checked rubric over scalability, availability, data modelling, trade-offs and communication; the overall score is computed in code).
 
 ## F-11 · Design review
 
-3–6 findings `{severity, nodes, title, detail, fix?}`; "Apply fix" runs the fix ops through validation.
+Up to 6 findings `{severity, nodeIds, title, detail, fix?}`: deterministic rule findings (SPOFs, hot components, uncached read paths, budget) whose fixes are found by simulation, plus up to 4 AI findings whose fixes pass `validateBatch`. "Apply fix" runs the ops through the store (undoable, logged as "review fix"). Works with the AI down (rules only).
 
 ## F-12 · Share & export
 

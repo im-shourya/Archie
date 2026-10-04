@@ -1,3 +1,4 @@
+import type { z } from "zod";
 import type { CommandUsage } from "../schemas";
 
 /**
@@ -14,8 +15,17 @@ export interface Turn {
   raw?: unknown;
 }
 
+/** The structured output a request asks for. Providers convert and cache it by `name`. */
+export interface OutputSpec<T = unknown> {
+  /** Stable id, e.g. "command_result"; also the JSON-schema name sent to providers that need one. */
+  name: string;
+  schema: z.ZodType<T>;
+}
+
 export interface CompletionRequest {
   system: string;
+  /** Defaults to the command result (COMMAND_OUTPUT). */
+  output?: OutputSpec;
   turns: readonly Turn[];
   /** 1 normally, 2 on the max_tokens retry (G-11). */
   tokenScale: 1 | 2;

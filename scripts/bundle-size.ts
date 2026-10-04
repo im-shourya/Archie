@@ -8,9 +8,8 @@
  *
  * Usage: npm run bundle:size -- [--route /b/[id]] [--budget-kb 300]
  *
- * CI passes --budget-kb 320 as a no-regression ratchet: the route measures 318.7 KB today,
- * 90 KB of it zod's classic API used for client-side op validation. Moving that to zod/mini
- * (~5 KB) is the planned fix that brings it under the 300 KB target (docs/31 · Open items).
+ * The simulator's schemas use zod/mini with only the English locale, which took the route from
+ * 318.7 KB to 248.9 KB (docs/34 Step 0).
  */
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";

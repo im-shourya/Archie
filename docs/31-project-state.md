@@ -4,6 +4,8 @@ Where the project is **right now**. Update at the end of every phase (and whenev
 
 ## Current phase
 
+**Phase 6 done** (`feat/interview`) ([34-phase-6-plan.md](34-phase-6-plan.md)): SPOF scan, six interview problems with simulator-computed SLO checks and golden-tested reference designs, `/api/interview/turn`, `/api/interview/score` and `/api/review` on a shared structured-output session, interview mode with a live checklist, grounded questions and a scorecard, design review with simulator-proven fixes, the phone ⋯ menu and the `/design` style guide. `zod/mini` on the client closed the bundle gap (318.7 → 260.6 KB). Every acceptance criterion met.
+
 **Phase 5 done** (`feat/design-system`) ([33-phase-5-plan.md](33-phase-5-plan.md)): design-system audit with a token contract test, the Inspector (FR-016), the phone bottom sheet (both known mobile bugs closed), the Web Speech mic fallback (FR-062), the access-code dialog, an axe gate (0 serious/critical across 36 audits) with a keyboard journey, reduced-motion e2e, and a bundle measurement. **One criterion is open:** the board route ships 318.7 KB of gzipped JS against a 300 KB target (see Open items).
 
 **Phase 4 done** (`feat/ai-harness`, merged in #7) ([32-phase-4-plan.md](32-phase-4-plan.md)): schemas + context DSL, system prompt, harness with repair and guardrails, `/api/command` with rate limiting, the AI tier in the command bar, and the eval runner with 31 cases. All of it is tested with a mocked model. Running on free tiers: a Gemini model ladder → Groq fallback with quota guards ([ADR-016/017](30-architecture-decisions.md)). **Phase 4 acceptance criteria all met (2026-10-02):** 29/31 eval cases (93.5%), 0 false actions, warm P50 1.8–1.9 s. Out-of-bounds numbers are now caught in code (G-05). **Merged in #7 (`727deeb`).**
@@ -30,6 +32,7 @@ Where the project is **right now**. Update at the end of every phase (and whenev
 - [x] Out-of-bounds numbers → clarify (G-05 in code + prompt); re-run dev 94.7%, test 91.7%, 0 false actions
 - [x] Request budget enforced even when an SDK ignores abort (a live case hung for 96 s)
 - [x] Merged in #7 (CI green; production build checked with `npm start` + a real `/api/command` call)
+- [x] Phase 6: SPOF scan, problem bank + sloChecks, interview turn/score and review endpoints, interview mode + scorecard, review panel + ⋯ menu, `/design`, bundle back under budget
 - [x] Phase 5: token audit + contract test, Inspector, bottom sheet + portrait layout, mic fallback, access-code dialog, axe gate + keyboard journey, reduced-motion e2e, `bundle:size` + CI ratchet, visual QA at 360/768/1280/1440 in both themes, README screenshots
 
 ## Blocked
@@ -42,7 +45,7 @@ _None open._ Fixed in Phase 5: wide graphs rendered tiny on phones and portrait 
 
 ## Open items
 
-- **NFR-015 bundle budget:** `/b/[id]` is 318.7 KB gzipped (target < 300). zod 4's classic API is ≈ 90 KB of it because the simulator validates ops in the browser; `zod/mini` is ≈ 5 KB for the same schemas (measured with esbuild). The fix moves the shared schemas (simulator, database, AI wire format) to `zod/mini` or validates client-side with a mini copy; it needs the AI eval re-run, so it gets its own PR. CI holds a 320 KB ratchet meanwhile.
+_None._ (NFR-015 closed in Phase 6: 260.6 KB with `zod/mini` on the client.)
 
 ## Open questions
 
@@ -55,8 +58,8 @@ _None open._ Fixed in Phase 5: wide graphs rendered tiny on phones and portrait 
 2. Test screen recording with the Wispr overlay visible
 3. Make the repository public before submitting (it's private, so the repo link and README images won't open for judges)
 4. Rotate the Gemini and Groq keys (they were pasted in chat)
-5. Bundle: move client-side validation to `zod/mini` (NFR-015), then drop the CI ratchet to 300 KB
-6. 🎙 Phase 6: interview mode and design review
+5. Docker image for deployment (`chore/docker`): one long-running container keeps the in-memory quota guards and rate limits correct
+6. 🎙 Phase 7: evals ≥ 80 cases, deploy, share/export
 
 ## Metrics snapshot
 
@@ -69,10 +72,12 @@ _None open._ Fixed in Phase 5: wide graphs rendered tiny on phones and portrait 
 | Simulator P95 @ 100 nodes | 2.327 ms |
 | Fast path on eval cases (B0) | 2/31 handled, precision 100% |
 | AI warm P50 / P95 (test) | 1.8 s / 11.9 s (P95 = a fallback hop on the free tier) |
-| Tests | 431 unit/property/contract · 128 e2e (desktop + Pixel 7) |
+| Tests | 514 unit/property/contract · 191 e2e (desktop + Pixel 7) |
 | Accessibility (axe, WCAG 2.2 A/AA) | 0 serious/critical over 36 audits |
-| Board route initial JS (gzip) | 318.7 KB (target < 300) · Home 238.6 KB |
+| Board route initial JS (gzip) | 260.6 KB (target < 300) · Home 170.9 KB |
+| SPOF scan P95 @ 100 nodes | 21.3 ms |
+| Interview turn / score / review (live, free tier) | 1.8–2.9 s / 3.6 s / 8.5 s |
 
 ## Last updated
 
-2026-10-03
+2026-10-04

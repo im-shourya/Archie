@@ -4,6 +4,17 @@ export { buildUserMessage, escapeText, graphDsl, simSummary, type ContextInput }
 export { COMMAND_SYSTEM_PROMPT } from "./prompts/command";
 export { runCommand, HarnessError, type HarnessErrorCode, type RunOptions } from "./harness";
 export {
+  fallbackQuestion,
+  InterviewTurnRequestSchema,
+  runInterviewTurn,
+  TranscriptTurnSchema,
+  type InterviewTurnRequest,
+  type InterviewTurnResponse,
+  type TranscriptTurn,
+} from "./interview";
+export { ReviewRequestSchema, runReview, type ReviewResponse } from "./review";
+export { DIMENSIONS, runScore, ScoreRequestSchema, type Dimension, type RubricItem, type Scorecard } from "./score";
+export {
   DEFAULT_MODELS,
   DEFAULT_QUOTAS,
   fallbackName,

@@ -76,6 +76,13 @@ for (const scheme of ["light", "dark"] as const) {
       await audit(page);
     });
 
+    test("board with a failed component (down node keeps AA contrast)", async ({ page }) => {
+      await openThreeTier(page);
+      await say(page, "Kill Redis.");
+      await expect(page.getByTestId("node-redis")).toHaveAttribute("data-sim", "down");
+      await audit(page);
+    });
+
     test("Inspector", async ({ page }) => {
       await openThreeTier(page);
       await page.getByTestId("node-redis").click();
@@ -123,6 +130,67 @@ for (const scheme of ["light", "dark"] as const) {
       await openThreeTier(page);
       await say(page, "tidy up the caching layer please");
       await expect(page.getByRole("alertdialog")).toBeVisible();
+      await audit(page);
+    });
+
+    test("interview problem picker", async ({ page }) => {
+      await page.goto("/interview");
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      await audit(page);
+    });
+
+    test("interview panel", async ({ page, isMobile }) => {
+      await page.goto("/b/new?problem=url-shortener");
+      await expect(page).toHaveURL(/\/b\/[0-9a-z]+$/);
+      if (isMobile) await page.getByRole("button", { name: "Expand panel" }).click();
+      await expect(page.getByTestId("interview")).toBeVisible();
+      await expect(page.getByTestId("slo-count")).toHaveText("0 of 6 passing");
+      await audit(page);
+    });
+
+    test("scorecard", async ({ page, isMobile }) => {
+      test.skip(isMobile, "Finish is in the ⋯ menu on phones");
+      await page.route("**/api/interview/score", (r) =>
+        r.fulfill({
+          json: {
+            checks: [],
+            overall: 3.4,
+            summary: "Solid.",
+            rubric: [
+              "scalability",
+              "availability",
+              "data-modelling",
+              "trade-offs",
+              "communication",
+            ].map((dimension, i) => ({
+              dimension,
+              score: 3 + (i % 2),
+              evidence: "Evidence sentence for this dimension.",
+              nodeIds: [],
+              unsupported: i === 2,
+            })),
+          },
+        }),
+      );
+      await page.goto("/b/new?problem=url-shortener");
+      await page.getByRole("button", { name: "Finish" }).first().click();
+      await page.getByRole("dialog").getByRole("button", { name: "Finish" }).click();
+      await expect(page.getByTestId("scorecard").getByRole("meter")).toHaveCount(5);
+      await audit(page);
+    });
+
+    test("review panel", async ({ page, isMobile }) => {
+      await page.route("**/api/review", (r) =>
+        r.fulfill({ status: 503, json: { error: { code: "LLM_UNAVAILABLE", message: "x" } } }),
+      );
+      await openThreeTier(page);
+      if (isMobile) {
+        await page.getByRole("button", { name: "More actions" }).click();
+        await page.getByRole("menuitem", { name: "Review design" }).click();
+      } else {
+        await page.getByRole("button", { name: "Review" }).click();
+      }
+      await expect(page.getByTestId("finding-rule:spof:redis")).toBeVisible();
       await audit(page);
     });
 

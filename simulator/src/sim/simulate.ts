@@ -5,6 +5,7 @@ import { monteCarlo } from "./montecarlo";
 import { propagate } from "./propagate";
 import { reliability } from "./reliability";
 import { fnv1a, mulberry32 } from "./rng";
+import { successFrom } from "./spof";
 import type { EdgeMetrics, NodeMetrics, SimResult } from "./types";
 
 /**
@@ -58,17 +59,8 @@ export function simulate(graph: Graph): SimResult {
     };
   }
 
-  const clients = graph.nodes.filter((n) => n.kind === "client" && n.status === "up");
   const total = prop.injected.read + prop.injected.write;
-  const { readRatio } = graph.workload;
-  let successRate = 1;
-  if (clients.length > 0 && total > 0) {
-    successRate =
-      clients.reduce(
-        (s, c) => s + readRatio * (1 - rel.nodeFail(c.id, "read")) + (1 - readRatio) * (1 - rel.nodeFail(c.id, "write")),
-        0,
-      ) / clients.length;
-  }
+  const successRate = successFrom(graph, prop, rel);
 
   let bottleneck: SimResult["bottleneck"] = null;
   for (const id of model.order) {
