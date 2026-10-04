@@ -417,8 +417,10 @@
   background: var(--color-text-primary);
 }
 
-.bar[data-unsupported] .segment {
+.bar[data-unsupported] {
+  border-radius: 3px;
   outline: 1px dashed var(--color-border-strong);
+  outline-offset: 2px;
 }
 
 .rubricScore {
