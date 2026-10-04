@@ -17,7 +17,7 @@ Archie is a system-design board you talk to. You describe changes out loud ("fiv
 
 ![The three-tier template at 50,000 requests per second: Postgres is saturated at ρ 1.40 and the bottleneck note explains why](docs/assets/board-bottleneck.png)
 
-> Built by voice with [Wispr Flow](https://ref.wisprflow.ai/hhg) for Hacker House Goa 2026. **Status:** in development. Phases 0–5 of 8 are done ([roadmap](docs/29-roadmap.md), [project state](docs/31-project-state.md)).
+> Built by voice with [Wispr Flow](https://ref.wisprflow.ai/hhg) for Hacker House Goa 2026. **Status:** in development. Phases 0–6 of the 9 (0–8) are done ([roadmap](docs/29-roadmap.md), [project state](docs/31-project-state.md)).
 
 ## What works today
 
@@ -28,6 +28,8 @@ Archie is a system-design board you talk to. You describe changes out loud ("fiv
 - **Explanations with the math.** The bottleneck gets a note such as *"1,500 reads/s + 5,000 writes/s on 1 shard (capacity 10,000 reads / 4,000 writes per shard) → ρ = 1.40 → 28.6% of its requests dropped."*
 - **Failure injection and blast radius.** *"Kill Redis"* shows success falling from 96.3% to 54.5% and which components became hot.
 - **An Inspector for every component.** Select a node (click, or Tab + Enter) to edit its label, replicas, shards, hit rate, capacity, latency, role and failover, fail or recover it, and disconnect its edges. Every edit goes through the same validated operations as voice, so bad values show the exact limit and Undo always works.
+- **Interview practice.** Pick one of six problems (URL shortener to video streaming). The requirements set the load, and a live checklist shows which SLOs your design meets at peak: success rate, read and write p99, headroom, surviving any single failure, and cost. Every pass or fail is computed by the simulator. An interviewer asks one question at a time, aimed at your weakest point and grounded in your board (read aloud if you like). **Finish** gives a scorecard: the computed checks plus a five-part rubric where every score cites evidence.
+- **Design review and single points of failure.** Every board shows which components can't survive losing one instance. **Review** lists ranked findings, each with a fix the simulator has proven clears it, plus AI findings when the model is available. Apply a fix in one click, then undo it if you change your mind.
 - **Works on phones, by keyboard and without Wispr Flow.** Under 768 px the panel becomes a bottom sheet that peeks with the bottleneck, and graphs lay out top to bottom so labels stay legible. Every action is keyboard-reachable, with visible focus. Browsers with the Web Speech API get a mic button as a fallback for Wispr Flow.
 - **Boards in your browser.** Templates (three-tier, URL shortener, chat), undo/redo, change history, automatic layout, light and dark themes. Boards are saved in IndexedDB and never leave your browser.
 
@@ -39,13 +41,20 @@ Archie is a system-design board you talk to. You describe changes out loud ("fiv
   <img src="docs/assets/board-phone.png" width="24%" alt="Archie on a phone: the graph laid out top to bottom and a bottom sheet showing the bottleneck line and metrics">
 </p>
 
+![Interview mode: the URL shortener's live SLO checklist (1 of 6 passing) and the interviewer's question about the saturated API, with chips that highlight the nodes it refers to](docs/assets/board-interview.png)
+
+<p align="center">
+  <img src="docs/assets/board-scorecard.png" width="49%" alt="The scorecard: 3.4 out of 5, the computed SLO checks, and rubric bars with evidence; one dimension marked not enough evidence">
+  <img src="docs/assets/board-review.png" width="49%" alt="Design review on the three-tier board: Redis is a single point of failure and Postgres is saturated, each with an Apply fix button">
+</p>
+
 ### Planned
 
 | Phase | Feature | Status |
 |-------|---------|--------|
 | 4 | AI tier: full descriptions ("users hit two load balancers…"), clarifying questions, confirmations, grounded answers ([plan](docs/32-phase-4-plan.md)) | ✅ Done (#7) |
 | 5 | Design pass: Inspector, phone layout, mic fallback, access-code dialog, accessibility gate ([plan](docs/33-phase-5-plan.md)) | ✅ Done |
-| 6 | Interview mode with simulator-checked SLOs, design review | 📋 Planned |
+| 6 | Interview mode with simulator-checked SLOs and a scorecard, design review, SPOF scan, `/design` style guide ([plan](docs/34-phase-6-plan.md)) | ✅ Done |
 | 7 | Eval report, share links, exports, deployment | 📋 Planned |
 
 ## Results
@@ -55,13 +64,15 @@ Measured with the scripts in this repository (`npm run bench:fast`, `npm run ben
 | What | Result | Target |
 |------|--------|--------|
 | Voice command, parse + apply (fast path) | P50 0.006 ms · P100 0.138 ms over 14,000 runs | P50 < 10 ms |
-| Full simulation incl. 10,000-sample Monte Carlo, 100 components | P95 2.33 ms | P95 < 5 ms |
+| Full simulation incl. 10,000-sample Monte Carlo, 100 components | P95 2.39 ms | P95 < 5 ms |
+| SPOF scan (one what-if per component), 100 components | P95 21.3 ms | P95 < 600 ms |
+| Interview question / scorecard / review, live (free-tier Gemini) | 1.8–2.9 s / 3.6 s / 8.5 s (review included a provider failover) | — |
 | AI command understanding, held-out test split (12 cases, free-tier Gemini → Groq) | task accuracy 91.7% · kind accuracy 100% · **0 false actions** · warm P50 1.8 s | ≥ 90% · false actions ≤ 2% · P50 < 3 s |
 | AI command understanding, all 31 cases | 29/31 = 93.5% · 0 false actions | ≥ 85% (Phase 4) |
-| Unit, property and contract tests | 431 passing | — |
-| End-to-end tests (desktop + mobile Chromium) | 128 passing (AI responses mocked) | — |
-| Accessibility: axe, WCAG 2.2 A/AA, 9 states × light/dark × desktop/phone | **0 serious or critical** violations; keyboard-only journey passes | 0 |
-| Board route initial JS, gzipped (`npm run bundle:size`) | 318.7 KB (Home 238.6 KB) | < 300 KB · **not met yet**: 90 KB is zod's classic API in the browser; moving client validation to `zod/mini` is the fix ([doc 31](docs/31-project-state.md)) |
+| Unit, property and contract tests | 514 passing | — |
+| End-to-end tests (desktop + mobile Chromium) | 191 passing (AI responses mocked) | — |
+| Accessibility: axe, WCAG 2.2 A/AA, 15 states × light/dark × desktop/phone, plus `/design` | **0 serious or critical** violations; keyboard-only journey passes | 0 |
+| Board route initial JS, gzipped (`npm run bundle:size`) | 260.6 KB (Home 170.9 KB), with interview and review loaded on demand | < 300 KB, enforced in CI |
 
 The simulator's headline numbers are golden-tested against hand calculations in [docs/10](docs/10-traffic-model.md). It is a teaching model (M/M/1 per replica, steady state), not a vendor benchmark; assumptions are listed in [docs/09](docs/09-simulation-engine.md).
 

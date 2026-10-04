@@ -108,7 +108,7 @@ The AI tier of the command bar. It's only called when the fast path returns `nul
 
 Design review of the current board.
 
-**Request** `{ "graph": Graph, "requirements"?: Requirements }`. The server runs `simulate()` itself.
+**Request** `{ "graph": Graph, "problemId"?: ProblemId }` (requirements come from the problem). The server runs `simulate()`, `spofScan()` and the deterministic `ruleFindings()` itself; the model may add up to 4 findings. 5/min/IP. With the AI unavailable, the response is the rule findings with `aiAvailable: false` (HTTP 200).
 
 **Response**
 
@@ -127,7 +127,7 @@ Design review of the current board.
 }
 ```
 
-`severity`: `high | medium | low`. `fix.ops` are pre-validated, and "Apply fix" runs them through `applyBatch`.
+Each finding also has `id` (`rule:spof:redis`, `ai:0`) and `source` (`rule | ai`); the response adds `aiAvailable`, `model`, `timings`. `severity`: `high | medium | low`, sorted high → low, at most 6. Rule fixes are found by simulation; AI `fix.ops` must pass `validateBatch` or the fix is dropped (the finding stays). "Apply fix" runs them through `applyBatch`.
 
 ---
 
@@ -136,9 +136,12 @@ Design review of the current board.
 Interview problem bank (static).
 
 ```json
-{ "items": [ { "id": "url-shortener", "title": "Design a URL shortener", "difficulty": "easy",
-  "requirements": { "dau": 10000000, "peakRps": 40000, "readRatio": 0.95, "p99Ms": 100, "availability": 0.999 } } ] }
+{ "items": [ { "id": "url-shortener", "title": "Design a URL shortener", "difficulty": "easy", "brief": "…",
+  "requirements": { "dau": 10000000, "peakRps": 40000, "readRatio": 0.95, "p99Ms": 200, "p99WriteMs": 300, "availability": 0.999, "monthlyBudget": 2500 },
+  "hints": [ { "check": "general", "question": "…" } ] } ] }
 ```
+
+Cacheable (`max-age=3600`). Reference designs (the answer key) are never served.
 
 ## `POST /api/interview/turn` — P1
 
@@ -152,7 +155,7 @@ Interview problem bank (static).
 }
 ```
 
-The server computes `simulate()` + `sloChecks()` and asks **one** question aimed at the weakest point.
+Request also accepts `changes` (≤ 10 recent utterances); the transcript is ≤ 20 turns of ≤ 1,000 chars. The server computes `simulate()`, `spofScan()` and `sloChecks()` at the problem's peak and asks **one** question aimed at the weakest point. A question with no real node and no failing targeted check is replaced by the problem's next hint (`source: "fallback"`, no second model call). 10/min/IP.
 
 **Response**
 
@@ -160,8 +163,11 @@ The server computes `simulate()` + `sloChecks()` and asks **one** question aimed
 {
   "question": "Your fan-out happens on the write path. What happens when a user with 30M followers posts?",
   "focusNodeIds": ["feed-service"],
-  "checks": [ { "id": "p99", "label": "p99 ≤ 200 ms", "pass": false, "actual": "412 ms" } ],
-  "done": false
+  "checks": [ { "id": "p99-read", "label": "Read p99 ≤ 300 ms", "pass": false, "actual": "412 ms", "nodeIds": [] } ],
+  "source": "ai",
+  "done": false,
+  "model": "gemini-2.5-flash",
+  "timings": { "contextMs": 12, "llmMs": 1800, "totalMs": 1815 }
 }
 ```
 
@@ -182,7 +188,7 @@ The server computes `simulate()` + `sloChecks()` and asks **one** question aimed
 }
 ```
 
-Dimensions: `scalability · availability · data-modelling · trade-offs · communication`.
+Dimensions: `scalability · availability · data-modelling · trade-offs · communication`, always all five in that order. Code clamps scores to 1–5; an item without evidence (or, except communication, without a real node id) becomes 3 with `unsupported: true`; `overall` is the mean, computed in code. Checks are recomputed by the simulator. 10/min/IP.
 
 ---
 
