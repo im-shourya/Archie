@@ -140,6 +140,14 @@ Open <http://localhost:3000>, pick **Open the 50k rps demo**, and try saying *"S
 
 Local commands and the simulator need no environment variables. AI commands (anything the fast path doesn't understand) need a free `GEMINI_API_KEY` from [Google AI Studio](https://aistudio.google.com/apikey) in `.env.local`, plus an optional free `GROQ_API_KEY` from [Groq](https://console.groq.com/keys) as the fallback. Keys are server-only and never sent to the browser. Per-provider quota guards keep usage under the free tiers: when both are full, the API answers 429 rather than failing upstream. To use Claude instead, set `ANTHROPIC_API_KEY` and `ARCHIE_PROVIDER=anthropic`. Note that Google may use prompts sent on its free tier to improve its products. [`.env.example`](.env.example) lists the optional ones: `ARCHIE_PROVIDER`, `ARCHIE_FALLBACK`, `ARCHIE_MODEL`, the quota overrides (`GEMINI_RPM`, `GROQ_TPM`, …), `ARCHIE_DAILY_CAP`, `ARCHIE_ACCESS_CODE`, `ARCHIE_IP_SALT` and `NEXT_PUBLIC_SITE_URL`.
 
+### Run with Docker
+
+```bash
+docker compose up --build        # http://localhost:3000, keys read from .env.local at runtime
+```
+
+One container is the production setup ([ADR-018](docs/30-architecture-decisions.md)): the AI quota guards and rate limits live in memory, so a single long-running process keeps them exact. The image is non-root, has no secrets baked in, and is built and smoke-tested in CI on every PR.
+
 ### Commands
 
 | Command | What it does |
@@ -151,6 +159,7 @@ Local commands and the simulator need no environment variables. AI commands (any
 | `npm run test:e2e` | End-to-end tests (run `npx playwright install chromium` once first) |
 | `npm run bench:fast` · `npm run bench:sim` | Latency benchmarks, written to `evals/results/` |
 | `npm run bundle:size` | Gzipped initial JS of the board route, after `npm run build` (CI fails above 320 KB) |
+| `docker compose up --build` | Production image on <http://localhost:3000> (see [deployment](docs/25-deployment.md)) |
 | `npx tsx scripts/screenshots.ts --base <url> [--readme]` | Visual QA screenshots at 360/768/1280/1440 px in light and dark; `--readme` refreshes `docs/assets` |
 | `npm run eval` | Command-understanding eval against the real model (needs `GEMINI_API_KEY`; `GROQ_API_KEY` adds the fallback; paces itself to the free quotas); `-- --fastpath-only` for the no-AI baseline, `-- --split test` for the held-out split |
 | `npm run dev:backend` | The API alone on <http://localhost:8787/api> |
