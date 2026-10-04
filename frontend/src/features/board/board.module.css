@@ -532,6 +532,64 @@
   opacity: 0;
 }
 
+/* Editable boards: drag from a handle to connect. Shown on hover, focus and selection only. */
+.handleEditable {
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--color-surface);
+  background: var(--color-primary);
+  opacity: 0;
+  transition: opacity 120ms ease-out, transform 120ms ease-out;
+}
+
+:global(.react-flow__node):hover .handleEditable,
+:global(.react-flow__node):focus-visible .handleEditable,
+:global(.react-flow__node.selected) .handleEditable,
+:global(.react-flow.connecting) .handleEditable {
+  opacity: 1;
+}
+
+.handleEditable:hover {
+  transform: scale(1.3);
+}
+
+.edgeSelected {
+  stroke: var(--color-primary) !important;
+}
+
+/* The × on a selected connection: a 28 px target that stays clear of the rps label. */
+.edgeDelete {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-raised);
+  cursor: pointer;
+  pointer-events: all;
+}
+
+.edgeDelete:hover {
+  border-color: var(--color-state-saturated);
+  color: var(--color-state-saturated);
+}
+
+.edgeDelete:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .handleEditable {
+    transition: none;
+  }
+}
+
 .pulse {
   animation: pulse 900ms ease-out;
 }

@@ -14,7 +14,7 @@ import {
   type SpofScan,
 } from "@archie/simulator";
 import { KindIcon } from "@/components/icons/KindIcon";
-import { compact, ms, percent } from "@/lib/format";
+import { compact, ms, opMessage, percent } from "@/lib/format";
 import { useBoardStore } from "../store/board.store";
 import styles from "./inspector.module.css";
 
@@ -65,11 +65,6 @@ function rangeText(prop: NumericProp): string | null {
   const scale = FIELDS[prop].scale ?? 1;
   if (min === undefined || max === undefined) return null;
   return `${(min * scale).toLocaleString("en-US")}–${(max * scale).toLocaleString("en-US")}`;
-}
-
-/** "op (updateNode): props.replicas Too big: expected …" → "Too big: expected …". */
-function opMessage(message: string): string {
-  return message.replace(/^op \([^)]*\):\s*(?:props\.)?[\w.]*\s*/, "") || message;
 }
 
 function stored(node: ArchNode, prop: NumericProp): number {
