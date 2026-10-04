@@ -5,6 +5,7 @@ import { useReactFlow } from "@xyflow/react";
 import { AudioLines, Mic, Sparkles, Zap } from "lucide-react";
 import { parseCommand, type FastPathAction } from "@archie/ai/fastpath";
 import { getRepository } from "@archie/database";
+import { isTyping } from "@/lib/keyboard";
 import { useFit } from "../board/useFit";
 import { recentNodeIds, useBoardStore } from "../store/board.store";
 import { AccessCodeDialog } from "./AccessCodeDialog";
@@ -67,10 +68,6 @@ export function matchOption(text: string, options: readonly string[]): string | 
   return t.length >= 2 && partial.length === 1 ? partial[0]! : null;
 }
 
-function isTyping(target: EventTarget | null): boolean {
-  return target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName));
-}
-
 export function CommandBar() {
   const graph = useBoardStore((s) => s.board?.graph);
   const events = useBoardStore((s) => s.events);
@@ -78,6 +75,7 @@ export function CommandBar() {
   const undo = useBoardStore((s) => s.undo);
   const redo = useBoardStore((s) => s.redo);
   const notice = useBoardStore((s) => s.notice);
+  const interviewMode = useBoardStore((s) => s.board?.mode === "interview");
   const { getNodes, zoomIn, zoomOut } = useReactFlow();
   const fit = useFit();
 
@@ -368,7 +366,9 @@ export function CommandBar() {
           className={styles.input}
           value={text}
           rows={1}
-          placeholder={`Try: “${EXAMPLES[exampleIndex]}”`}
+          placeholder={
+            interviewMode ? "Change the board: “add a Redis cache in front of Postgres”" : `Try: “${EXAMPLES[exampleIndex]}”`
+          }
           aria-label="Command"
           aria-describedby="command-help"
           autoComplete="off"

@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
-import { WireResultSchema } from "../schemas";
-import { ProviderError, type Completion, type CompletionRequest, type LlmProvider } from "./types";
+import { COMMAND_OUTPUT } from "./output";
+import { ProviderError, type Completion, type CompletionRequest, type LlmProvider, type OutputSpec } from "./types";
 
 /** Claude via the Anthropic SDK (docs/12 · Model configuration). Paid; opt in with ARCHIE_PROVIDER=anthropic. */
 
@@ -13,7 +13,15 @@ export const FALLBACK_BETA = "server-side-fallback-2026-07-01";
 /** The slice of the SDK the provider uses, so tests can pass a mock. */
 export type MessagesClient = Pick<Anthropic, "beta">;
 
-const outputFormat = betaZodOutputFormat(WireResultSchema);
+const formats = new Map<string, ReturnType<typeof betaZodOutputFormat>>();
+function outputFormat(spec: OutputSpec = COMMAND_OUTPUT) {
+  let format = formats.get(spec.name);
+  if (!format) {
+    format = betaZodOutputFormat(spec.schema);
+    formats.set(spec.name, format);
+  }
+  return format;
+}
 
 let client: MessagesClient | null = null;
 function defaultClient(): MessagesClient {
@@ -61,7 +69,7 @@ export function createAnthropicProvider(options: { client?: MessagesClient; mode
             // Byte-stable system prompt with a cache breakpoint; thinking is left adaptive (no param).
             system: [{ type: "text", text: req.system, cache_control: { type: "ephemeral" } }],
             messages,
-            output_config: { format: outputFormat, effort: "low" },
+            output_config: { format: outputFormat(req.output), effort: "low" },
             betas: [FALLBACK_BETA],
             fallbacks: "default",
           },

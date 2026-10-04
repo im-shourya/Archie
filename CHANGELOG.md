@@ -5,6 +5,9 @@ All notable user-visible changes. Format: [Keep a Changelog](https://keepachange
 ## [Unreleased]
 
 ### Fixed
+- Failed components stay readable: they're dimmed with colour instead of transparency, which had dropped their text below the contrast minimum.
+- Components no longer blink after every change, and Escape from the Inspector always returns focus to the component.
+- Undo and other shortcuts work while a checkbox has focus.
 - Wide graphs no longer render tiny on phones and portrait tablets: they lay out top to bottom and stay legible after fit, also after rotating.
 - On phones, toasts and AI panels no longer overlap the side panel.
 - Canvas components show a visible focus ring when reached with the keyboard.
@@ -13,10 +16,16 @@ All notable user-visible changes. Format: [Keep a Changelog](https://keepachange
 - An AI request can no longer run past its 20-second budget when a provider stops responding.
 
 ### Changed
+- The board page loads about 60 KB less JavaScript (validation now uses a lighter library in the browser).
 - Command bar, history and node cards use icons instead of emoji.
 - Commands the fast path doesn't understand now go to the AI tier instead of showing a hint.
 
 ### Added
+- Interview practice: six problems with requirements, a live checklist of the SLOs your design meets at peak (computed by the simulator), an interviewer that asks one grounded question at a time (read aloud if you like), and a scorecard with the computed checks and an evidence-based rubric.
+- Design review: ranked findings for any board, each fix proven by the simulator to clear its finding, plus AI findings when available; apply a fix in one click and undo it.
+- Single points of failure: every board marks the components that can't survive losing one instance, and the Inspector shows what losing one would do.
+- `/design`: a live style guide with every colour token (and its contrast), the type scale, icons and component states.
+- Phone menu (⋯) for Review, Finish and Rename.
 - Inspector: select a component to edit its label, replicas, shards, hit rate, capacity, latency, cost, role and failover, fail or recover it, see its live load, and disconnect its edges. Invalid values show the exact limit and change nothing; every edit can be undone.
 - Phone layout: the side panel becomes a bottom sheet that peeks with the bottleneck and expands to half or full.
 - Mic button for browsers with built-in speech recognition, as a fallback when Wispr Flow isn't installed.

@@ -177,6 +177,17 @@
   color: var(--color-text-secondary);
 }
 
+.failure {
+  margin: 0;
+  font: 500 13px/1.5 var(--font-mono), monospace;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+}
+
+.failure[data-spof] {
+  color: var(--color-state-saturated);
+}
+
 .edges {
   display: grid;
   gap: 4px;

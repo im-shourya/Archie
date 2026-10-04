@@ -63,6 +63,20 @@ interface BoardState {
   redo(): boolean;
   setPinned(nodeId: string, position: { x: number; y: number } | null): void;
   rename(name: string): void;
+  /** Interview mode: replace the board's interview state (transcript, scorecard) and save it. */
+  setInterview(interview: unknown): void;
+  /**
+   * Set by the top bar's Finish button and consumed by the Interview panel, which opens its
+   * confirm dialog. A flag rather than an event: the panel may mount after the click (lazy, tab switch).
+   */
+  finishPending: boolean;
+  /** Design review panel (docs/design §5.7): shown in place of the side panel's tab body. */
+  reviewOpen: boolean;
+  setReviewOpen(open: boolean): void;
+  /** Bumped when something on phones needs the bottom sheet fully open (Finish → scorecard). */
+  sheetRequest: number;
+  requestFinish(): void;
+  consumeFinish(): void;
 }
 
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
@@ -106,6 +120,21 @@ export const useBoardStore = create<BoardState>()((set, get) => {
     selection: [],
     focus: [],
     notice: null,
+    finishPending: false,
+    sheetRequest: 0,
+    reviewOpen: false,
+
+    setReviewOpen(open) {
+      set({ reviewOpen: open });
+    },
+
+    requestFinish() {
+      set((s) => ({ finishPending: true, sheetRequest: s.sheetRequest + 1 }));
+    },
+
+    consumeFinish() {
+      set({ finishPending: false });
+    },
 
     notify(message, undoable) {
       set({ notice: { id: Date.now(), message, undoable } });
@@ -124,7 +153,7 @@ export const useBoardStore = create<BoardState>()((set, get) => {
     },
 
     async load(id) {
-      set({ status: "loading", board: null, events: [], undoStack: [], redoStack: [], selection: [], focus: [] });
+      set({ status: "loading", board: null, events: [], undoStack: [], redoStack: [], selection: [], focus: [], reviewOpen: false });
       const repo = await getRepository();
       const [board, events] = await Promise.all([repo.getBoard(id), repo.listEvents(id)]);
       if (get().status !== "loading") return;
@@ -182,6 +211,14 @@ export const useBoardStore = create<BoardState>()((set, get) => {
         return position ? { ...rest, pinned: position } : rest;
       });
       const next = { ...board, graph: { ...board.graph, nodes }, updatedAt: Date.now() };
+      set({ board: next });
+      scheduleSave(next);
+    },
+
+    setInterview(interview) {
+      const { board } = get();
+      if (!board) return;
+      const next = { ...board, interview, updatedAt: Date.now() };
       set({ board: next });
       scheduleSave(next);
     },

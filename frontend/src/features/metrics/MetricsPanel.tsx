@@ -1,6 +1,6 @@
 "use client";
 
-import type { Graph, SimResult } from "@archie/simulator";
+import type { Graph, SimResult, SpofScan } from "@archie/simulator";
 import { compact, ms, percent, usd } from "@/lib/format";
 import styles from "./metrics.module.css";
 
@@ -8,6 +8,7 @@ interface Props {
   graph: Graph;
   sim: SimResult;
   baseline: SimResult | null;
+  scan: SpofScan & { pending: boolean };
 }
 
 const HOT = new Set(["hot", "saturated"]);
@@ -21,7 +22,7 @@ function Delta({ before, after, unit }: { before: string; after: string; unit?: 
   );
 }
 
-export function MetricsPanel({ graph, sim, baseline }: Props) {
+export function MetricsPanel({ graph, sim, baseline, scan }: Props) {
   const { workload } = graph;
   const label = (id: string) => graph.nodes.find((n) => n.id === id)?.label ?? id;
   const down = graph.nodes.filter((n) => n.status === "down");
@@ -120,6 +121,26 @@ export function MetricsPanel({ graph, sim, baseline }: Props) {
           </p>
         ) : (
           <p className={styles.hint}>None: every component has at least 30% headroom.</p>
+        )}
+      </section>
+
+      <section aria-labelledby="m-spof">
+        <h3 id="m-spof" className={styles.heading}>
+          Single points of failure
+        </h3>
+        {scan.pending ? (
+          <p className={styles.hint}>checking…</p>
+        ) : scan.spofs.length > 0 ? (
+          <ul className={styles.list} data-testid="spof-list">
+            {scan.spofs.map((s) => (
+              <li key={s.id}>
+                <strong>{label(s.id)}</strong> · success → <span className={styles.num}>{percent(s.successRate)}</span> if one
+                instance fails
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className={styles.hint}>None: losing any one instance keeps 95% of successful requests.</p>
         )}
       </section>
 
