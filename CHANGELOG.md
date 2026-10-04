@@ -4,6 +4,9 @@ All notable user-visible changes. Format: [Keep a Changelog](https://keepachange
 
 ## [Unreleased]
 
+### Added
+- Legal pages: a privacy policy, terms of use, third-party services and open-source notices, and an accessibility statement, at `/legal` (with `/privacy` and `/terms`). They are rendered from `docs/legal`, so the site and the repository always agree.
+
 ### Changed
 - Visual redesign: Geist type, Phosphor icons, a crisp neutral palette in light and dark (contrast-checked), sentence-case headings, quieter shadows and quick, reduced-motion-safe button feedback.
 - A new home page: a two-line headline, the real board front and centre (a close-up on phones), the three spoken steps, real measured numbers from the evals, and templates as a simple list.
