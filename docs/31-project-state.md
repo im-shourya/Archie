@@ -4,6 +4,8 @@ Where the project is **right now**. Update at the end of every phase (and whenev
 
 ## Current phase
 
+**Phase 7 planned** ([35-phase-7-plan.md](35-phase-7-plan.md)): grow the evals to 92 cases and publish one final test-split run, `/evals`, share links, exports, replay (cuttable), and the Docker image deployed on Render. Starts on `chore/evals-deploy` once the keys are rotated.
+
 **Phase 6 done** (`feat/interview`) ([34-phase-6-plan.md](34-phase-6-plan.md)): SPOF scan, six interview problems with simulator-computed SLO checks and golden-tested reference designs, `/api/interview/turn`, `/api/interview/score` and `/api/review` on a shared structured-output session, interview mode with a live checklist, grounded questions and a scorecard, design review with simulator-proven fixes, the phone ⋯ menu and the `/design` style guide. `zod/mini` on the client closed the bundle gap (318.7 → 260.6 KB). Every acceptance criterion met.
 
 **Phase 5 done** (`feat/design-system`) ([33-phase-5-plan.md](33-phase-5-plan.md)): design-system audit with a token contract test, the Inspector (FR-016), the phone bottom sheet (both known mobile bugs closed), the Web Speech mic fallback (FR-062), the access-code dialog, an axe gate (0 serious/critical across 36 audits) with a keyboard journey, reduced-motion e2e, and a bundle measurement. **One criterion is open:** the board route ships 318.7 KB of gzipped JS against a 300 KB target (see Open items).
@@ -58,8 +60,9 @@ _None._ (NFR-015 closed in Phase 6: 260.6 KB with `zod/mini` on the client.)
 1. Sign up for Wispr Flow via <https://ref.wisprflow.ai/hhg>
 2. Test screen recording with the Wispr overlay visible
 3. Make the repository public before submitting (it's private, so the repo link and README images won't open for judges)
-4. Rotate the Gemini and Groq keys (they were pasted in chat)
-5. 🎙 Phase 7: evals ≥ 80 cases, deploy the Docker image (ADR-018) to a container host, share/export
+4. Rotate the Gemini and Groq keys (they were pasted in chat). **Before** the Phase 7 deploy: the live service only gets the new keys
+5. Create a Render account (free web service) for the Phase 7 deploy
+6. 🎙 Phase 7 from [doc 35](35-phase-7-plan.md): evals to 92 cases, share/export, deploy the Docker image (ADR-018) on Render
 
 ## Metrics snapshot
 
