@@ -13,11 +13,13 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-2a44c8" alt="MIT license"></a>
 </p>
 
+**Try it live: <https://archie-rb2x.onrender.com>** (free hosting: if nobody has used it for a while, the first load can take about a minute).
+
 Archie is a system-design board you talk to. You describe changes out loud ("five replicas of the API", "kill Redis"), the diagram updates, and a simulator shows where the system saturates, which requests fail, and why, with the numbers behind every red component. It's built for engineers sketching a design and for students practising system-design interviews.
 
 ![The three-tier template at 50,000 requests per second: Postgres is saturated at ρ 1.40 and the bottleneck note explains why](docs/assets/board-bottleneck.png)
 
-> Built by voice with [Wispr Flow](https://ref.wisprflow.ai/hhg) for Hacker House Goa 2026. **Status:** in development. Phases 0–6 are done and Phase 7 (evals, share and export, deployment) is in progress ([roadmap](docs/29-roadmap.md), [project state](docs/31-project-state.md)).
+> Built by voice with [Wispr Flow](https://ref.wisprflow.ai/hhg) for Hacker House Goa 2026. **Status:** Phases 0–7 are done and the app is deployed; Phase 8 (record and submit) is next ([roadmap](docs/29-roadmap.md), [project state](docs/31-project-state.md)).
 
 ## What works today
 
@@ -62,7 +64,7 @@ Archie is a system-design board you talk to. You describe changes out loud ("fiv
 | 4 | AI tier: full descriptions ("users hit two load balancers…"), clarifying questions, confirmations, grounded answers ([plan](docs/32-phase-4-plan.md)) | ✅ Done (#7) |
 | 5 | Design pass: Inspector, phone layout, mic fallback, access-code dialog, accessibility gate ([plan](docs/33-phase-5-plan.md)) | ✅ Done |
 | 6 | Interview mode with simulator-checked SLOs and a scorecard, design review, SPOF scan, `/design` style guide ([plan](docs/34-phase-6-plan.md)) | ✅ Done |
-| 7 | 92 eval cases, `/evals`, share links, exports and Open file, replay ✅ · final test-split run and deployment on Render 🚧 ([plan](docs/35-phase-7-plan.md)) | 🚧 In progress |
+| 7 | 92 eval cases, `/evals`, share links, exports and Open file, replay, deployment on Render ([plan](docs/35-phase-7-plan.md)) | ✅ Done (#12) |
 
 ## Results
 
@@ -74,6 +76,7 @@ Measured with the scripts in this repository (`npm run bench:fast`, `npm run ben
 | Full simulation incl. 10,000-sample Monte Carlo, 100 components | P95 2.39 ms | P95 < 5 ms |
 | SPOF scan (one what-if per component), 100 components | P95 21.3 ms | P95 < 600 ms |
 | Interview question / scorecard / review, live (free-tier Gemini) | 1.8–2.9 s / 3.6 s / 8.5 s (review included a provider failover) | — |
+| AI command, **deployed** (6 held-out cases sent to the live site from India, network included) | 6/6 correct · 0 false actions · warm P50 2.4 s, P95 3.9 s · first call 6.7 s | P50 < 3 s |
 | **AI command understanding, held-out test split** (34 cases, run once on the final build, free-tier Gemini, 2026-10-04) | **task accuracy 91.2%** (31/34) · kind accuracy 94.1% · over-clarify 0% · warm P50 2.3 s, P95 6.7 s · **1 false action** (11.1% of 9 hold-back cases): "connect the workers to the database" picked one of two databases instead of asking ([notes](evals/notes.md)) | ≥ 90% ✅ · false actions ≤ 2% ❌ · P50 < 3 s ✅ · P95 < 6 s ❌ |
 | AI command understanding, dev split of the 92-case dataset (58 cases, 2026-10-04) | 48/48 answered cases correct · **0 false actions** · 10 got no answer: every free-tier model timed out, before the [fallback fix](docs/35-phase-7-plan.md) | Phase 7: test split ≥ 90%, run once at the end |
 | Fast path alone on all 92 cases (no AI) | handles 8, all correct (precision 100%); abstains on the rest | precision 100% |
