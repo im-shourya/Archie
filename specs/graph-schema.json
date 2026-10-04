@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://archie.dev/specs/graph-schema.json",
+  "title": "Archie Graph",
+  "description": "Architecture graph: nodes, edges, workload. See docs/07-graph-model.md. Zod schemas in simulator/src/graph/types.ts must match.",
+  "type": "object",
+  "required": ["nodes", "edges", "workload", "version"],
+  "additionalProperties": false,
+  "properties": {
+    "nodes": { "type": "array", "maxItems": 200, "items": { "$ref": "#/$defs/ArchNode" } },
+    "edges": { "type": "array", "maxItems": 600, "items": { "$ref": "#/$defs/ArchEdge" } },
+    "workload": { "$ref": "#/$defs/Workload" },
+    "version": { "type": "integer", "minimum": 0 }
+  },
+  "$defs": {
+    "NodeId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,39}$" },
+    "NodeKind": {
+      "type": "string",
+      "enum": ["client", "cdn", "lb", "gateway", "service", "worker", "cache", "sql", "nosql", "queue", "objectstore", "search", "external"]
+    },
+    "NodeProps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["replicas"],
+      "properties": {
+        "replicas": { "type": "integer", "minimum": 1, "maximum": 1000 },
+        "shards": { "type": "integer", "minimum": 1, "maximum": 256 },
+        "capacityRps": { "type": "number", "exclusiveMinimum": 0, "maximum": 10000000 },
+        "readCapacity": { "type": "number", "exclusiveMinimum": 0, "maximum": 10000000 },
+        "writeCapacity": { "type": "number", "exclusiveMinimum": 0, "maximum": 10000000 },
+        "latencyMs": { "type": "number", "minimum": 0, "maximum": 60000 },
+        "hitRate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "role": { "type": "string", "enum": ["primary", "replica"] },
+        "failover": { "type": "boolean" },
+        "costPerReplica": { "type": "number", "minimum": 0, "maximum": 1000000 }
+      }
+    },
+    "ArchNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "label", "props", "status"],
+      "properties": {
+        "id": { "$ref": "#/$defs/NodeId" },
+        "kind": { "$ref": "#/$defs/NodeKind" },
+        "label": { "type": "string", "minLength": 1, "maxLength": 60 },
+        "props": { "$ref": "#/$defs/NodeProps" },
+        "status": { "type": "string", "enum": ["up", "down"] },
+        "pinned": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["x", "y"],
+          "properties": { "x": { "type": "number" }, "y": { "type": "number" } }
+        }
+      }
+    },
+    "ArchEdge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "from", "to", "kind", "traffic"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,39}->[a-z][a-z0-9-]{0,39}$" },
+        "from": { "$ref": "#/$defs/NodeId" },
+        "to": { "$ref": "#/$defs/NodeId" },
+        "kind": { "type": "string", "enum": ["call", "async", "replication"] },
+        "traffic": { "type": "string", "enum": ["all", "read", "write"] },
+        "weight": { "type": "number", "exclusiveMinimum": 0, "maximum": 1000 }
+      }
+    },
+    "Workload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rps", "readRatio", "peakMultiplier"],
+      "properties": {
+        "rps": { "type": "number", "minimum": 0, "maximum": 10000000 },
+        "readRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "peakMultiplier": { "type": "number", "minimum": 1, "maximum": 100 }
+      }
+    }
+  }
+}

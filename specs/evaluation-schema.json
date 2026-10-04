@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://archie.dev/specs/evaluation-schema.json",
+  "title": "Archie Evaluation",
+  "description": "Eval case (one JSONL line) and run results (evals/results/latest.json). See docs/22-24.",
+  "$defs": {
+    "Category": {
+      "type": "string",
+      "enum": ["create", "modify", "connect", "scale", "insert", "workload", "failure", "compound", "question", "ambiguity", "destructive", "off-topic", "injection", "bounds", "dictation-noise"]
+    },
+    "Kind": { "type": "string", "enum": ["ops", "clarify", "confirm", "answer", "noop"] },
+    "Assertion": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 2,
+      "properties": {
+        "nodeExists": { "type": "object" },
+        "node": { "type": "string" },
+        "props": { "type": "object" },
+        "edgeExists": { "type": "object" },
+        "edgeAbsent": { "type": "object" },
+        "nodeCount": { "type": "object", "required": ["kind"], "properties": { "kind": { "type": "string" }, "eq": { "type": "integer" }, "gte": { "type": "integer" } } },
+        "workload": { "type": "object" },
+        "status": { "type": "object", "required": ["node", "eq"], "properties": { "node": { "type": "string" }, "eq": { "enum": ["up", "down"] } } },
+        "unchanged": { "const": true },
+        "answerMentions": { "type": "array", "items": { "type": "string" } },
+        "focusIncludes": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "Case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "split", "category", "fixture", "utterance", "expect"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z-]+-[0-9]{2,3}$" },
+        "split": { "enum": ["dev", "test"] },
+        "category": { "$ref": "#/$defs/Category" },
+        "fixture": { "type": "string" },
+        "utterance": { "type": "string", "minLength": 1, "maxLength": 4000 },
+        "expect": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind"],
+          "properties": { "kind": { "$ref": "#/$defs/Kind" }, "assert": { "type": "array", "items": { "$ref": "#/$defs/Assertion" } } }
+        },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "retired": { "type": "boolean" },
+        "note": { "type": "string" }
+      }
+    },
+    "LatencyStats": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["n", "p50", "p70", "p95", "p99", "p100", "mean"],
+      "properties": {
+        "n": { "type": "integer", "minimum": 0 },
+        "p50": { "type": "number" }, "p70": { "type": "number" }, "p95": { "type": "number" },
+        "p99": { "type": "number" }, "p100": { "type": "number" }, "mean": { "type": "number" }
+      }
+    },
+    "CaseResult": {
+      "type": "object",
+      "required": ["id", "category", "pass", "expectedKind", "actualKind", "tier", "totalMs"],
+      "properties": {
+        "id": { "type": "string" },
+        "category": { "$ref": "#/$defs/Category" },
+        "pass": { "type": "boolean" },
+        "expectedKind": { "$ref": "#/$defs/Kind" },
+        "actualKind": { "$ref": "#/$defs/Kind" },
+        "tier": { "enum": ["fastpath", "ai"] },
+        "attempts": { "type": "integer" },
+        "totalMs": { "type": "number" },
+        "failedAssertions": { "type": "array", "items": { "type": "string" } },
+        "usage": { "type": "object" }
+      }
+    },
+    "RunResult": {
+      "type": "object",
+      "required": ["runId", "createdAt", "commit", "split", "model", "effort", "promptHash", "environment", "metrics", "byCategory", "latency", "cases"],
+      "properties": {
+        "runId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "commit": { "type": "string" },
+        "split": { "enum": ["dev", "test", "all"] },
+        "model": { "type": "string" },
+        "effort": { "type": "string" },
+        "promptHash": { "type": "string" },
+        "target": { "enum": ["local", "deployed"] },
+        "environment": { "type": "object", "properties": { "cpu": { "type": "string" }, "node": { "type": "string" }, "region": { "type": "string" } } },
+        "metrics": {
+          "type": "object",
+          "required": ["taskAccuracy", "kindAccuracy", "falseActionRate", "overClarifyRate", "fastPathPrecision", "fastPathCoverage", "repairRate"],
+          "properties": {
+            "taskAccuracy": { "type": "number" }, "kindAccuracy": { "type": "number" },
+            "falseActionRate": { "type": "number" }, "overClarifyRate": { "type": "number" },
+            "fastPathPrecision": { "type": "number" }, "fastPathCoverage": { "type": "number" },
+            "repairRate": { "type": "number" }, "answerGroundedness": { "type": "number" }, "cacheHitRate": { "type": "number" }
+          }
+        },
+        "byCategory": {
+          "type": "object",
+          "additionalProperties": { "type": "object", "required": ["n", "pass"], "properties": { "n": { "type": "integer" }, "pass": { "type": "integer" } } }
+        },
+        "latency": {
+          "type": "object",
+          "properties": {
+            "fastpath": { "$ref": "#/$defs/LatencyStats" },
+            "aiWarm": { "$ref": "#/$defs/LatencyStats" },
+            "aiCold": { "$ref": "#/$defs/LatencyStats" },
+            "simulator": { "type": "object", "additionalProperties": { "$ref": "#/$defs/LatencyStats" } },
+            "layout": { "type": "object", "additionalProperties": { "$ref": "#/$defs/LatencyStats" } }
+          }
+        },
+        "cases": { "type": "array", "items": { "$ref": "#/$defs/CaseResult" } }
+      }
+    }
+  }
+}
