@@ -185,14 +185,14 @@ Files: `frontend/src/app/b/[id]/replay/page.tsx`, `features/replay/{Replay,useRe
 
 ## Acceptance criteria (Phase 7 is done when)
 
-- [ ] ≥ 80 cases (target 92), every category ≥ 5 with ≥ 2 in test, the dataset test green, the 31 original lines unchanged
+- [x] ≥ 80 cases (target 92), every category ≥ 5 with ≥ 2 in test, the dataset test green, the 31 original lines unchanged
 - [ ] Test-split task accuracy ≥ 90%, false-action ≤ 2%, fast-path precision 100%, from **one** run on the final build. A miss is published with its reason, not hidden
 - [ ] `evals/results/latest.json` committed, rendered on `/evals` and in the README, with the commit, model(s) and prompt hash
 - [ ] AI warm P50 < 3 s and P95 < 6 s reported (P95 has missed on the free tier before; if it misses again, the README says why)
-- [ ] Share link round-trips; malformed and oversized links render EF-05; Duplicate saves an editable copy (FR-042, T-06)
-- [ ] JSON, Mermaid, design doc, SVG and PNG export; JSON re-imports (FR-043)
+- [x] Share link round-trips; malformed and oversized links render EF-05; Duplicate saves an editable copy (FR-042, T-06)
+- [x] JSON, Mermaid, design doc, SVG and PNG export; JSON re-imports (FR-043)
 - [ ] The Docker image runs on Render: `deploy-smoke.sh` passes against the live URL, `/api/health` shows the deployed commit, the client IP can't be forged, and the keys are the rotated ones
-- [ ] axe 0 serious/critical on `/evals`, `/s`, the error page and the Export menu, in both themes, desktop and phone; board route < 300 KB
+- [x] axe 0 serious/critical on `/evals`, `/s`, the error page, the Export menu and replay, in both themes, desktop and phone; board route < 300 KB (263.8)
 - [ ] `npm test`, lint, typecheck, build, e2e and CI green; the quota budget kept, with ≥ 30 calls left for Phase 8
 - [ ] Docs, README and CHANGELOG `v1.0.0` updated; history scanned; the repo is public
 
@@ -237,9 +237,9 @@ Built on `chore/evals-deploy`, one commit per step plus fix commits. Validation 
 | 5 Share | ✅ `/s`, Duplicate, EF-05 for six kinds of broken link |
 | 6 Export | ✅ JSON, Mermaid, design doc, SVG, PNG; Open file |
 | 7 Deploy | 🚧 Code done (`render.yaml`, build arg, client-IP header, version fallback, `deploy-smoke.sh` passing against a local production build, keep-warm). **The Render service needs the owner's account and the rotated keys** |
-| 8 Final runs | ⏳ Mon 5 Oct after 12:30 IST |
+| 8 Final runs | ⏳ Mon 5 Oct after 12:30 IST. `npm run eval -- --base-url` (deployed eval) is built and checked against a keyless local server |
 | 9 Replay | ✅ `/b/[id]/replay` |
-| 10 Release | 🚧 Docs and README updated for what is built; the CHANGELOG `v1.0.0`, screenshots, history scan and going public come after Step 8 |
+| 10 Release | 🚧 Docs, README and screenshots (share, export, replay) done; the whole history scanned clean (no key-shaped strings, no `.env`, `.claude/` or work log ever committed). The CHANGELOG `v1.0.0`, the `/evals` screenshot and going public come after Step 8 |
 
 Deviations, all measured:
 
