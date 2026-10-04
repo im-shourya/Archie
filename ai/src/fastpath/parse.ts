@@ -1,4 +1,4 @@
-import { CATALOG, validateBatch, type ArchNode, type Graph, type NodeKind, type Op } from "@archie/simulator";
+import { CATALOG, uniqueLabel, validateBatch, type ArchNode, type Graph, type NodeKind, type Op } from "@archie/simulator";
 import { normalize } from "./normalize";
 import { kindsOf, resolveRef, type ResolveContext } from "./resolve";
 
@@ -111,7 +111,7 @@ export const RULES: readonly Rule[] = [
     build: (m, g) => {
       const kind = addedKind(m.k ?? "");
       if (!kind) return null;
-      const label = uniqueLabel(m.label ? titleCase(m.label) : addedLabel(m.k!, kind), g);
+      const label = uniqueLabel(m.label ? titleCase(m.label) : addedLabel(m.k!, kind), g.nodes.map((n) => n.label));
       return {
         ops: [{ type: "addNode", kind, label }],
         summary: `Added ${label} (not connected yet)`,
@@ -276,13 +276,6 @@ function titleCase(text: string): string {
 function addedLabel(phrase: string, kind: NodeKind): string {
   const generic = new Set([kind, "service", "server", "cache", "queue", "worker", "workers", "gateway", "search", "lb", "load balancer", "balancer", "client"]);
   return generic.has(phrase) ? CATALOG[kind].displayName : titleCase(phrase);
-}
-
-/** "Redis" → "Redis 2" when the board already has one, so the new component can be referred to. */
-function uniqueLabel(label: string, graph: Graph): string {
-  const taken = new Set(graph.nodes.map((n) => n.label.toLowerCase()));
-  if (!taken.has(label.toLowerCase())) return label;
-  for (let n = 2; ; n++) if (!taken.has(`${label} ${n}`.toLowerCase())) return `${label} ${n}`;
 }
 
 export function parseCommand(utterance: string, graph: Graph, ctx: ResolveContext = {}): FastPathResult | null {
