@@ -166,6 +166,44 @@
   outline-offset: 2px;
 }
 
+/* Engineered, not decorative: a quick colour change on hover and a 1 px press. */
+.iconButton,
+.button,
+.textButton {
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.iconButton:hover:not(:disabled),
+.button:hover:not(:disabled),
+.textButton:hover:not(:disabled) {
+  border-color: var(--color-border-default);
+  background: var(--color-surface-sunken);
+}
+
+.iconButton:active:not(:disabled),
+.button:active:not(:disabled),
+.textButton:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iconButton,
+  .button,
+  .textButton {
+    transition: none;
+  }
+
+  .iconButton:active:not(:disabled),
+  .button:active:not(:disabled),
+  .textButton:active:not(:disabled) {
+    transform: none;
+  }
+}
+
 .iconButton:disabled {
   opacity: 0.4;
   cursor: default;
@@ -214,9 +252,7 @@
   margin: 0 0 12px;
   font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
 }
 
 .muted {

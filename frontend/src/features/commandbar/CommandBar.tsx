@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useReactFlow } from "@xyflow/react";
-import { AudioLines, Mic, Sparkles, Zap } from "lucide-react";
+import { Cloud, Lightning, Microphone, Waveform } from "@phosphor-icons/react/dist/ssr";
 import { parseCommand, type FastPathAction } from "@archie/ai/fastpath";
 import { getRepository } from "@archie/database";
 import { isTyping } from "@/lib/keyboard";
@@ -359,7 +359,7 @@ export function CommandBar() {
         {speech.supported ? (
           <MicButton listening={speech.listening} onToggle={speech.listening ? speech.stop : speech.start} />
         ) : (
-          <Mic className={styles.mic} size={18} strokeWidth={1.75} aria-hidden />
+          <Microphone className={styles.mic} size={18} aria-hidden />
         )}
         <textarea
           ref={inputRef}
@@ -392,12 +392,12 @@ export function CommandBar() {
           {ai.state.phase === "thinking" && (ai.state.slow ? "still thinking…" : "thinking…")}
           {ai.state.phase !== "thinking" && badge?.tier === "ai" && (
             <>
-              <Sparkles size={12} strokeWidth={2} aria-hidden /> AI · {formatSeconds(badge.ms)}
+              <Cloud size={12} weight="bold" aria-hidden /> AI · {formatSeconds(badge.ms)}
             </>
           )}
           {ai.state.phase !== "thinking" && badge?.tier === "local" && (
             <>
-              <Zap size={12} strokeWidth={2} aria-hidden /> local · {formatMs(badge.ms)}
+              <Lightning size={12} weight="bold" aria-hidden /> local · {formatMs(badge.ms)}
             </>
           )}
           {ai.state.phase !== "thinking" && badge?.tier === "none" && "— not understood"}
@@ -409,7 +409,7 @@ export function CommandBar() {
           onClick={toggleHandsFree}
           title="Hands-free: send automatically when you stop talking (H)"
         >
-          <AudioLines size={14} strokeWidth={2} aria-hidden /> Hands-free
+          <Waveform size={14} weight="bold" aria-hidden /> Hands-free
         </button>
       </div>
       {ai.state.phase === "code" && (

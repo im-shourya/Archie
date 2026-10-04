@@ -1,51 +1,57 @@
 /*
  * Archie design tokens (docs/06 · Design system). Semantic names only; components never use
- * raw colours. Light = warm drafting paper + graphite ink; dark = graphite, not inverted.
- * All text roles meet WCAG AA (≥ 4.5:1) on both background and surface in both themes.
+ * raw colours. Light = a crisp, barely warm whiteboard + near-black ink; dark = true neutrals,
+ * not inverted. One accent (the brand blue) for actions, focus and the active voice state.
+ * Every text role meets WCAG AA (≥ 4.5:1) on background, surface and sunken in both themes.
  */
 :root {
   color-scheme: light dark;
 
   /* Surfaces */
-  --color-background: #f6f5f1;
+  --color-background: #fafaf9;
   --color-surface: #ffffff;
-  --color-surface-sunken: #eeece6;
+  --color-surface-sunken: #f4f4f2;
 
   /* Text */
-  --color-text-primary: #16181d;
-  --color-text-secondary: #525866;
-  --color-text-muted: #686e7b;
+  --color-text-primary: #0a0a0a;
+  --color-text-secondary: #52525b;
+  --color-text-muted: #6b6b72;
 
   /* Borders */
-  --color-border-subtle: #e2e0d8;
-  --color-border-default: #cfccc2;
-  --color-border-strong: #9c9890;
+  --color-border-subtle: #ececea;
+  --color-border-default: #deded9;
+  --color-border-strong: #a3a39d;
 
   /* Brand / interaction: reserved for actions, focus and the active voice state */
   --color-primary: #2a44c8;
   --color-primary-hover: #2238a8;
   --color-primary-foreground: #ffffff;
-  --color-primary-subtle: #e9ecfb;
+  --color-primary-subtle: #eef0fc;
   --color-focus: #2a44c8;
 
   /* Simulation state (semantic; never decorative). Always paired with a label or bar. */
   --color-state-healthy: #1e7a58;
-  --color-state-warm: #9a6200;
-  --color-state-hot: #b8501a;
+  --color-state-warm: #925b00;
+  --color-state-hot: #ab4716;
   --color-state-saturated: #c0283a;
   --color-state-down: #646a77;
-  --color-edge: #a8a497;
+  --color-edge: #b4b4ae;
 
-  /* Shape */
-  --radius-sm: 4px;
+  /* Shape: small radii, borders before shadows; shadows are layered and quiet */
+  --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
-  --shadow-raised: 0 1px 2px rgb(22 24 29 / 0.06);
-  --shadow-overlay: 0 8px 24px rgb(22 24 29 / 0.12);
+  --shadow-raised: 0 1px 1px rgb(10 10 10 / 0.03), 0 1px 3px rgb(10 10 10 / 0.05);
+  --shadow-overlay: 0 0 0 1px rgb(10 10 10 / 0.05), 0 12px 32px -8px rgb(10 10 10 / 0.18);
+
+  /* Motion: fast and quiet; reduced motion turns it off (docs/06 · Motion) */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --duration-fast: 120ms;
+  --duration-normal: 200ms;
 
   /* React Flow */
   --xy-background-color-default: var(--color-background);
-  --xy-background-pattern-dots-color-default: #d9d6cc;
+  --xy-background-pattern-dots-color-default: #dcdcd8;
   --xy-controls-button-background-color-default: var(--color-surface);
   --xy-controls-button-border-color-default: var(--color-border-subtle);
   --xy-controls-button-color-default: var(--color-text-secondary);
@@ -54,35 +60,35 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-background: #111317;
-    --color-surface: #181b20;
-    --color-surface-sunken: #21252b;
+    --color-background: #0a0a0a;
+    --color-surface: #121212;
+    --color-surface-sunken: #1c1c1c;
 
-    --color-text-primary: #ecedef;
-    --color-text-secondary: #aab0ba;
-    --color-text-muted: #8c929d;
+    --color-text-primary: #ededed;
+    --color-text-secondary: #a3a3a3;
+    --color-text-muted: #8e8e8e;
 
-    --color-border-subtle: #2a2f36;
-    --color-border-default: #3a4049;
-    --color-border-strong: #5a606b;
+    --color-border-subtle: #2a2a2a;
+    --color-border-default: #363636;
+    --color-border-strong: #555555;
 
     --color-primary: #93a5ff;
     --color-primary-hover: #b0beff;
     --color-primary-foreground: #0b1020;
-    --color-primary-subtle: #1c2340;
+    --color-primary-subtle: #1a2040;
     --color-focus: #93a5ff;
 
     --color-state-healthy: #41c493;
     --color-state-warm: #e5ac3e;
     --color-state-hot: #f28a4e;
     --color-state-saturated: #ff707b;
-    --color-state-down: #8c929d;
-    --color-edge: #4d535d;
+    --color-state-down: #8e8e8e;
+    --color-edge: #3d3d3d;
 
-    --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.4);
-    --shadow-overlay: 0 8px 24px rgb(0 0 0 / 0.5);
+    --shadow-raised: 0 0 0 1px rgb(255 255 255 / 0.04), 0 1px 3px rgb(0 0 0 / 0.5);
+    --shadow-overlay: 0 0 0 1px rgb(255 255 255 / 0.06), 0 16px 40px -8px rgb(0 0 0 / 0.7);
 
-    --xy-background-pattern-dots-color-default: #2a2f36;
+    --xy-background-pattern-dots-color-default: #232323;
   }
 }
 
@@ -105,6 +111,13 @@ body {
   font-size: 16px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Geist reads best slightly tightened at heading sizes. */
+h1,
+h2 {
+  letter-spacing: -0.02em;
 }
 
 :focus-visible {
@@ -114,7 +127,7 @@ body {
 
 /* Smooth layout transitions for canvas nodes (docs/06 · Motion), not while dragging. */
 .react-flow__node:not(.dragging) {
-  transition: transform 250ms ease-out;
+  transition: transform 250ms var(--ease-out);
 }
 
 /* Keyboard focus on canvas nodes (doc 06 · Accessibility). React Flow's stylesheet removes it. */

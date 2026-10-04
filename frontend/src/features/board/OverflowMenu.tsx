@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { Ellipsis } from "lucide-react";
+import { DotsThree } from "@phosphor-icons/react/dist/ssr";
 import styles from "./board.module.css";
 
 /**
@@ -81,7 +81,7 @@ export function OverflowMenu({
           }
         }}
       >
-        {trigger ?? <Ellipsis size={16} aria-hidden />}
+        {trigger ?? <DotsThree size={16} aria-hidden />}
       </button>
       {open && (
         <ul

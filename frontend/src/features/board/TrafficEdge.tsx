@@ -1,7 +1,7 @@
 "use client";
 
 import { memo } from "react";
-import { X } from "lucide-react";
+import { X } from "@phosphor-icons/react/dist/ssr";
 import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, type Edge, type EdgeProps } from "@xyflow/react";
 import { compact } from "@/lib/format";
 import { useBoardStore } from "../store/board.store";

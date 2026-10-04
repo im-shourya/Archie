@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, ChevronDown, Download, Flag, PencilLine, Redo2, ScanSearch, Share2, Undo2 } from "lucide-react";
+import { ArrowArcLeft, ArrowArcRight, ArrowLeft, CaretDown, DownloadSimple, Flag, ListMagnifyingGlass, PencilSimpleLine, ShareNetwork } from "@phosphor-icons/react/dist/ssr";
 import { LogoMark } from "@/components/brand/LogoMark";
 import { percent } from "@/lib/format";
 import { isTyping } from "@/lib/keyboard";
@@ -364,7 +364,7 @@ function TopActions({ compact, interview, hasNodes, onFinish, onRename }: TopAct
   };
   const exportItems = EXPORT_KINDS.map((kind) => ({
     label: compact ? `Export ${EXPORT_LABEL[kind]}` : EXPORT_LABEL[kind],
-    icon: <Download size={16} aria-hidden />,
+    icon: <DownloadSimple size={16} aria-hidden />,
     onSelect: () => void runExport(kind),
   }));
 
@@ -374,14 +374,14 @@ function TopActions({ compact, interview, hasNodes, onFinish, onRename }: TopAct
       {!compact && hasNodes && (
         <>
           <button type="button" className={styles.textButton} onClick={share}>
-            <Share2 size={16} aria-hidden /> Share
+            <ShareNetwork size={16} aria-hidden /> Share
           </button>
           <OverflowMenu
             label="Export"
             buttonClassName={styles.textButton}
             trigger={
               <>
-                <Download size={16} aria-hidden /> Export <ChevronDown size={14} aria-hidden />
+                <DownloadSimple size={16} aria-hidden /> Export <CaretDown size={14} aria-hidden />
               </>
             }
             items={exportItems}
@@ -400,7 +400,7 @@ function TopActions({ compact, interview, hasNodes, onFinish, onRename }: TopAct
           onClick={() => setReviewOpen(true)}
           title="Review the design (R)"
         >
-          <ScanSearch size={16} aria-hidden /> Review
+          <ListMagnifyingGlass size={16} aria-hidden /> Review
         </button>
       )}
       <button
@@ -411,7 +411,7 @@ function TopActions({ compact, interview, hasNodes, onFinish, onRename }: TopAct
         aria-label="Undo"
         title="Undo (⌘Z)"
       >
-        <Undo2 size={16} aria-hidden />
+        <ArrowArcLeft size={16} aria-hidden />
       </button>
       <button
         type="button"
@@ -421,7 +421,7 @@ function TopActions({ compact, interview, hasNodes, onFinish, onRename }: TopAct
         aria-label="Redo"
         title="Redo (⇧⌘Z)"
       >
-        <Redo2 size={16} aria-hidden />
+        <ArrowArcRight size={16} aria-hidden />
       </button>
       {compact && (
         <OverflowMenu
@@ -429,12 +429,12 @@ function TopActions({ compact, interview, hasNodes, onFinish, onRename }: TopAct
             ...(interview
               ? [{ label: "Finish interview", icon: <Flag size={16} aria-hidden />, onSelect: onFinish }]
               : hasNodes
-                ? [{ label: "Review design", icon: <ScanSearch size={16} aria-hidden />, onSelect: () => setReviewOpen(true) }]
+                ? [{ label: "Review design", icon: <ListMagnifyingGlass size={16} aria-hidden />, onSelect: () => setReviewOpen(true) }]
                 : []),
             ...(hasNodes
-              ? [{ label: "Share link", icon: <Share2 size={16} aria-hidden />, onSelect: share }, ...exportItems]
+              ? [{ label: "Share link", icon: <ShareNetwork size={16} aria-hidden />, onSelect: share }, ...exportItems]
               : []),
-            { label: "Rename board", icon: <PencilLine size={16} aria-hidden />, onSelect: onRename },
+            { label: "Rename board", icon: <PencilSimpleLine size={16} aria-hidden />, onSelect: onRename },
           ]}
         />
       )}
