@@ -1,5 +1,7 @@
 /**
- * npm run eval -- [--split dev|test|all] [--fastpath-only] [--only <id,id>] [--out <file>]
+ * npm run eval -- [--split dev|test|all] [--fastpath-only] [--only <id,id>] [--out <file>] [--show]
+ *
+ * --show prints the result (kind, message, ops) of every failing case, for triage.
  *
  * Runs the full production path for each case (docs/22 · Pipeline under test):
  *   fixture + utterance → fast path → (null) → harness (real model) → guardrails → applyBatch → assertions
@@ -43,6 +45,7 @@ const flag = (name: string) => {
 };
 const split = (flag("split") ?? "dev") as Split;
 const fastpathOnly = args.includes("--fastpath-only");
+const show = args.includes("--show");
 const only = flag("only")?.split(",");
 const out = flag("out") ?? (fastpathOnly ? "evals/results/b0-fastpath.json" : "evals/results/latest.json");
 
@@ -60,6 +63,8 @@ function fixture(c: EvalCase): Graph {
   if (!g) throw new Error(`${c.id}: unknown fixture "${c.fixture}"`);
   return g;
 }
+
+const shown = new Map<string, unknown>();
 
 async function runCase(c: EvalCase): Promise<CaseResult> {
   const before = fixture(c);
@@ -85,6 +90,7 @@ async function runCase(c: EvalCase): Promise<CaseResult> {
     const applied = res.kind === "ops" ? applyBatch(before, res.ops) : null;
     const after = applied?.ok ? applied.graph : before;
     const outcome: Outcome = { before, after, kind: res.kind, message: res.message, options: res.options, focusNodeIds: res.focusNodeIds };
+    if (show) shown.set(c.id, { kind: res.kind, message: res.message, options: res.options, ops: res.kind === "ops" ? res.ops : undefined });
     const result: Omit<CaseResult, "pass"> = {
       ...base,
       actualKind: res.kind,
@@ -102,6 +108,7 @@ async function runCase(c: EvalCase): Promise<CaseResult> {
     return finish(c, result, outcome);
   } catch (err) {
     const code = err instanceof HarnessError ? err.code : "INTERNAL";
+    if (err instanceof HarnessError && err.retryAfterSeconds) rateLimitWaitMs = Math.min(65_000, err.retryAfterSeconds * 1000 + 500);
     return { ...base, actualKind: "noop", tier: "ai", totalMs: performance.now() - t0, applied: false, pass: false, error: code, failedAssertions: [`error: ${code}`] };
   }
 }
@@ -118,6 +125,8 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 /** About one call's worth of tokens: system prompt + a typical board + output. */
 const CALL_TOKENS = estimateTokens(COMMAND_SYSTEM_PROMPT.length + 3_000, 2_000);
 let warnedDay = false;
+const MAX_RATE_LIMIT_RETRIES = 3;
+let rateLimitWaitMs = 60_000;
 
 const results: CaseResult[] = [];
 for (const c of cases) {
@@ -131,10 +140,18 @@ for (const c of cases) {
       await sleep(wait + 250);
     }
   }
-  const r = await runCase(c);
+  let r = await runCase(c);
+  // Every provider was briefly out of room: that's pacing, not an answer. Wait it out and retry
+  // (at most 3 times); any other error is a real failure and is scored as one.
+  for (let retry = 1; r.error === "RATE_LIMITED" && retry <= MAX_RATE_LIMIT_RETRIES; retry++) {
+    console.log(`  (${c.id}: every provider is busy; retry ${retry} in ${Math.ceil(rateLimitWaitMs / 1000)} s)`);
+    await sleep(rateLimitWaitMs);
+    r = await runCase(c);
+  }
   results.push(r);
   const mark = r.pass ? "✓" : "✗";
   const served = r.model ? ` [${r.model}]` : "";
+  if (show && !r.pass && shown.has(c.id)) console.log(`  ${JSON.stringify(shown.get(c.id))}`);
   console.log(`${mark} ${c.id.padEnd(20)} ${r.tier.padEnd(8)} ${r.actualKind.padEnd(7)} ${ms(r.totalMs).padStart(9)}${served}  ${r.failedAssertions?.join(" | ") ?? ""}`);
 }
 
