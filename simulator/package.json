@@ -6,7 +6,8 @@
   "description": "Graph model, op engine and simulation engine. Pure TypeScript, no I/O.",
   "exports": {
     ".": "./src/index.ts",
-    "./references": "./src/interview/references.ts"
+    "./references": "./src/interview/references.ts",
+    "./export": "./src/export/index.ts"
   },
   "scripts": {
     "typecheck": "tsc -p ."
