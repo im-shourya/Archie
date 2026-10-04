@@ -51,6 +51,12 @@ interface BoardState {
   /** Node ids selected on the canvas (mirrored from React Flow for the panels). */
   selection: string[];
   setSelection(ids: string[]): void;
+  /**
+   * A node to select on the canvas, set by actions outside it (Add ▾). The canvas applies it to
+   * React Flow, whose selection then flows back into `selection`, and clears it.
+   */
+  selectRequest: string | null;
+  requestSelect(id: string | null): void;
   /** Nodes an AI answer or question refers to, highlighted while the user looks at it. */
   focus: string[];
   setFocus(ids: string[]): void;
@@ -146,6 +152,7 @@ export const useBoardStore = create<BoardState>()((set, get) => {
     redoStack: [],
     changed: { ids: [], at: 0 },
     selection: [],
+    selectRequest: null,
     focus: [],
     notice: null,
     finishPending: false,
@@ -166,6 +173,10 @@ export const useBoardStore = create<BoardState>()((set, get) => {
 
     notify(message, undoable) {
       set({ notice: { id: Date.now(), message, undoable } });
+    },
+
+    requestSelect(id) {
+      set({ selectRequest: id });
     },
 
     setFocus(ids) {
