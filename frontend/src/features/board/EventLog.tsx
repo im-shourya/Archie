@@ -1,6 +1,9 @@
 "use client";
 
+import Link from "next/link";
+import { History } from "lucide-react";
 import type { BoardEvent } from "@archie/simulator";
+import { useBoardStore } from "../store/board.store";
 import styles from "./board.module.css";
 
 const SOURCE_LABEL: Record<BoardEvent["source"], string> = {
@@ -13,7 +16,7 @@ const SOURCE_LABEL: Record<BoardEvent["source"], string> = {
   template: "template",
 };
 
-function describe(event: BoardEvent): string {
+export function describeEvent(event: BoardEvent): string {
   if (event.utterance) return event.utterance;
   if (event.source === "undo") return "Undid last change";
   if (event.source === "redo") return "Redid change";
@@ -22,20 +25,28 @@ function describe(event: BoardEvent): string {
 }
 
 export function EventLog({ events }: { events: BoardEvent[] }) {
+  const boardId = useBoardStore((s) => s.board?.id);
   if (events.length === 0) {
     return <p className={styles.muted}>No changes yet.</p>;
   }
   return (
-    <ol className={styles.log} aria-label="Change history">
-      {[...events].reverse().map((event) => (
-        <li key={event.id}>
-          <span className={styles.logText}>{describe(event)}</span>
-          <span className={styles.logMeta}>
-            {SOURCE_LABEL[event.source]} · v{event.versionAfter} ·{" "}
-            {new Date(event.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-          </span>
-        </li>
-      ))}
-    </ol>
+    <>
+      {boardId && (
+        <Link href={`/b/${boardId}/replay`} className={styles.replayLink}>
+          <History size={16} aria-hidden /> Replay this session
+        </Link>
+      )}
+      <ol className={styles.log} aria-label="Change history">
+        {[...events].reverse().map((event) => (
+          <li key={event.id}>
+            <span className={styles.logText}>{describeEvent(event)}</span>
+            <span className={styles.logMeta}>
+              {SOURCE_LABEL[event.source]} · v{event.versionAfter} ·{" "}
+              {new Date(event.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </>
   );
 }
