@@ -186,9 +186,9 @@ Files: `frontend/src/app/b/[id]/replay/page.tsx`, `features/replay/{Replay,useRe
 ## Acceptance criteria (Phase 7 is done when)
 
 - [x] ≥ 80 cases (target 92), every category ≥ 5 with ≥ 2 in test, the dataset test green, the 31 original lines unchanged
-- [ ] Test-split task accuracy ≥ 90%, false-action ≤ 2%, fast-path precision 100%, from **one** run on the final build. A miss is published with its reason, not hidden
-- [ ] `evals/results/latest.json` committed, rendered on `/evals` and in the README, with the commit, model(s) and prompt hash
-- [ ] AI warm P50 < 3 s and P95 < 6 s reported (P95 has missed on the free tier before; if it misses again, the README says why)
+- [x] Test-split task accuracy ≥ 90% (91.2%) and fast-path precision 100%, from **one** run on the final build. **False-action 11.1% missed the ≤ 2% target** (one of nine: ambiguity-08); published with its reason, fix deferred
+- [x] `evals/results/latest.json` committed, rendered on `/evals` and in the README, with the commit, model(s) and prompt hash
+- [x] AI warm P50 < 3 s (2.3 s) reported; P95 6.7 s missed the 6 s target on the free tier and the README says so
 - [x] Share link round-trips; malformed and oversized links render EF-05; Duplicate saves an editable copy (FR-042, T-06)
 - [x] JSON, Mermaid, design doc, SVG and PNG export; JSON re-imports (FR-043)
 - [ ] The Docker image runs on Render: `deploy-smoke.sh` passes against the live URL, `/api/health` shows the deployed commit, the client IP can't be forged, and the keys are the rotated ones
@@ -237,7 +237,7 @@ Built on `chore/evals-deploy`, one commit per step plus fix commits. Validation 
 | 5 Share | ✅ `/s`, Duplicate, EF-05 for six kinds of broken link |
 | 6 Export | ✅ JSON, Mermaid, design doc, SVG, PNG; Open file |
 | 7 Deploy | 🚧 Code done (`render.yaml`, build arg, client-IP header, version fallback, `deploy-smoke.sh` passing against a local production build, keep-warm). **The Render service needs the owner's account and the rotated keys** |
-| 8 Final runs | ⏳ Mon 5 Oct after 12:30 IST. `npm run eval -- --base-url` (deployed eval) is built and checked against a keyless local server |
+| 8 Final runs | ✅ Test split run once on Sun 4 Oct (the owner's new Gemini account had fresh quota): 91.2%, 1 false action, P50 2.3 s. 🚧 Deployed eval waits for the Render service (`--base-url` is built and checked) |
 | 9 Replay | ✅ `/b/[id]/replay` |
 | 10 Release | 🚧 Docs, README and screenshots (share, export, replay) done; the whole history scanned clean (no key-shaped strings, no `.env`, `.claude/` or work log ever committed). The CHANGELOG `v1.0.0`, the `/evals` screenshot and going public come after Step 8 |
 
