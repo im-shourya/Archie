@@ -70,6 +70,11 @@ interface BoardState {
    * confirm dialog. A flag rather than an event: the panel may mount after the click (lazy, tab switch).
    */
   finishPending: boolean;
+  /** Design review panel (docs/design §5.7): shown in place of the side panel's tab body. */
+  reviewOpen: boolean;
+  setReviewOpen(open: boolean): void;
+  /** Bumped when something on phones needs the bottom sheet fully open (Finish → scorecard). */
+  sheetRequest: number;
   requestFinish(): void;
   consumeFinish(): void;
 }
@@ -116,9 +121,15 @@ export const useBoardStore = create<BoardState>()((set, get) => {
     focus: [],
     notice: null,
     finishPending: false,
+    sheetRequest: 0,
+    reviewOpen: false,
+
+    setReviewOpen(open) {
+      set({ reviewOpen: open });
+    },
 
     requestFinish() {
-      set({ finishPending: true });
+      set((s) => ({ finishPending: true, sheetRequest: s.sheetRequest + 1 }));
     },
 
     consumeFinish() {
@@ -142,7 +153,7 @@ export const useBoardStore = create<BoardState>()((set, get) => {
     },
 
     async load(id) {
-      set({ status: "loading", board: null, events: [], undoStack: [], redoStack: [], selection: [], focus: [] });
+      set({ status: "loading", board: null, events: [], undoStack: [], redoStack: [], selection: [], focus: [], reviewOpen: false });
       const repo = await getRepository();
       const [board, events] = await Promise.all([repo.getBoard(id), repo.listEvents(id)]);
       if (get().status !== "loading") return;

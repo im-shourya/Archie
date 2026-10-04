@@ -172,6 +172,19 @@ for (const scheme of ["light", "dark"] as const) {
       await audit(page);
     });
 
+    test("review panel", async ({ page, isMobile }) => {
+      await page.route("**/api/review", (r) => r.fulfill({ status: 503, json: { error: { code: "LLM_UNAVAILABLE", message: "x" } } }));
+      await openThreeTier(page);
+      if (isMobile) {
+        await page.getByRole("button", { name: "More actions" }).click();
+        await page.getByRole("menuitem", { name: "Review design" }).click();
+      } else {
+        await page.getByRole("button", { name: "Review" }).click();
+      }
+      await expect(page.getByTestId("finding-rule:spof:redis")).toBeVisible();
+      await audit(page);
+    });
+
     test("access-code dialog", async ({ page }) => {
       await page.route("**/api/command", (r) =>
         r.fulfill({ status: 401, json: { error: { code: "ACCESS_CODE_REQUIRED", message: "x" } } }),
