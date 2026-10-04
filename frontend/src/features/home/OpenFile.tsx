@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
-import { FolderOpen } from "lucide-react";
 import { decodeBoardFile, MAX_BOARD_FILE_BYTES } from "@archie/database";
 import { createBoardFromGraph } from "@/lib/boards";
 import styles from "./home.module.css";
@@ -34,9 +33,10 @@ export function OpenFile() {
 
   return (
     <>
-      <button type="button" className={styles.ghost} onClick={() => input.current?.click()} disabled={busy}>
-        <FolderOpen size={18} aria-hidden /> {busy ? "Opening…" : "Open file"}
+      <button type="button" className={styles.inlineLink} onClick={() => input.current?.click()} disabled={busy}>
+        {busy ? "opening…" : "open a saved board file"}
       </button>
+      .
       <input
         ref={input}
         type="file"
@@ -50,9 +50,9 @@ export function OpenFile() {
         }}
       />
       {error && (
-        <p className={styles.fileError} role="alert">
+        <span className={styles.fileError} role="alert">
           {error}
-        </p>
+        </span>
       )}
     </>
   );

@@ -1,39 +1,39 @@
 import {
   Archive,
-  Boxes,
-  Cog,
+  ArrowsSplit,
   Database,
+  Door,
+  Gear,
   Globe,
-  ListOrdered,
-  MemoryStick,
+  HardDrives,
+  MagnifyingGlass,
+  Memory,
   Plug,
-  Router,
-  Search,
-  Server,
-  Split,
+  Queue,
+  Stack,
   Users,
-  type LucideIcon,
-} from "lucide-react";
+} from "@phosphor-icons/react/dist/ssr";
+import type { Icon } from "@phosphor-icons/react";
 import type { NodeKind } from "@archie/simulator";
 
-/** One Lucide icon per component kind (docs/06 · Icons). Decorative: the label carries meaning. */
-const ICONS: Record<NodeKind, LucideIcon> = {
+/** One Phosphor icon per component kind (docs/06 · Icons). Decorative: the label carries meaning. */
+const ICONS: Record<NodeKind, Icon> = {
   client: Users,
   cdn: Globe,
-  lb: Split,
-  gateway: Router,
-  service: Server,
-  worker: Cog,
-  cache: MemoryStick,
+  lb: ArrowsSplit,
+  gateway: Door,
+  service: HardDrives,
+  worker: Gear,
+  cache: Memory,
   sql: Database,
-  nosql: Boxes,
-  queue: ListOrdered,
+  nosql: Stack,
+  queue: Queue,
   objectstore: Archive,
-  search: Search,
+  search: MagnifyingGlass,
   external: Plug,
 };
 
 export function KindIcon({ kind, size = 18 }: { kind: NodeKind; size?: number }) {
   const Icon = ICONS[kind];
-  return <Icon size={size} strokeWidth={1.75} aria-hidden />;
+  return <Icon size={size} aria-hidden />;
 }

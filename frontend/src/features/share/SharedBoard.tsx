@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Copy } from "lucide-react";
+import { ArrowLeft, Copy } from "@phosphor-icons/react/dist/ssr";
 import { ReactFlowProvider } from "@xyflow/react";
 import { decodeShare, type SharedBoard as Shared } from "@archie/database";
 import { LogoMark } from "@/components/brand/LogoMark";
