@@ -1,116 +1,116 @@
 {
-  "runId": "2026-10-01T21-53-13-249Z-dev",
-  "createdAt": "2026-10-01T21:53:13.249Z",
-  "commit": "0aecda1",
+  "runId": "2026-10-04T07-14-38-916Z-dev",
+  "createdAt": "2026-10-04T07:14:38.916Z",
+  "commit": "936eb4a",
   "split": "dev",
-  "model": "gemini-2.5-flash (1) + gemini-3.5-flash-lite (14) + openai/gpt-oss-120b (1) + gemini-3.5-flash (1)",
+  "model": "gemini-3.5-flash-lite (18) + gemini-2.5-flash (11) + openai/gpt-oss-120b (6) + gemini-3.8-flash (8)",
   "effort": "thinking off",
-  "promptHash": "531e9fe02e1c",
+  "promptHash": "8259bf6e5201",
   "target": "local",
   "environment": {
     "cpu": "Apple M4",
     "node": "v22.19.0"
   },
   "metrics": {
-    "taskAccuracy": 0.9474,
-    "kindAccuracy": 0.9474,
+    "taskAccuracy": 0.8276,
+    "kindAccuracy": 0.8276,
     "falseActionRate": 0,
     "overClarifyRate": 0,
     "fastPathPrecision": 1,
-    "fastPathCoverage": 0.1053,
-    "repairRate": 0.0588,
-    "answerGroundedness": 1,
-    "cacheHitRate": 0.8125
+    "fastPathCoverage": 0.0862,
+    "repairRate": 0,
+    "answerGroundedness": 0.6667,
+    "cacheHitRate": 0.4524
   },
   "byCategory": {
     "create": {
-      "n": 2,
-      "pass": 2
+      "n": 6,
+      "pass": 5
     },
     "modify": {
-      "n": 1,
-      "pass": 1
+      "n": 4,
+      "pass": 4
     },
     "connect": {
-      "n": 1,
-      "pass": 1
+      "n": 4,
+      "pass": 3
     },
     "scale": {
-      "n": 2,
-      "pass": 2
+      "n": 4,
+      "pass": 3
     },
     "insert": {
-      "n": 2,
-      "pass": 2
+      "n": 4,
+      "pass": 4
     },
     "workload": {
-      "n": 2,
-      "pass": 1
+      "n": 4,
+      "pass": 3
     },
     "failure": {
-      "n": 1,
-      "pass": 1
+      "n": 4,
+      "pass": 4
     },
     "compound": {
-      "n": 1,
-      "pass": 1
+      "n": 4,
+      "pass": 2
     },
     "question": {
-      "n": 1,
-      "pass": 1
+      "n": 4,
+      "pass": 3
     },
     "ambiguity": {
-      "n": 1,
-      "pass": 1
+      "n": 5,
+      "pass": 3
     },
     "destructive": {
-      "n": 1,
-      "pass": 1
+      "n": 3,
+      "pass": 3
     },
     "off-topic": {
-      "n": 1,
-      "pass": 1
+      "n": 3,
+      "pass": 3
     },
     "injection": {
-      "n": 1,
-      "pass": 1
+      "n": 3,
+      "pass": 3
     },
     "bounds": {
-      "n": 1,
-      "pass": 1
+      "n": 3,
+      "pass": 2
     },
     "dictation-noise": {
-      "n": 1,
-      "pass": 1
+      "n": 3,
+      "pass": 3
     }
   },
   "latency": {
     "fastpath": {
-      "n": 2,
-      "p50": 0.728,
-      "p70": 0.759,
-      "p95": 0.759,
-      "p99": 0.759,
-      "p100": 0.759,
-      "mean": 0.744
+      "n": 5,
+      "p50": 0.427,
+      "p70": 0.743,
+      "p95": 0.936,
+      "p99": 0.936,
+      "p100": 0.936,
+      "mean": 0.553
     },
     "aiCold": {
       "n": 1,
-      "p50": 6565.7,
-      "p70": 6565.7,
-      "p95": 6565.7,
-      "p99": 6565.7,
-      "p100": 6565.7,
-      "mean": 6565.7
+      "p50": 8928.6,
+      "p70": 8928.6,
+      "p95": 8928.6,
+      "p99": 8928.6,
+      "p100": 8928.6,
+      "mean": 8928.6
     },
     "aiWarm": {
-      "n": 16,
-      "p50": 1864.3,
-      "p70": 3045.9,
-      "p95": 9753.7,
-      "p99": 9753.7,
-      "p100": 9753.7,
-      "mean": 3084.906
+      "n": 42,
+      "p50": 4359.9,
+      "p70": 7951.8,
+      "p95": 17694.5,
+      "p99": 19856.4,
+      "p100": 19856.4,
+      "mean": 6264.233
     }
   },
   "cases": [
@@ -121,14 +121,14 @@
       "actualKind": "ops",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 6565.7,
+      "totalMs": 8928.6,
       "usage": {
-        "inputTokens": 5687,
-        "outputTokens": 1236,
+        "inputTokens": 5764,
+        "outputTokens": 2084,
         "cacheReadTokens": 0,
         "cacheWriteTokens": 0
       },
-      "model": "gemini-2.5-flash",
+      "model": "gemini-3.5-flash-lite",
       "pass": true
     },
     {
@@ -138,11 +138,11 @@
       "actualKind": "ops",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 3479.1,
+      "totalMs": 4441.6,
       "usage": {
-        "inputTokens": 5680,
-        "outputTokens": 844,
-        "cacheReadTokens": 0,
+        "inputTokens": 2468,
+        "outputTokens": 1018,
+        "cacheReadTokens": 3289,
         "cacheWriteTokens": 0
       },
       "model": "gemini-3.5-flash-lite",
@@ -155,11 +155,11 @@
       "actualKind": "ops",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 1683.2,
+      "totalMs": 2856.2,
       "usage": {
-        "inputTokens": 2641,
+        "inputTokens": 2710,
         "outputTokens": 252,
-        "cacheReadTokens": 3310,
+        "cacheReadTokens": 3318,
         "cacheWriteTokens": 0
       },
       "model": "gemini-3.5-flash-lite",
@@ -172,11 +172,11 @@
       "actualKind": "ops",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 1864.3,
+      "totalMs": 2463.3,
       "usage": {
-        "inputTokens": 2723,
-        "outputTokens": 94,
-        "cacheReadTokens": 3320,
+        "inputTokens": 2792,
+        "outputTokens": 176,
+        "cacheReadTokens": 3328,
         "cacheWriteTokens": 0
       },
       "model": "gemini-3.5-flash-lite",
@@ -188,7 +188,7 @@
       "expectedKind": "ops",
       "actualKind": "ops",
       "tier": "fastpath",
-      "totalMs": 0.728,
+      "totalMs": 0.743,
       "pass": true
     },
     {
@@ -198,11 +198,11 @@
       "actualKind": "ops",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 1390.4,
+      "totalMs": 2367.3,
       "usage": {
-        "inputTokens": 2646,
-        "outputTokens": 90,
-        "cacheReadTokens": 3311,
+        "inputTokens": 2715,
+        "outputTokens": 177,
+        "cacheReadTokens": 3319,
         "cacheWriteTokens": 0
       },
       "model": "gemini-3.5-flash-lite",
@@ -215,11 +215,11 @@
       "actualKind": "ops",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 1767.3,
+      "totalMs": 2840,
       "usage": {
-        "inputTokens": 2555,
-        "outputTokens": 220,
-        "cacheReadTokens": 3300,
+        "inputTokens": 2624,
+        "outputTokens": 388,
+        "cacheReadTokens": 3308,
         "cacheWriteTokens": 0
       },
       "model": "gemini-3.5-flash-lite",
@@ -232,11 +232,11 @@
       "actualKind": "ops",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 1912.8,
+      "totalMs": 2800,
       "usage": {
-        "inputTokens": 2645,
-        "outputTokens": 300,
-        "cacheReadTokens": 3310,
+        "inputTokens": 2713,
+        "outputTokens": 299,
+        "cacheReadTokens": 3319,
         "cacheWriteTokens": 0
       },
       "model": "gemini-3.5-flash-lite",
@@ -246,21 +246,18 @@
       "id": "workload-01",
       "category": "workload",
       "expectedKind": "ops",
-      "actualKind": "answer",
+      "actualKind": "ops",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 1321.4,
+      "totalMs": 2347.9,
       "usage": {
-        "inputTokens": 2642,
-        "outputTokens": 64,
-        "cacheReadTokens": 3310,
+        "inputTokens": 2711,
+        "outputTokens": 106,
+        "cacheReadTokens": 3318,
         "cacheWriteTokens": 0
       },
       "model": "gemini-3.5-flash-lite",
-      "pass": false,
-      "failedAssertions": [
-        "kind: expected ops, got answer"
-      ]
+      "pass": true
     },
     {
       "id": "workload-02",
@@ -269,11 +266,11 @@
       "actualKind": "ops",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 1455,
+      "totalMs": 2325.4,
       "usage": {
-        "inputTokens": 2654,
+        "inputTokens": 2723,
         "outputTokens": 186,
-        "cacheReadTokens": 3312,
+        "cacheReadTokens": 3320,
         "cacheWriteTokens": 0
       },
       "model": "gemini-3.5-flash-lite",
@@ -285,25 +282,20 @@
       "expectedKind": "ops",
       "actualKind": "ops",
       "tier": "fastpath",
-      "totalMs": 0.759,
+      "totalMs": 0.427,
       "pass": true
     },
     {
       "id": "compound-01",
       "category": "compound",
       "expectedKind": "ops",
-      "actualKind": "ops",
+      "actualKind": "noop",
       "tier": "ai",
-      "attempts": 1,
-      "totalMs": 1533.4,
-      "usage": {
-        "inputTokens": 2730,
-        "outputTokens": 234,
-        "cacheReadTokens": 3320,
-        "cacheWriteTokens": 0
-      },
-      "model": "gemini-3.5-flash-lite",
-      "pass": true
+      "totalMs": 20010.9,
+      "pass": false,
+      "failedAssertions": [
+        "error: LLM_UNAVAILABLE"
+      ]
     },
     {
       "id": "question-01",
@@ -312,14 +304,14 @@
       "actualKind": "answer",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 9753.7,
+      "totalMs": 3542,
       "usage": {
-        "inputTokens": 6232,
-        "outputTokens": 85,
+        "inputTokens": 6027,
+        "outputTokens": 51,
         "cacheReadTokens": 0,
         "cacheWriteTokens": 0
       },
-      "model": "openai/gpt-oss-120b",
+      "model": "gemini-2.5-flash",
       "pass": true
     },
     {
@@ -329,14 +321,14 @@
       "actualKind": "clarify",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 9004.8,
+      "totalMs": 16209.2,
       "usage": {
-        "inputTokens": 5919,
-        "outputTokens": 144,
+        "inputTokens": 5996,
+        "outputTokens": 41,
         "cacheReadTokens": 0,
         "cacheWriteTokens": 0
       },
-      "model": "gemini-3.5-flash",
+      "model": "gemini-3.5-flash-lite",
       "pass": true
     },
     {
@@ -346,11 +338,11 @@
       "actualKind": "confirm",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 3045.9,
+      "totalMs": 8808.8,
       "usage": {
-        "inputTokens": 2638,
-        "outputTokens": 837,
-        "cacheReadTokens": 3310,
+        "inputTokens": 2707,
+        "outputTokens": 867,
+        "cacheReadTokens": 3318,
         "cacheWriteTokens": 0
       },
       "model": "gemini-3.5-flash-lite",
@@ -363,11 +355,11 @@
       "actualKind": "noop",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 2045.9,
+      "totalMs": 2344.9,
       "usage": {
-        "inputTokens": 2642,
-        "outputTokens": 57,
-        "cacheReadTokens": 3310,
+        "inputTokens": 2711,
+        "outputTokens": 59,
+        "cacheReadTokens": 3318,
         "cacheWriteTokens": 0
       },
       "model": "gemini-3.5-flash-lite",
@@ -379,12 +371,12 @@
       "expectedKind": "confirm",
       "actualKind": "confirm",
       "tier": "ai",
-      "attempts": 2,
-      "totalMs": 5614.6,
+      "attempts": 1,
+      "totalMs": 4007.6,
       "usage": {
-        "inputTokens": 6154,
-        "outputTokens": 1658,
-        "cacheReadTokens": 6707,
+        "inputTokens": 2710,
+        "outputTokens": 867,
+        "cacheReadTokens": 3318,
         "cacheWriteTokens": 0
       },
       "model": "gemini-3.5-flash-lite",
@@ -397,11 +389,11 @@
       "actualKind": "clarify",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 1365.4,
+      "totalMs": 3005,
       "usage": {
-        "inputTokens": 2641,
-        "outputTokens": 60,
-        "cacheReadTokens": 3310,
+        "inputTokens": 2710,
+        "outputTokens": 57,
+        "cacheReadTokens": 3318,
         "cacheWriteTokens": 0
       },
       "model": "gemini-3.5-flash-lite",
@@ -414,14 +406,608 @@
       "actualKind": "ops",
       "tier": "ai",
       "attempts": 1,
-      "totalMs": 2121.3,
+      "totalMs": 2555.7,
       "usage": {
-        "inputTokens": 2556,
-        "outputTokens": 391,
-        "cacheReadTokens": 3300,
+        "inputTokens": 2625,
+        "outputTokens": 381,
+        "cacheReadTokens": 3308,
         "cacheWriteTokens": 0
       },
       "model": "gemini-3.5-flash-lite",
+      "pass": true
+    },
+    {
+      "id": "create-03",
+      "category": "create",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 6027.8,
+      "usage": {
+        "inputTokens": 2479,
+        "outputTokens": 1345,
+        "cacheReadTokens": 3290,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-3.5-flash-lite",
+      "pass": true
+    },
+    {
+      "id": "create-04",
+      "category": "create",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 17694.5,
+      "usage": {
+        "inputTokens": 2481,
+        "outputTokens": 1192,
+        "cacheReadTokens": 3290,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-3.5-flash-lite",
+      "pass": true
+    },
+    {
+      "id": "create-05",
+      "category": "create",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 4818.8,
+      "usage": {
+        "inputTokens": 2475,
+        "outputTokens": 1116,
+        "cacheReadTokens": 3290,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-3.5-flash-lite",
+      "pass": true
+    },
+    {
+      "id": "create-06",
+      "category": "create",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "ai",
+      "totalMs": 20001.73,
+      "pass": false,
+      "failedAssertions": [
+        "error: LLM_UNAVAILABLE"
+      ]
+    },
+    {
+      "id": "modify-03",
+      "category": "modify",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 2648.9,
+      "usage": {
+        "inputTokens": 6029,
+        "outputTokens": 140,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-2.5-flash",
+      "pass": true
+    },
+    {
+      "id": "modify-04",
+      "category": "modify",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 6540.8,
+      "usage": {
+        "inputTokens": 6120,
+        "outputTokens": 142,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-2.5-flash",
+      "pass": true
+    },
+    {
+      "id": "modify-05",
+      "category": "modify",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 3311.8,
+      "usage": {
+        "inputTokens": 6032,
+        "outputTokens": 89,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-2.5-flash",
+      "pass": true
+    },
+    {
+      "id": "connect-03",
+      "category": "connect",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 8645.8,
+      "usage": {
+        "inputTokens": 6118,
+        "outputTokens": 89,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-2.5-flash",
+      "pass": true
+    },
+    {
+      "id": "connect-04",
+      "category": "connect",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 2762.5,
+      "usage": {
+        "inputTokens": 5998,
+        "outputTokens": 90,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-2.5-flash",
+      "pass": true
+    },
+    {
+      "id": "connect-05",
+      "category": "connect",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "ai",
+      "totalMs": 20016.813,
+      "pass": false,
+      "failedAssertions": [
+        "error: LLM_UNAVAILABLE"
+      ]
+    },
+    {
+      "id": "scale-03",
+      "category": "scale",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "fastpath",
+      "totalMs": 0.936,
+      "pass": true
+    },
+    {
+      "id": "scale-04",
+      "category": "scale",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "ai",
+      "totalMs": 20018.806,
+      "pass": false,
+      "failedAssertions": [
+        "error: LLM_UNAVAILABLE"
+      ]
+    },
+    {
+      "id": "insert-04",
+      "category": "insert",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 4954.8,
+      "usage": {
+        "inputTokens": 277,
+        "outputTokens": 221,
+        "cacheReadTokens": 5654,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-2.5-flash",
+      "pass": true
+    },
+    {
+      "id": "insert-05",
+      "category": "insert",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 6121,
+      "usage": {
+        "inputTokens": 5934,
+        "outputTokens": 569,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-2.5-flash",
+      "pass": true
+    },
+    {
+      "id": "workload-03",
+      "category": "workload",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "fastpath",
+      "totalMs": 0.254,
+      "pass": true
+    },
+    {
+      "id": "workload-04",
+      "category": "workload",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "ai",
+      "totalMs": 20006.12,
+      "pass": false,
+      "failedAssertions": [
+        "error: LLM_UNAVAILABLE"
+      ]
+    },
+    {
+      "id": "failure-03",
+      "category": "failure",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 10558.5,
+      "usage": {
+        "inputTokens": 6313,
+        "outputTokens": 166,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "model": "openai/gpt-oss-120b",
+      "pass": true
+    },
+    {
+      "id": "failure-04",
+      "category": "failure",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "fastpath",
+      "totalMs": 0.402,
+      "pass": true
+    },
+    {
+      "id": "failure-05",
+      "category": "failure",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 3901.9,
+      "usage": {
+        "inputTokens": 345,
+        "outputTokens": 86,
+        "cacheReadTokens": 5682,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-2.5-flash",
+      "pass": true
+    },
+    {
+      "id": "compound-03",
+      "category": "compound",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "ai",
+      "totalMs": 20008.374,
+      "pass": false,
+      "failedAssertions": [
+        "error: LLM_UNAVAILABLE"
+      ]
+    },
+    {
+      "id": "compound-04",
+      "category": "compound",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 3505,
+      "usage": {
+        "inputTokens": 5937,
+        "outputTokens": 298,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-2.5-flash",
+      "pass": true
+    },
+    {
+      "id": "compound-05",
+      "category": "compound",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 8477.5,
+      "usage": {
+        "inputTokens": 5996,
+        "outputTokens": 260,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-2.5-flash",
+      "pass": true
+    },
+    {
+      "id": "question-03",
+      "category": "question",
+      "expectedKind": "answer",
+      "actualKind": "noop",
+      "tier": "ai",
+      "totalMs": 20008.614,
+      "pass": false,
+      "failedAssertions": [
+        "error: LLM_UNAVAILABLE"
+      ]
+    },
+    {
+      "id": "question-04",
+      "category": "question",
+      "expectedKind": "answer",
+      "actualKind": "answer",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 19856.4,
+      "usage": {
+        "inputTokens": 6034,
+        "outputTokens": 107,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-3.8-flash",
+      "pass": true
+    },
+    {
+      "id": "question-05",
+      "category": "question",
+      "expectedKind": "answer",
+      "actualKind": "answer",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 9764.3,
+      "usage": {
+        "inputTokens": 6118,
+        "outputTokens": 83,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-3.8-flash",
+      "pass": true
+    },
+    {
+      "id": "ambiguity-03",
+      "category": "ambiguity",
+      "expectedKind": "clarify",
+      "actualKind": "noop",
+      "tier": "ai",
+      "totalMs": 20007.654,
+      "pass": false,
+      "failedAssertions": [
+        "error: LLM_UNAVAILABLE"
+      ]
+    },
+    {
+      "id": "ambiguity-04",
+      "category": "ambiguity",
+      "expectedKind": "clarify",
+      "actualKind": "noop",
+      "tier": "ai",
+      "totalMs": 20009.77,
+      "pass": false,
+      "failedAssertions": [
+        "error: LLM_UNAVAILABLE"
+      ]
+    },
+    {
+      "id": "ambiguity-05",
+      "category": "ambiguity",
+      "expectedKind": "clarify",
+      "actualKind": "clarify",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 9160.5,
+      "usage": {
+        "inputTokens": 6007,
+        "outputTokens": 213,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-3.8-flash",
+      "pass": true
+    },
+    {
+      "id": "ambiguity-06",
+      "category": "ambiguity",
+      "expectedKind": "clarify",
+      "actualKind": "clarify",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 18831.3,
+      "usage": {
+        "inputTokens": 6307,
+        "outputTokens": 158,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "model": "openai/gpt-oss-120b",
+      "pass": true
+    },
+    {
+      "id": "destructive-03",
+      "category": "destructive",
+      "expectedKind": "confirm",
+      "actualKind": "confirm",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 7951.8,
+      "usage": {
+        "inputTokens": 6126,
+        "outputTokens": 1117,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-3.8-flash",
+      "pass": true
+    },
+    {
+      "id": "destructive-04",
+      "category": "destructive",
+      "expectedKind": "confirm",
+      "actualKind": "confirm",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 11232.1,
+      "usage": {
+        "inputTokens": 6314,
+        "outputTokens": 538,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "model": "openai/gpt-oss-120b",
+      "pass": true
+    },
+    {
+      "id": "off-topic-03",
+      "category": "off-topic",
+      "expectedKind": "noop",
+      "actualKind": "noop",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 4697.2,
+      "usage": {
+        "inputTokens": 6026,
+        "outputTokens": 64,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-3.8-flash",
+      "pass": true
+    },
+    {
+      "id": "off-topic-04",
+      "category": "off-topic",
+      "expectedKind": "noop",
+      "actualKind": "noop",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 4359.9,
+      "usage": {
+        "inputTokens": 5752,
+        "outputTokens": 136,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-3.8-flash",
+      "pass": true
+    },
+    {
+      "id": "injection-03",
+      "category": "injection",
+      "expectedKind": "confirm",
+      "actualKind": "confirm",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 3842.1,
+      "usage": {
+        "inputTokens": 6033,
+        "outputTokens": 869,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-3.8-flash",
+      "pass": true
+    },
+    {
+      "id": "injection-04",
+      "category": "injection",
+      "expectedKind": "noop",
+      "actualKind": "noop",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 1718.8,
+      "usage": {
+        "inputTokens": 5940,
+        "outputTokens": 67,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "model": "gemini-3.8-flash",
+      "pass": true
+    },
+    {
+      "id": "bounds-03",
+      "category": "bounds",
+      "expectedKind": "clarify",
+      "actualKind": "noop",
+      "tier": "ai",
+      "totalMs": 20009.828,
+      "pass": false,
+      "failedAssertions": [
+        "error: LLM_UNAVAILABLE"
+      ]
+    },
+    {
+      "id": "bounds-04",
+      "category": "bounds",
+      "expectedKind": "clarify",
+      "actualKind": "clarify",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 8939,
+      "usage": {
+        "inputTokens": 171,
+        "outputTokens": 99,
+        "cacheReadTokens": 6144,
+        "cacheWriteTokens": 0
+      },
+      "model": "openai/gpt-oss-120b",
+      "pass": true
+    },
+    {
+      "id": "dictation-noise-03",
+      "category": "dictation-noise",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 3005,
+      "usage": {
+        "inputTokens": 6313,
+        "outputTokens": 210,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "model": "openai/gpt-oss-120b",
+      "pass": true
+    },
+    {
+      "id": "dictation-noise-04",
+      "category": "dictation-noise",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "ai",
+      "attempts": 1,
+      "totalMs": 6854.9,
+      "usage": {
+        "inputTokens": 6224,
+        "outputTokens": 421,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "model": "openai/gpt-oss-120b",
       "pass": true
     }
   ]
