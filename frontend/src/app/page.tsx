@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Plus } from "lucide-react";
+import { ArrowRight, GraduationCap, Plus } from "lucide-react";
 import { TEMPLATES, type TemplateId } from "@archie/simulator";
 import { Wordmark } from "@/components/brand/LogoMark";
 import { RecentBoards } from "@/features/home/RecentBoards";
@@ -65,6 +65,9 @@ export default function Home() {
           </Link>
           <Link href="/b/new?template=three-tier" className={styles.secondary}>
             Open the 50k rps demo <ArrowRight size={18} aria-hidden />
+          </Link>
+          <Link href="/interview" className={styles.secondary}>
+            <GraduationCap size={18} aria-hidden /> Practice an interview
           </Link>
         </div>
 
