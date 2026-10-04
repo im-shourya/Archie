@@ -45,6 +45,9 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Docker builds set ARCHIE_STANDALONE=1: a minimal server.js plus only the traced node_modules
+  // (docs/25, ADR-018). Off otherwise, so `npm start` and CI's e2e run unchanged.
+  ...(process.env.ARCHIE_STANDALONE === "1" ? { output: "standalone" as const } : {}),
   transpilePackages: ["@archie/simulator", "@archie/ai", "@archie/database", "@archie/backend"],
   turbopack: { root },
   outputFileTracingRoot: root,

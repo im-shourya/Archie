@@ -10,6 +10,7 @@ export const health = new Hono().get("/", (c) =>
     fallback: fallbackName(),
     quota: quotaStatus(),
     model: modelName(),
-    version: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? "dev",
+    // Vercel sets the commit SHA; the Docker image is stamped with ARCHIE_VERSION at build time.
+    version: (process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.ARCHIE_VERSION)?.slice(0, 7) ?? "dev",
   }),
 );

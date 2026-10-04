@@ -32,6 +32,7 @@ Where the project is **right now**. Update at the end of every phase (and whenev
 - [x] Out-of-bounds numbers → clarify (G-05 in code + prompt); re-run dev 94.7%, test 91.7%, 0 false actions
 - [x] Request budget enforced even when an SDK ignores abort (a live case hung for 96 s)
 - [x] Merged in #7 (CI green; production build checked with `npm start` + a real `/api/command` call)
+- [x] Docker image (ADR-018): standalone build, non-root runtime, health check, CI build + smoke test
 - [x] Phase 6: SPOF scan, problem bank + sloChecks, interview turn/score and review endpoints, interview mode + scorecard, review panel + ⋯ menu, `/design`, bundle back under budget
 - [x] Phase 5: token audit + contract test, Inspector, bottom sheet + portrait layout, mic fallback, access-code dialog, axe gate + keyboard journey, reduced-motion e2e, `bundle:size` + CI ratchet, visual QA at 360/768/1280/1440 in both themes, README screenshots
 
@@ -58,8 +59,7 @@ _None._ (NFR-015 closed in Phase 6: 260.6 KB with `zod/mini` on the client.)
 2. Test screen recording with the Wispr overlay visible
 3. Make the repository public before submitting (it's private, so the repo link and README images won't open for judges)
 4. Rotate the Gemini and Groq keys (they were pasted in chat)
-5. Docker image for deployment (`chore/docker`): one long-running container keeps the in-memory quota guards and rate limits correct
-6. 🎙 Phase 7: evals ≥ 80 cases, deploy, share/export
+5. 🎙 Phase 7: evals ≥ 80 cases, deploy the Docker image (ADR-018) to a container host, share/export
 
 ## Metrics snapshot
 
