@@ -29,3 +29,8 @@ export function percent(fraction: number): string {
 export function usd(n: number): string {
   return `$${Math.round(n).toLocaleString("en-US")}`;
 }
+
+/** An op error for people: "op (updateNode): props.replicas Too big: …" → "Too big: …". */
+export function opMessage(message: string): string {
+  return message.replace(/^op \([^)]*\):\s*(?:props\.)?[\w.]*\s*/, "") || message;
+}

@@ -29,7 +29,7 @@ Archie is a system-design board you talk to. You describe changes out loud ("fiv
 - **A live simulator.** Every change re-runs a queueing model: per-component load and utilization (ρ), cache-aside reads, read replicas, sharding, queues with backlog, failover, end-to-end success rate, p50/p95/p99 latency, throughput and a monthly cost estimate.
 - **Explanations with the math.** The bottleneck gets a note such as *"1,500 reads/s + 5,000 writes/s on 1 shard (capacity 10,000 reads / 4,000 writes per shard) → ρ = 1.40 → 28.6% of its requests dropped."*
 - **Failure injection and blast radius.** *"Kill Redis"* shows success falling from 96.3% to 54.5% and which components became hot.
-- **Edit by hand, no AI needed.** **Add ▾** puts any component type on the board, and *"add a Redis cache"* or *"add an orders service"* by voice does the same locally, in under a millisecond. The new component opens in the Inspector, where you can **Connect** it (direction, component, reads or writes).
+- **Edit by hand, no AI needed.** **Add ▾** puts any component type on the board, and *"add a Redis cache"* or *"add an orders service"* by voice does the same locally, in under a millisecond. The new component opens in the Inspector, where you can **Connect** it (direction, component, reads or writes). On the canvas, drag from one component's handle to another to connect them, and select a connection to remove it (× or Delete). Everything can be undone.
 - **An Inspector for every component.** Select a node (click, or Tab + Enter) to edit its label, replicas, shards, hit rate, capacity, latency, role and failover, fail or recover it, connect it, and disconnect its edges. Every edit goes through the same validated operations as voice, so bad values show the exact limit and Undo always works.
 - **Interview practice.** Pick one of six problems (URL shortener to video streaming). The requirements set the load, and a live checklist shows which SLOs your design meets at peak: success rate, read and write p99, headroom, surviving any single failure, and cost. Every pass or fail is computed by the simulator. An interviewer asks one question at a time, aimed at your weakest point and grounded in your board (read aloud if you like). **Finish** gives a scorecard: the computed checks plus a five-part rubric where every score cites evidence.
 - **Design review and single points of failure.** Every board shows which components can't survive losing one instance. **Review** lists ranked findings, each with a fix the simulator has proven clears it, plus AI findings when the model is available. Apply a fix in one click, then undo it if you change your mind.
@@ -83,9 +83,9 @@ Measured with the scripts in this repository (`npm run bench:fast`, `npm run ben
 | AI command understanding, dev split of the 92-case dataset (58 cases, 2026-10-04) | 48/48 answered cases correct · **0 false actions** · 10 got no answer: every free-tier model timed out, before the [fallback fix](docs/35-phase-7-plan.md) | Phase 7: test split ≥ 90%, run once at the end |
 | Fast path alone on all 92 cases (no AI) | handles 8, all correct (precision 100%); abstains on the rest | precision 100% |
 | Unit, property and contract tests | 612 passing | — |
-| End-to-end tests (desktop + mobile Chromium) | 252 passing (AI responses mocked) | — |
+| End-to-end tests (desktop + mobile Chromium) | 260 passing (AI responses mocked) | — |
 | Accessibility: axe, WCAG 2.2 A/AA, 15 states × light/dark × desktop/phone, plus `/design` | **0 serious or critical** violations; keyboard-only journey passes | 0 |
-| Board route initial JS, gzipped (`npm run bundle:size`) | 266.2 KB, with interview, review and export code loaded on demand | < 300 KB, enforced in CI |
+| Board route initial JS, gzipped (`npm run bundle:size`) | 266.9 KB, with interview, review and export code loaded on demand | < 300 KB, enforced in CI |
 
 ![The /evals page: 97.1% task accuracy on the 34 held-out cases, 0% false actions, warm AI P50 2.39 s, and passes per category for dev and test](docs/assets/evals.png)
 

@@ -24,6 +24,7 @@ import { Canvas } from "./Canvas";
 import { BottomSheet, type Snap } from "./BottomSheet";
 import { AddMenu } from "./AddMenu";
 import { OverflowMenu } from "./OverflowMenu";
+import { disconnect } from "./TrafficEdge";
 import { EventLog } from "./EventLog";
 import { useCompactLayout } from "./useCompactLayout";
 import { useFit } from "./useFit";
@@ -46,7 +47,7 @@ import styles from "./board.module.css";
 
 /** Board shortcuts (docs/05 · Keyboard). Lives inside the provider to read the selection. */
 function BoardKeyboard() {
-  const { getNodes } = useReactFlow();
+  const { getNodes, getEdges } = useReactFlow();
   const fit = useFit();
   const undo = useBoardStore((s) => s.undo);
   const redo = useBoardStore((s) => s.redo);
@@ -67,10 +68,20 @@ function BoardKeyboard() {
         const ids = getNodes()
           .filter((n) => n.selected)
           .map((n) => n.id);
-        if (ids.length === 0) return;
+        // Selected connections go too, unless a removed node takes them with it.
+        const edges = getEdges().filter((ed) => ed.selected && !ids.includes(ed.source) && !ids.includes(ed.target));
+        if (ids.length === 0 && edges.length === 0) return;
         e.preventDefault();
+        if (ids.length === 0 && edges.length === 1) {
+          const ed = edges[0]!;
+          const d = ed.data as { fromLabel?: string; toLabel?: string } | undefined;
+          return disconnect(ed.source, ed.target, d?.fromLabel ?? ed.source, d?.toLabel ?? ed.target);
+        }
         apply(
-          ids.map((id) => ({ type: "removeNode", id })),
+          [
+            ...ids.map((id) => ({ type: "removeNode" as const, id })),
+            ...edges.map((ed) => ({ type: "disconnect" as const, from: ed.source, to: ed.target })),
+          ],
           { utterance: null, source: "inspector" },
         );
       } else if (!mod && !e.altKey && e.key.toLowerCase() === "r") {
@@ -84,7 +95,7 @@ function BoardKeyboard() {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [getNodes, fit, undo, redo, apply]);
+  }, [getNodes, getEdges, fit, undo, redo, apply]);
 
   return null;
 }
