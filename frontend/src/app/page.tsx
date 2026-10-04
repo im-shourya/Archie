@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, GraduationCap, Plus } from "lucide-react";
 import { TEMPLATES, type TemplateId } from "@archie/simulator";
 import { Wordmark } from "@/components/brand/LogoMark";
+import { OpenFile } from "@/features/home/OpenFile";
 import { RecentBoards } from "@/features/home/RecentBoards";
 import styles from "@/features/home/home.module.css";
 import { SITE, siteUrl } from "@/lib/site";
@@ -69,6 +70,7 @@ export default function Home() {
           <Link href="/interview" className={styles.secondary}>
             <GraduationCap size={18} aria-hidden /> Practice an interview
           </Link>
+          <OpenFile />
         </div>
 
         <section aria-labelledby="how-heading" className={styles.section}>
