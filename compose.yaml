@@ -1,0 +1,12 @@
+# Local production-like run: `docker compose up --build`, then http://localhost:3000.
+# Keys come from .env.local at runtime (see .env.example); nothing secret is in the image.
+services:
+  archie:
+    build: .
+    image: archie:local
+    ports:
+      - "3000:3000"
+    env_file:
+      - path: .env.local
+        required: false
+    restart: unless-stopped

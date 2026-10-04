@@ -1,0 +1,24 @@
+# Secrets and local agent files never enter the build context.
+.env
+.env.*
+!.env.example
+.claude/
+CLAUDE.local.md
+WORKLOG.local.md
+
+# Rebuilt inside the image.
+node_modules/
+**/node_modules/
+**/.next/
+coverage/
+dist/
+
+# Not needed to build or run.
+.git/
+.github/
+test-results/
+playwright-report/
+evals/results/
+docs/assets/
+*.log
+.DS_Store
