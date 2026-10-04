@@ -338,9 +338,16 @@
   color: var(--color-state-saturated);
 }
 
+/* Down: dimmed with tokens, not opacity, so the label and numbers keep AA contrast. */
 .node[data-sim="down"] {
-  opacity: 0.55;
   border-style: dashed;
+  border-color: var(--color-state-down);
+  background: var(--color-surface-sunken);
+}
+
+.node[data-sim="down"] .label,
+.node[data-sim="down"] .load {
+  color: var(--color-text-secondary);
 }
 
 .node[data-sim="idle"] {

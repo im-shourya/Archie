@@ -76,6 +76,13 @@ for (const scheme of ["light", "dark"] as const) {
       await audit(page);
     });
 
+    test("board with a failed component (down node keeps AA contrast)", async ({ page }) => {
+      await openThreeTier(page);
+      await say(page, "Kill Redis.");
+      await expect(page.getByTestId("node-redis")).toHaveAttribute("data-sim", "down");
+      await audit(page);
+    });
+
     test("Inspector", async ({ page }) => {
       await openThreeTier(page);
       await page.getByTestId("node-redis").click();
@@ -173,7 +180,9 @@ for (const scheme of ["light", "dark"] as const) {
     });
 
     test("review panel", async ({ page, isMobile }) => {
-      await page.route("**/api/review", (r) => r.fulfill({ status: 503, json: { error: { code: "LLM_UNAVAILABLE", message: "x" } } }));
+      await page.route("**/api/review", (r) =>
+        r.fulfill({ status: 503, json: { error: { code: "LLM_UNAVAILABLE", message: "x" } } }),
+      );
       await openThreeTier(page);
       if (isMobile) {
         await page.getByRole("button", { name: "More actions" }).click();

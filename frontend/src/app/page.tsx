@@ -110,6 +110,7 @@ export default function Home() {
         <span>Built by voice with Wispr Flow.</span>
         <span>Boards stay in your browser.</span>
         <a href={SITE.repo}>MIT licensed</a>
+        <Link href="/design">Design system</Link>
       </footer>
     </div>
   );
