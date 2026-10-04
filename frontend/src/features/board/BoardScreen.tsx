@@ -8,7 +8,14 @@ import { isTyping } from "@/lib/keyboard";
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { ReactFlowProvider, useReactFlow } from "@xyflow/react";
-import { PROBLEMS, TEMPLATES, type Graph, type Problem, type ProblemId, type TemplateId } from "@archie/simulator";
+import {
+  PROBLEMS,
+  TEMPLATES,
+  type Graph,
+  type Problem,
+  type ProblemId,
+  type TemplateId,
+} from "@archie/simulator";
 import { CommandBar } from "../commandbar/CommandBar";
 import { Inspector } from "../inspector/Inspector";
 import { MetricsPanel } from "../metrics/MetricsPanel";
@@ -24,9 +31,14 @@ import { useSpofScan } from "./useSpofScan";
 import { readInterview, type InterviewState } from "../interview/state";
 import { passing, useSloChecks } from "../interview/useSloChecks";
 
-const ReviewPanel = dynamic(() => import("../review/ReviewPanel").then((m) => m.ReviewPanel), { ssr: false });
+const ReviewPanel = dynamic(() => import("../review/ReviewPanel").then((m) => m.ReviewPanel), {
+  ssr: false,
+});
 // Interview UI loads only on interview boards (NFR-015).
-const InterviewPanel = dynamic(() => import("../interview/InterviewPanel").then((m) => m.InterviewPanel), { ssr: false });
+const InterviewPanel = dynamic(
+  () => import("../interview/InterviewPanel").then((m) => m.InterviewPanel),
+  { ssr: false },
+);
 import styles from "./board.module.css";
 
 /** Board shortcuts (docs/05 · Keyboard). Lives inside the provider to read the selection. */
@@ -49,7 +61,9 @@ function BoardKeyboard() {
         e.preventDefault();
         redo();
       } else if (!mod && (e.key === "Delete" || e.key === "Backspace")) {
-        const ids = getNodes().filter((n) => n.selected).map((n) => n.id);
+        const ids = getNodes()
+          .filter((n) => n.selected)
+          .map((n) => n.id);
         if (ids.length === 0) return;
         e.preventDefault();
         apply(
@@ -74,13 +88,15 @@ function BoardKeyboard() {
 
 function EmptyBoard() {
   const apply = useBoardStore((s) => s.apply);
-  const insert = (id: TemplateId) => apply(TEMPLATES[id].ops, { utterance: null, source: "template" });
+  const insert = (id: TemplateId) =>
+    apply(TEMPLATES[id].ops, { utterance: null, source: "template" });
   return (
     <div className={styles.empty}>
       <h2>Describe your system</h2>
       <p className={styles.muted}>
-        Describing whole systems out loud (<em>“users hit a load balancer in front of three API
-        servers”</em>) arrives with the AI. For now, start from a template, then change it by voice:
+        Describing whole systems out loud (
+        <em>“users hit a load balancer in front of three API servers”</em>) arrives with the AI. For
+        now, start from a template, then change it by voice:
         <em> “kill Redis”</em>, <em>“five replicas of the API”</em>.
       </p>
       <div className={styles.emptyActions}>
@@ -105,7 +121,15 @@ const TAB_LABEL: Record<PanelTab, string> = {
 const DESIGN_TABS: PanelTab[] = ["metrics", "inspector", "history"];
 const INTERVIEW_TABS: PanelTab[] = ["interview", "metrics", "inspector", "history"];
 
-function PanelTabs({ tabs, tab, onChange }: { tabs: PanelTab[]; tab: PanelTab; onChange: (t: PanelTab) => void }) {
+function PanelTabs({
+  tabs,
+  tab,
+  onChange,
+}: {
+  tabs: PanelTab[];
+  tab: PanelTab;
+  onChange: (t: PanelTab) => void;
+}) {
   return (
     <div className={styles.tabs} role="tablist" aria-label="Side panel">
       {tabs.map((t) => (
@@ -160,7 +184,8 @@ function SimulatedBoard({ graph, tab, onTab, problem, interview }: BoardProps) {
   const setReviewOpen = useBoardStore((s) => s.setReviewOpen);
   const selection = useBoardStore((s) => s.selection);
   const events = useBoardStore((s) => s.events);
-  const selected = selection.length === 1 ? graph.nodes.find((n) => n.id === selection[0]) : undefined;
+  const selected =
+    selection.length === 1 ? graph.nodes.find((n) => n.id === selection[0]) : undefined;
   const heading = useRef<HTMLHeadingElement>(null);
   const keyboard = useLastInputWasKeyboard();
 
@@ -201,32 +226,48 @@ function SimulatedBoard({ graph, tab, onTab, problem, interview }: BoardProps) {
           onTab(t);
         }}
       />
-      {reviewOpen ? (
-        <ReviewPanel graph={graph} problem={problem} />
-      ) : (
+      {/* Review renders inside the tab panel, so the tabs' aria-controls always resolves. */}
       <div id="side-panel-body" role="tabpanel" aria-labelledby={`tab-${tab}`}>
-        {tab === "interview" && problem && interview && (
-          <InterviewPanel graph={graph} problem={problem} interview={interview} checks={slo.checks} pending={slo.pending} />
+        {reviewOpen && <ReviewPanel graph={graph} problem={problem} />}
+        {!reviewOpen && (
+          <>
+            {tab === "interview" && problem && interview && (
+              <InterviewPanel
+                graph={graph}
+                problem={problem}
+                interview={interview}
+                checks={slo.checks}
+                pending={slo.pending}
+              />
+            )}
+            {tab === "metrics" && (
+              <MetricsPanel graph={graph} sim={sim} baseline={baseline} scan={scan} />
+            )}
+            {tab === "inspector" &&
+              (selected ? (
+                <Inspector
+                  ref={heading}
+                  graph={graph}
+                  sim={sim}
+                  node={selected}
+                  scan={scan}
+                  onEscape={() =>
+                    document
+                      .querySelector<HTMLElement>(
+                        `.react-flow__node[data-id="${CSS.escape(selected.id)}"]`,
+                      )
+                      ?.focus()
+                  }
+                />
+              ) : (
+                <p className={styles.muted}>
+                  Select a component on the canvas to inspect and edit it.
+                </p>
+              ))}
+            {tab === "history" && <EventLog events={events} />}
+          </>
         )}
-        {tab === "metrics" && <MetricsPanel graph={graph} sim={sim} baseline={baseline} scan={scan} />}
-        {tab === "inspector" &&
-          (selected ? (
-            <Inspector
-              ref={heading}
-              graph={graph}
-              sim={sim}
-              node={selected}
-              scan={scan}
-              onEscape={() =>
-                document.querySelector<HTMLElement>(`.react-flow__node[data-id="${CSS.escape(selected.id)}"]`)?.focus()
-              }
-            />
-          ) : (
-            <p className={styles.muted}>Select a component on the canvas to inspect and edit it.</p>
-          ))}
-        {tab === "history" && <EventLog events={events} />}
       </div>
-      )}
     </>
   );
 
@@ -236,7 +277,8 @@ function SimulatedBoard({ graph, tab, onTab, problem, interview }: BoardProps) {
         <Canvas graph={graph} sim={sim} spofs={scan.spofs} />
         {graph.nodes.length === 0 && (
           <p className={styles.canvasHint}>
-            Design by voice: <em>“users hit a load balancer in front of three API servers and Postgres”</em>
+            Design by voice:{" "}
+            <em>“users hit a load balancer in front of three API servers and Postgres”</em>
           </p>
         )}
       </section>
@@ -260,7 +302,8 @@ function SimulatedBoard({ graph, tab, onTab, problem, interview }: BoardProps) {
               )
             ) : sim.bottleneck ? (
               <>
-                <strong>Bottleneck</strong> · {label(sim.bottleneck.id)} · ρ {sim.bottleneck.rho.toFixed(2)}
+                <strong>Bottleneck</strong> · {label(sim.bottleneck.id)} · ρ{" "}
+                {sim.bottleneck.rho.toFixed(2)}
               </>
             ) : (
               <>
@@ -299,7 +342,10 @@ export function BoardScreen({ id }: { id: string }) {
     void load(id);
   }, [id, load]);
 
-  const problem = board?.mode === "interview" && board.problemId ? (PROBLEMS[board.problemId as ProblemId] ?? null) : null;
+  const problem =
+    board?.mode === "interview" && board.problemId
+      ? (PROBLEMS[board.problemId as ProblemId] ?? null)
+      : null;
   const interview = problem ? readInterview(board?.interview) : null;
   // Interview boards open on the Interview tab.
   const boardId = board?.id;
@@ -358,23 +404,54 @@ export function BoardScreen({ id }: { id: string }) {
               </button>
             )}
             {!compact && !problem && board.graph.nodes.length > 0 && (
-              <button type="button" className={styles.textButton} onClick={() => setReviewOpen(true)} title="Review the design (R)">
+              <button
+                type="button"
+                className={styles.textButton}
+                onClick={() => setReviewOpen(true)}
+                title="Review the design (R)"
+              >
                 <ScanSearch size={16} aria-hidden /> Review
               </button>
             )}
-            <button type="button" className={styles.iconButton} onClick={undo} disabled={!canUndo} aria-label="Undo" title="Undo (⌘Z)">
+            <button
+              type="button"
+              className={styles.iconButton}
+              onClick={undo}
+              disabled={!canUndo}
+              aria-label="Undo"
+              title="Undo (⌘Z)"
+            >
               <Undo2 size={16} aria-hidden />
             </button>
-            <button type="button" className={styles.iconButton} onClick={redo} disabled={!canRedo} aria-label="Redo" title="Redo (⇧⌘Z)">
+            <button
+              type="button"
+              className={styles.iconButton}
+              onClick={redo}
+              disabled={!canRedo}
+              aria-label="Redo"
+              title="Redo (⇧⌘Z)"
+            >
               <Redo2 size={16} aria-hidden />
             </button>
             {compact && (
               <OverflowMenu
                 items={[
                   ...(problem
-                    ? [{ label: "Finish interview", icon: <Flag size={16} aria-hidden />, onSelect: finish }]
+                    ? [
+                        {
+                          label: "Finish interview",
+                          icon: <Flag size={16} aria-hidden />,
+                          onSelect: finish,
+                        },
+                      ]
                     : board.graph.nodes.length > 0
-                      ? [{ label: "Review design", icon: <ScanSearch size={16} aria-hidden />, onSelect: () => setReviewOpen(true) }]
+                      ? [
+                          {
+                            label: "Review design",
+                            icon: <ScanSearch size={16} aria-hidden />,
+                            onSelect: () => setReviewOpen(true),
+                          },
+                        ]
                       : []),
                   {
                     label: "Rename board",
@@ -406,7 +483,13 @@ export function BoardScreen({ id }: { id: string }) {
               </aside>
             </>
           ) : (
-            <SimulatedBoard graph={board.graph} tab={tab} onTab={setTab} problem={problem} interview={interview} />
+            <SimulatedBoard
+              graph={board.graph}
+              tab={tab}
+              onTab={setTab}
+              problem={problem}
+              interview={interview}
+            />
           )}
         </main>
         <CommandBar />
