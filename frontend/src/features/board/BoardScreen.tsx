@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Flag, PencilLine, Redo2, ScanSearch, Undo2 } from "lucide-react";
+import { ArrowLeft, ChevronDown, Download, Flag, PencilLine, Redo2, ScanSearch, Share2, Undo2 } from "lucide-react";
 import { LogoMark } from "@/components/brand/LogoMark";
 import { percent } from "@/lib/format";
 import { isTyping } from "@/lib/keyboard";
@@ -30,6 +30,8 @@ import { useSimulation } from "./useSimulation";
 import { useSpofScan } from "./useSpofScan";
 import { readInterview, type InterviewState } from "../interview/state";
 import { passing, useSloChecks } from "../interview/useSloChecks";
+import { copyShareLink, shareUrl } from "../share/share";
+import { EXPORT_KINDS, EXPORT_LABEL, useExport } from "../export/useExport";
 
 const ReviewPanel = dynamic(() => import("../review/ReviewPanel").then((m) => m.ReviewPanel), {
   ssr: false,
@@ -323,9 +325,114 @@ function SimulatedBoard({ graph, tab, onTab, problem, interview }: BoardProps) {
   );
 }
 
+interface TopActionsProps {
+  compact: boolean;
+  interview: boolean;
+  hasNodes: boolean;
+  onFinish(): void;
+  onRename(): void;
+}
+
+/** Top-bar actions (docs/design §5.9). Inside the React Flow provider: exports read the layout. */
+function TopActions({ compact, interview, hasNodes, onFinish, onRename }: TopActionsProps) {
+  const undo = useBoardStore((s) => s.undo);
+  const redo = useBoardStore((s) => s.redo);
+  const setReviewOpen = useBoardStore((s) => s.setReviewOpen);
+  const notify = useBoardStore((s) => s.notify);
+  const canUndo = useBoardStore((s) => s.undoStack.length > 0);
+  const canRedo = useBoardStore((s) => s.redoStack.length > 0);
+  const runExport = useExport();
+  // FR-042: a read-only link with the design in the hash. Too large → point at the JSON export.
+  const share = async () => {
+    const { board } = useBoardStore.getState();
+    if (!board) return;
+    const url = shareUrl(board, window.location.origin);
+    if (!url.ok) return notify(url.error, false);
+    if ((await copyShareLink(url.value)) === "copied")
+      notify("Link copied. Anyone with it sees a read-only copy.", false);
+  };
+  const exportItems = EXPORT_KINDS.map((kind) => ({
+    label: compact ? `Export ${EXPORT_LABEL[kind]}` : EXPORT_LABEL[kind],
+    icon: <Download size={16} aria-hidden />,
+    onSelect: () => void runExport(kind),
+  }));
+
+  return (
+    <div className={styles.topActions}>
+      {!compact && hasNodes && (
+        <>
+          <button type="button" className={styles.textButton} onClick={share}>
+            <Share2 size={16} aria-hidden /> Share
+          </button>
+          <OverflowMenu
+            label="Export"
+            buttonClassName={styles.textButton}
+            trigger={
+              <>
+                <Download size={16} aria-hidden /> Export <ChevronDown size={14} aria-hidden />
+              </>
+            }
+            items={exportItems}
+          />
+        </>
+      )}
+      {!compact && interview && (
+        <button type="button" className={styles.textButton} onClick={onFinish}>
+          <Flag size={16} aria-hidden /> Finish
+        </button>
+      )}
+      {!compact && !interview && hasNodes && (
+        <button
+          type="button"
+          className={styles.textButton}
+          onClick={() => setReviewOpen(true)}
+          title="Review the design (R)"
+        >
+          <ScanSearch size={16} aria-hidden /> Review
+        </button>
+      )}
+      <button
+        type="button"
+        className={styles.iconButton}
+        onClick={undo}
+        disabled={!canUndo}
+        aria-label="Undo"
+        title="Undo (⌘Z)"
+      >
+        <Undo2 size={16} aria-hidden />
+      </button>
+      <button
+        type="button"
+        className={styles.iconButton}
+        onClick={redo}
+        disabled={!canRedo}
+        aria-label="Redo"
+        title="Redo (⇧⌘Z)"
+      >
+        <Redo2 size={16} aria-hidden />
+      </button>
+      {compact && (
+        <OverflowMenu
+          items={[
+            ...(interview
+              ? [{ label: "Finish interview", icon: <Flag size={16} aria-hidden />, onSelect: onFinish }]
+              : hasNodes
+                ? [{ label: "Review design", icon: <ScanSearch size={16} aria-hidden />, onSelect: () => setReviewOpen(true) }]
+                : []),
+            ...(hasNodes
+              ? [{ label: "Share link", icon: <Share2 size={16} aria-hidden />, onSelect: share }, ...exportItems]
+              : []),
+            { label: "Rename board", icon: <PencilLine size={16} aria-hidden />, onSelect: onRename },
+          ]}
+        />
+      )}
+    </div>
+  );
+}
+
 export function BoardScreen({ id }: { id: string }) {
   const [tab, setTab] = useState<PanelTab>("metrics");
-  const { status, board, events, persistent, load, undo, redo, rename } = useBoardStore();
+  const { status, board, events, persistent, load, rename } = useBoardStore();
   const requestFinish = useBoardStore((s) => s.requestFinish);
   const setReviewOpen = useBoardStore((s) => s.setReviewOpen);
   const { compact } = useCompactLayout();
@@ -335,8 +442,6 @@ export function BoardScreen({ id }: { id: string }) {
     setTab("interview");
     requestFinish();
   };
-  const canUndo = useBoardStore((s) => s.undoStack.length > 0);
-  const canRedo = useBoardStore((s) => s.redoStack.length > 0);
 
   useEffect(() => {
     void load(id);
@@ -397,78 +502,20 @@ export function BoardScreen({ id }: { id: string }) {
               if (e.key === "Enter") e.currentTarget.blur();
             }}
           />
-          <div className={styles.topActions}>
-            {!compact && problem && (
-              <button type="button" className={styles.textButton} onClick={finish}>
-                <Flag size={16} aria-hidden /> Finish
-              </button>
-            )}
-            {!compact && !problem && board.graph.nodes.length > 0 && (
-              <button
-                type="button"
-                className={styles.textButton}
-                onClick={() => setReviewOpen(true)}
-                title="Review the design (R)"
-              >
-                <ScanSearch size={16} aria-hidden /> Review
-              </button>
-            )}
-            <button
-              type="button"
-              className={styles.iconButton}
-              onClick={undo}
-              disabled={!canUndo}
-              aria-label="Undo"
-              title="Undo (⌘Z)"
-            >
-              <Undo2 size={16} aria-hidden />
-            </button>
-            <button
-              type="button"
-              className={styles.iconButton}
-              onClick={redo}
-              disabled={!canRedo}
-              aria-label="Redo"
-              title="Redo (⇧⌘Z)"
-            >
-              <Redo2 size={16} aria-hidden />
-            </button>
-            {compact && (
-              <OverflowMenu
-                items={[
-                  ...(problem
-                    ? [
-                        {
-                          label: "Finish interview",
-                          icon: <Flag size={16} aria-hidden />,
-                          onSelect: finish,
-                        },
-                      ]
-                    : board.graph.nodes.length > 0
-                      ? [
-                          {
-                            label: "Review design",
-                            icon: <ScanSearch size={16} aria-hidden />,
-                            onSelect: () => setReviewOpen(true),
-                          },
-                        ]
-                      : []),
-                  {
-                    label: "Rename board",
-                    icon: <PencilLine size={16} aria-hidden />,
-                    onSelect: () => {
-                      nameInput.current?.focus();
-                      nameInput.current?.select();
-                    },
-                  },
-                ]}
-              />
-            )}
-          </div>
+          <TopActions
+            compact={compact}
+            interview={!!problem}
+            hasNodes={board.graph.nodes.length > 0}
+            onFinish={finish}
+            onRename={() => {
+              nameInput.current?.focus();
+              nameInput.current?.select();
+            }}
+          />
         </header>
         {!persistent && (
           <p className={styles.banner} role="status">
-            This browser won’t save boards. Use Export (coming soon) to keep your work.
+            This browser won’t save boards. Use Export → JSON to keep your work.
           </p>
         )}
         <main className={styles.main}>

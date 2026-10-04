@@ -1,4 +1,5 @@
-import { applyBatch, buildTemplate, emptyGraph, PROBLEMS, TEMPLATES, type Op, type ProblemId, type TemplateId } from "@archie/simulator";
+import { applyBatch, buildTemplate, emptyGraph, PROBLEMS, TEMPLATES, type Graph, type Op, type ProblemId, type TemplateId } from "@archie/simulator";
+import { graphToBatches } from "@archie/simulator/export";
 import { BOARD_SCHEMA_VERSION, getRepository, newId, type Board } from "@archie/database";
 import type { InterviewState } from "@/features/interview/state";
 
@@ -63,4 +64,36 @@ export async function createInterviewBoard(problemId: ProblemId): Promise<string
   await repo.saveBoard(board);
   await repo.appendEvent(board.id, { id: newId(), at: now, utterance: null, source: "template", ops, versionAfter: result.graph.version });
   return board.id;
+}
+
+/**
+ * Save a copy of someone else's design as a new board: Duplicate on a shared link (FR-042) and
+ * Open file (JSON import). The graph is rebuilt from ops so History and replay start from them.
+ */
+export async function createBoardFromGraph(name: string, graph: Graph): Promise<string> {
+  const repo = await getRepository();
+  const now = Date.now();
+  const id = newId();
+  let rebuilt = emptyGraph();
+  const events = [];
+  for (const ops of graphToBatches(graph)) {
+    const r = applyBatch(rebuilt, ops);
+    if (!r.ok) throw new Error(r.errors[0]?.message ?? "could not rebuild the board");
+    rebuilt = r.graph;
+    events.push({ id: newId(), at: now, utterance: null, source: "template" as const, ops, versionAfter: rebuilt.version });
+  }
+  const board: Board = {
+    id,
+    name: name.slice(0, 80) || "Untitled board",
+    schemaVersion: BOARD_SCHEMA_VERSION,
+    graph: rebuilt,
+    mode: "design",
+    problemId: null,
+    interview: null,
+    createdAt: now,
+    updatedAt: now,
+  };
+  await repo.saveBoard(board);
+  for (const event of events) await repo.appendEvent(id, event);
+  return id;
 }

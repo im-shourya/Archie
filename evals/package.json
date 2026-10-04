@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "description": "Eval runner and latency benchmarks (docs/22-24).",
+  "exports": {
+    "./report": "./src/report.ts"
+  },
   "scripts": {
     "typecheck": "tsc -p ."
   },

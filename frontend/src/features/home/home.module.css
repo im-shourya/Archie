@@ -255,3 +255,10 @@
     margin-top: 48px;
   }
 }
+
+.fileError {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-state-saturated);
+}

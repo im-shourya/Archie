@@ -15,9 +15,28 @@ const MAX_TRACKED_CLIENTS = 10_000;
 /** Raw IPs are never stored or logged: only a salted hash is used as the bucket key. */
 const SALT = process.env.ARCHIE_IP_SALT || randomBytes(16).toString("hex");
 
+/**
+ * The client's address. Behind a host's proxy the left end of X-Forwarded-For is whatever the
+ * client sent, so deployments name the header the host sets (ARCHIE_CLIENT_IP_HEADER). For
+ * X-Forwarded-For itself the entry is counted from the right: ARCHIE_TRUSTED_PROXY_HOPS (default 1)
+ * is how many proxies append to it. Unset (local runs): the first X-Forwarded-For entry.
+ */
+export function clientIp(header: (name: string) => string | undefined): string {
+  const configured = process.env.ARCHIE_CLIENT_IP_HEADER?.trim().toLowerCase();
+  if (configured) {
+    const value = header(configured);
+    if (!value) return "unknown";
+    const entries = value.split(",").map((s) => s.trim()).filter(Boolean);
+    if (configured !== "x-forwarded-for") return entries[0] ?? "unknown";
+    const hops = Math.max(1, Number(process.env.ARCHIE_TRUSTED_PROXY_HOPS) || 1);
+    return entries[entries.length - hops] ?? "unknown";
+  }
+  const forwarded = header("x-forwarded-for")?.split(",")[0]?.trim();
+  return forwarded || header("x-real-ip") || "unknown";
+}
+
 export function clientKey(c: Context): string {
-  const forwarded = c.req.header("x-forwarded-for")?.split(",")[0]?.trim();
-  const ip = forwarded || c.req.header("x-real-ip") || "unknown";
+  const ip = clientIp((name) => c.req.header(name));
   return createHash("sha256").update(SALT).update(ip).digest("hex").slice(0, 32);
 }
 

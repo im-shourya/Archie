@@ -16,7 +16,19 @@ export interface MenuItem {
   onSelect(): void;
 }
 
-export function OverflowMenu({ items }: { items: MenuItem[] }) {
+export function OverflowMenu({
+  items,
+  label = "More actions",
+  trigger,
+  buttonClassName,
+}: {
+  items: MenuItem[];
+  /** Accessible name of the button and the menu. */
+  label?: string;
+  /** Visible button content (defaults to the ⋯ icon). */
+  trigger?: ReactNode;
+  buttonClassName?: string;
+}) {
   const [open, setOpen] = useState(false);
   const button = useRef<HTMLButtonElement>(null);
   const menu = useRef<HTMLUListElement>(null);
@@ -49,8 +61,8 @@ export function OverflowMenu({ items }: { items: MenuItem[] }) {
       <button
         ref={button}
         type="button"
-        className={styles.iconButton}
-        aria-label="More actions"
+        className={buttonClassName ?? styles.iconButton}
+        aria-label={trigger ? undefined : label}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? id : undefined}
@@ -59,17 +71,21 @@ export function OverflowMenu({ items }: { items: MenuItem[] }) {
           if (e.key === "ArrowDown") {
             e.preventDefault();
             setOpen(true);
+          } else if (e.key === "Escape" && open) {
+            // Focus moves into the menu a frame after it opens; Escape before that still closes it.
+            e.preventDefault();
+            setOpen(false);
           }
         }}
       >
-        <Ellipsis size={16} aria-hidden />
+        {trigger ?? <Ellipsis size={16} aria-hidden />}
       </button>
       {open && (
         <ul
           ref={menu}
           id={id}
           role="menu"
-          aria-label="More actions"
+          aria-label={label}
           className={styles.menu}
           onKeyDown={(e) => {
             const els = [
