@@ -1,96 +1,96 @@
 {
-  "runId": "2026-10-01T19-57-13-900Z-all-b0",
-  "createdAt": "2026-10-01T19:57:13.900Z",
-  "commit": "0508af7",
+  "runId": "2026-10-04T06-45-09-602Z-all-b0",
+  "createdAt": "2026-10-04T06:45:09.603Z",
+  "commit": "27a522b",
   "split": "all",
   "model": "none",
   "effort": "none",
-  "promptHash": "d7d3db96cf14",
+  "promptHash": "531e9fe02e1c",
   "target": "local",
   "environment": {
     "cpu": "Apple M4",
     "node": "v22.19.0"
   },
   "metrics": {
-    "taskAccuracy": 0.0645,
-    "kindAccuracy": 0.129,
+    "taskAccuracy": 0.087,
+    "kindAccuracy": 0.1522,
     "falseActionRate": 0,
     "overClarifyRate": 0,
     "fastPathPrecision": 1,
-    "fastPathCoverage": 0.0645,
+    "fastPathCoverage": 0.087,
     "repairRate": 0
   },
   "byCategory": {
     "create": {
-      "n": 2,
+      "n": 9,
       "pass": 0
     },
     "modify": {
-      "n": 2,
+      "n": 6,
       "pass": 0
     },
     "connect": {
-      "n": 2,
+      "n": 6,
       "pass": 0
     },
     "scale": {
-      "n": 2,
-      "pass": 1
+      "n": 6,
+      "pass": 4
     },
     "insert": {
-      "n": 3,
+      "n": 7,
       "pass": 0
     },
     "workload": {
-      "n": 2,
-      "pass": 0
-    },
-    "failure": {
-      "n": 2,
+      "n": 6,
       "pass": 1
     },
+    "failure": {
+      "n": 6,
+      "pass": 3
+    },
     "compound": {
-      "n": 2,
+      "n": 6,
       "pass": 0
     },
     "question": {
-      "n": 2,
+      "n": 7,
       "pass": 0
     },
     "ambiguity": {
-      "n": 2,
+      "n": 8,
       "pass": 0
     },
     "destructive": {
-      "n": 2,
+      "n": 5,
       "pass": 0
     },
     "off-topic": {
-      "n": 2,
+      "n": 5,
       "pass": 0
     },
     "injection": {
-      "n": 2,
+      "n": 5,
       "pass": 0
     },
     "bounds": {
-      "n": 2,
+      "n": 5,
       "pass": 0
     },
     "dictation-noise": {
-      "n": 2,
+      "n": 5,
       "pass": 0
     }
   },
   "latency": {
     "fastpath": {
-      "n": 2,
-      "p50": 0.15,
-      "p70": 0.402,
-      "p95": 0.402,
-      "p99": 0.402,
-      "p100": 0.402,
-      "mean": 0.276
+      "n": 8,
+      "p50": 0.029,
+      "p70": 0.057,
+      "p95": 0.188,
+      "p99": 0.188,
+      "p100": 0.188,
+      "mean": 0.064
     }
   },
   "cases": [
@@ -100,7 +100,7 @@
       "expectedKind": "ops",
       "actualKind": "noop",
       "tier": "fastpath",
-      "totalMs": 1.434,
+      "totalMs": 1.388,
       "pass": false,
       "failedAssertions": [
         "abstained"
@@ -112,7 +112,7 @@
       "expectedKind": "ops",
       "actualKind": "noop",
       "tier": "fastpath",
-      "totalMs": 0.791,
+      "totalMs": 0.721,
       "pass": false,
       "failedAssertions": [
         "abstained"
@@ -124,7 +124,7 @@
       "expectedKind": "ops",
       "actualKind": "noop",
       "tier": "fastpath",
-      "totalMs": 0.019,
+      "totalMs": 0.017,
       "pass": false,
       "failedAssertions": [
         "abstained"
@@ -136,7 +136,7 @@
       "expectedKind": "ops",
       "actualKind": "noop",
       "tier": "fastpath",
-      "totalMs": 0.013,
+      "totalMs": 0.012,
       "pass": false,
       "failedAssertions": [
         "abstained"
@@ -148,7 +148,7 @@
       "expectedKind": "ops",
       "actualKind": "ops",
       "tier": "fastpath",
-      "totalMs": 0.402,
+      "totalMs": 0.188,
       "pass": true
     },
     {
@@ -157,7 +157,7 @@
       "expectedKind": "ops",
       "actualKind": "noop",
       "tier": "fastpath",
-      "totalMs": 0.016,
+      "totalMs": 0.017,
       "pass": false,
       "failedAssertions": [
         "abstained"
@@ -169,7 +169,7 @@
       "expectedKind": "ops",
       "actualKind": "noop",
       "tier": "fastpath",
-      "totalMs": 0.024,
+      "totalMs": 0.02,
       "pass": false,
       "failedAssertions": [
         "abstained"
@@ -181,7 +181,7 @@
       "expectedKind": "ops",
       "actualKind": "noop",
       "tier": "fastpath",
-      "totalMs": 0.01,
+      "totalMs": 0.009,
       "pass": false,
       "failedAssertions": [
         "abstained"
@@ -193,7 +193,7 @@
       "expectedKind": "ops",
       "actualKind": "noop",
       "tier": "fastpath",
-      "totalMs": 0.013,
+      "totalMs": 0.011,
       "pass": false,
       "failedAssertions": [
         "abstained"
@@ -205,7 +205,7 @@
       "expectedKind": "ops",
       "actualKind": "noop",
       "tier": "fastpath",
-      "totalMs": 0.022,
+      "totalMs": 0.019,
       "pass": false,
       "failedAssertions": [
         "abstained"
@@ -217,7 +217,7 @@
       "expectedKind": "ops",
       "actualKind": "ops",
       "tier": "fastpath",
-      "totalMs": 0.15,
+      "totalMs": 0.057,
       "pass": true
     },
     {
@@ -226,7 +226,7 @@
       "expectedKind": "ops",
       "actualKind": "noop",
       "tier": "fastpath",
-      "totalMs": 0.016,
+      "totalMs": 0.013,
       "pass": false,
       "failedAssertions": [
         "abstained"
@@ -250,7 +250,7 @@
       "expectedKind": "clarify",
       "actualKind": "noop",
       "tier": "fastpath",
-      "totalMs": 0.077,
+      "totalMs": 0.069,
       "pass": false,
       "failedAssertions": [
         "abstained"
@@ -286,7 +286,7 @@
       "expectedKind": "confirm",
       "actualKind": "noop",
       "tier": "fastpath",
-      "totalMs": 0.009,
+      "totalMs": 0.007,
       "pass": false,
       "failedAssertions": [
         "abstained"
@@ -298,7 +298,7 @@
       "expectedKind": "clarify",
       "actualKind": "noop",
       "tier": "fastpath",
-      "totalMs": 0.34,
+      "totalMs": 0.271,
       "pass": false,
       "failedAssertions": [
         "abstained"
@@ -310,7 +310,466 @@
       "expectedKind": "ops",
       "actualKind": "noop",
       "tier": "fastpath",
+      "totalMs": 0.011,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "create-03",
+      "category": "create",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.015,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "create-04",
+      "category": "create",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.032,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "create-05",
+      "category": "create",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.013,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "create-06",
+      "category": "create",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.02,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "modify-03",
+      "category": "modify",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
       "totalMs": 0.009,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "modify-04",
+      "category": "modify",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.037,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "modify-05",
+      "category": "modify",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.008,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "connect-03",
+      "category": "connect",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.006,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "connect-04",
+      "category": "connect",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.008,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "connect-05",
+      "category": "connect",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.008,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "scale-03",
+      "category": "scale",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "fastpath",
+      "totalMs": 0.116,
+      "pass": true
+    },
+    {
+      "id": "scale-04",
+      "category": "scale",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.008,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "insert-04",
+      "category": "insert",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.006,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "insert-05",
+      "category": "insert",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.007,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "workload-03",
+      "category": "workload",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "fastpath",
+      "totalMs": 0.029,
+      "pass": true
+    },
+    {
+      "id": "workload-04",
+      "category": "workload",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.009,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "failure-03",
+      "category": "failure",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.022,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "failure-04",
+      "category": "failure",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "fastpath",
+      "totalMs": 0.029,
+      "pass": true
+    },
+    {
+      "id": "failure-05",
+      "category": "failure",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.007,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "compound-03",
+      "category": "compound",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.011,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "compound-04",
+      "category": "compound",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.009,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "compound-05",
+      "category": "compound",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.021,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "question-03",
+      "category": "question",
+      "expectedKind": "answer",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.007,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "question-04",
+      "category": "question",
+      "expectedKind": "answer",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.006,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "question-05",
+      "category": "question",
+      "expectedKind": "answer",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.006,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "ambiguity-03",
+      "category": "ambiguity",
+      "expectedKind": "clarify",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.018,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "ambiguity-04",
+      "category": "ambiguity",
+      "expectedKind": "clarify",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.023,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "ambiguity-05",
+      "category": "ambiguity",
+      "expectedKind": "clarify",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.018,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "ambiguity-06",
+      "category": "ambiguity",
+      "expectedKind": "clarify",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.006,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "destructive-03",
+      "category": "destructive",
+      "expectedKind": "confirm",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.01,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "destructive-04",
+      "category": "destructive",
+      "expectedKind": "confirm",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.043,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "off-topic-03",
+      "category": "off-topic",
+      "expectedKind": "noop",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.006,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "off-topic-04",
+      "category": "off-topic",
+      "expectedKind": "noop",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.006,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "injection-03",
+      "category": "injection",
+      "expectedKind": "confirm",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.008,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "injection-04",
+      "category": "injection",
+      "expectedKind": "noop",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.01,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "bounds-03",
+      "category": "bounds",
+      "expectedKind": "clarify",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.045,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "bounds-04",
+      "category": "bounds",
+      "expectedKind": "clarify",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.03,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "dictation-noise-03",
+      "category": "dictation-noise",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.019,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "dictation-noise-04",
+      "category": "dictation-noise",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.008,
       "pass": false,
       "failedAssertions": [
         "abstained"
@@ -322,7 +781,7 @@
       "expectedKind": "ops",
       "actualKind": "noop",
       "tier": "fastpath",
-      "totalMs": 0.043,
+      "totalMs": 0.016,
       "pass": false,
       "failedAssertions": [
         "abstained"
@@ -334,7 +793,7 @@
       "expectedKind": "ops",
       "actualKind": "noop",
       "tier": "fastpath",
-      "totalMs": 0.01,
+      "totalMs": 0.008,
       "pass": false,
       "failedAssertions": [
         "abstained"
@@ -346,7 +805,7 @@
       "expectedKind": "ops",
       "actualKind": "noop",
       "tier": "fastpath",
-      "totalMs": 0.008,
+      "totalMs": 0.007,
       "pass": false,
       "failedAssertions": [
         "abstained"
@@ -358,7 +817,7 @@
       "expectedKind": "ops",
       "actualKind": "noop",
       "tier": "fastpath",
-      "totalMs": 0.013,
+      "totalMs": 0.008,
       "pass": false,
       "failedAssertions": [
         "abstained"
@@ -370,7 +829,7 @@
       "expectedKind": "ops",
       "actualKind": "noop",
       "tier": "fastpath",
-      "totalMs": 0.019,
+      "totalMs": 0.013,
       "pass": false,
       "failedAssertions": [
         "abstained"
@@ -382,7 +841,7 @@
       "expectedKind": "answer",
       "actualKind": "noop",
       "tier": "fastpath",
-      "totalMs": 0.009,
+      "totalMs": 0.007,
       "pass": false,
       "failedAssertions": [
         "abstained"
@@ -394,7 +853,7 @@
       "expectedKind": "clarify",
       "actualKind": "noop",
       "tier": "fastpath",
-      "totalMs": 0.028,
+      "totalMs": 0.019,
       "pass": false,
       "failedAssertions": [
         "abstained"
@@ -406,7 +865,7 @@
       "expectedKind": "confirm",
       "actualKind": "noop",
       "tier": "fastpath",
-      "totalMs": 0.065,
+      "totalMs": 0.052,
       "pass": false,
       "failedAssertions": [
         "abstained"
@@ -418,7 +877,7 @@
       "expectedKind": "noop",
       "actualKind": "noop",
       "tier": "fastpath",
-      "totalMs": 0.008,
+      "totalMs": 0.006,
       "pass": false,
       "failedAssertions": [
         "abstained"
@@ -430,7 +889,7 @@
       "expectedKind": "ops",
       "actualKind": "noop",
       "tier": "fastpath",
-      "totalMs": 0.012,
+      "totalMs": 0.011,
       "pass": false,
       "failedAssertions": [
         "abstained"
@@ -442,7 +901,7 @@
       "expectedKind": "clarify",
       "actualKind": "noop",
       "tier": "fastpath",
-      "totalMs": 7.656,
+      "totalMs": 17.08,
       "pass": false,
       "failedAssertions": [
         "abstained"
@@ -454,7 +913,262 @@
       "expectedKind": "ops",
       "actualKind": "noop",
       "tier": "fastpath",
-      "totalMs": 0.042,
+      "totalMs": 0.023,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "create-07",
+      "category": "create",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.019,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "create-08",
+      "category": "create",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.028,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "create-09",
+      "category": "create",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.012,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "modify-06",
+      "category": "modify",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.011,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "connect-06",
+      "category": "connect",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.008,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "scale-05",
+      "category": "scale",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "fastpath",
+      "totalMs": 0.039,
+      "pass": true
+    },
+    {
+      "id": "scale-06",
+      "category": "scale",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "fastpath",
+      "totalMs": 0.027,
+      "pass": true
+    },
+    {
+      "id": "insert-06",
+      "category": "insert",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.008,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "insert-07",
+      "category": "insert",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.007,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "workload-05",
+      "category": "workload",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.006,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "workload-06",
+      "category": "workload",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.008,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "failure-06",
+      "category": "failure",
+      "expectedKind": "ops",
+      "actualKind": "ops",
+      "tier": "fastpath",
+      "totalMs": 0.025,
+      "pass": true
+    },
+    {
+      "id": "compound-06",
+      "category": "compound",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.009,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "question-06",
+      "category": "question",
+      "expectedKind": "answer",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.007,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "question-07",
+      "category": "question",
+      "expectedKind": "answer",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.006,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "ambiguity-07",
+      "category": "ambiguity",
+      "expectedKind": "clarify",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.006,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "ambiguity-08",
+      "category": "ambiguity",
+      "expectedKind": "clarify",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.032,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "destructive-05",
+      "category": "destructive",
+      "expectedKind": "confirm",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.006,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "off-topic-05",
+      "category": "off-topic",
+      "expectedKind": "noop",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.006,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "injection-05",
+      "category": "injection",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.019,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "bounds-05",
+      "category": "bounds",
+      "expectedKind": "clarify",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.072,
+      "pass": false,
+      "failedAssertions": [
+        "abstained"
+      ]
+    },
+    {
+      "id": "dictation-noise-05",
+      "category": "dictation-noise",
+      "expectedKind": "ops",
+      "actualKind": "noop",
+      "tier": "fastpath",
+      "totalMs": 0.015,
       "pass": false,
       "failedAssertions": [
         "abstained"

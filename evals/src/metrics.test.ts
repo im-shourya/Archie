@@ -1,6 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { NODE_KINDS, validateBatch } from "@archie/simulator";
-import { CATEGORIES, loadCases, loadFixtures } from "./cases";
 import { byCategory, computeMetrics, latency, type CaseResult } from "./metrics";
 
 const r = (over: Partial<CaseResult>): CaseResult => ({
@@ -62,36 +60,5 @@ describe("computeMetrics", () => {
 
   it("groups by category", () => {
     expect(byCategory(results).create).toEqual({ n: 5, pass: 3 });
-  });
-});
-
-describe("dataset", () => {
-  const cases = loadCases("all");
-  const fixtures = loadFixtures();
-
-  it("has unique ids, known fixtures and ≥ 2 cases per category", () => {
-    expect(new Set(cases.map((c) => c.id)).size).toBe(cases.length);
-    for (const c of cases) expect(fixtures[c.fixture], `${c.id} → ${c.fixture}`).toBeDefined();
-    for (const cat of CATEGORIES) expect(cases.filter((c) => c.category === cat).length, cat).toBeGreaterThanOrEqual(2);
-  });
-
-  it("is split about 60/40 dev/test", () => {
-    const dev = cases.filter((c) => c.split === "dev").length / cases.length;
-    expect(dev).toBeGreaterThan(0.55);
-    expect(dev).toBeLessThan(0.7);
-  });
-
-  it("fixtures are valid graphs that the op engine accepts", () => {
-    for (const [name, g] of Object.entries(fixtures)) {
-      for (const n of g.nodes) expect(NODE_KINDS, name).toContain(n.kind);
-      // A no-op round trip proves ids, edges and props are all valid for the engine.
-      if (g.nodes.length) expect(validateBatch(g, [{ type: "setWorkload" }]), name).toEqual([]);
-    }
-  });
-
-  it("hold-back cases assert the board is untouched", () => {
-    for (const c of cases.filter((x) => ["clarify", "confirm", "noop"].includes(x.expect.kind))) {
-      expect(c.expect.assert, c.id).toContainEqual({ unchanged: true });
-    }
   });
 });

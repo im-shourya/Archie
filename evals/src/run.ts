@@ -1,5 +1,10 @@
 /**
- * npm run eval -- [--split dev|test|all] [--fastpath-only] [--only <id,id>] [--out <file>]
+ * npm run eval -- [--split dev|test|all] [--fastpath-only] [--only <id,id>] [--out <file>] [--show]
+ *
+ * --show prints the result (kind, message, ops) of every failing case, for triage.
+ * --base-url <url> posts each case to a deployed /api/command instead of calling the harness
+ *   in-process, so latency includes the network and the host (docs/24). Writes deployed.json;
+ *   set EVAL_REGION to record where the server runs.
  *
  * Runs the full production path for each case (docs/22 · Pipeline under test):
  *   fixture + utterance → fast path → (null) → harness (real model) → guardrails → applyBatch → assertions
@@ -24,6 +29,8 @@ import {
   fallbackName,
   getProvider,
   HarnessError,
+  type CommandResponse,
+  type HarnessErrorCode,
   isConfigured,
   keyEnv,
   primaryWaitMs,
@@ -43,11 +50,13 @@ const flag = (name: string) => {
 };
 const split = (flag("split") ?? "dev") as Split;
 const fastpathOnly = args.includes("--fastpath-only");
+const show = args.includes("--show");
+const baseUrl = flag("base-url")?.replace(/\/$/, "");
 const only = flag("only")?.split(",");
-const out = flag("out") ?? (fastpathOnly ? "evals/results/b0-fastpath.json" : "evals/results/latest.json");
+const out = flag("out") ?? (fastpathOnly ? "evals/results/b0-fastpath.json" : baseUrl ? "evals/results/deployed.json" : "evals/results/latest.json");
 
 if (existsSync(".env.local")) process.loadEnvFile(".env.local");
-if (!fastpathOnly && !isConfigured()) {
+if (!fastpathOnly && !baseUrl && !isConfigured()) {
   console.error(`${keyEnv()} is not set (env or .env.local). Use --fastpath-only for the B0 baseline.`);
   process.exit(1);
 }
@@ -59,6 +68,26 @@ function fixture(c: EvalCase): Graph {
   const g = fixtures[c.fixture];
   if (!g) throw new Error(`${c.id}: unknown fixture "${c.fixture}"`);
   return g;
+}
+
+const shown = new Map<string, unknown>();
+
+/** One case against a deployed backend. API errors become the same HarnessError codes as local runs. */
+async function remoteCommand(body: { utterance: string; graph: Graph; baseVersion: number }): Promise<CommandResponse> {
+  const res = await fetch(`${baseUrl}/api/command`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(60_000),
+  });
+  const json = (await res.json().catch(() => null)) as (CommandResponse & { error?: { code: string; message: string } }) | null;
+  if (!res.ok || !json || json.error) {
+    const retry = Number(res.headers.get("retry-after"));
+    throw new HarnessError((json?.error?.code ?? "LLM_UPSTREAM") as HarnessErrorCode, json?.error?.message ?? `HTTP ${res.status}`, {
+      ...(Number.isFinite(retry) && retry > 0 ? { retryAfterSeconds: retry } : {}),
+    });
+  }
+  return json;
 }
 
 async function runCase(c: EvalCase): Promise<CaseResult> {
@@ -81,16 +110,21 @@ async function runCase(c: EvalCase): Promise<CaseResult> {
   }
 
   try {
-    const res = await runCommand({ utterance: c.utterance, graph: before, baseVersion: before.version }, { requestId: `eval-${c.id}` });
+    const request = { utterance: c.utterance, graph: before, baseVersion: before.version };
+    const tCall = performance.now();
+    const res = baseUrl ? await remoteCommand(request) : await runCommand(request, { requestId: `eval-${c.id}` });
+    const wallMs = performance.now() - tCall;
     const applied = res.kind === "ops" ? applyBatch(before, res.ops) : null;
     const after = applied?.ok ? applied.graph : before;
     const outcome: Outcome = { before, after, kind: res.kind, message: res.message, options: res.options, focusNodeIds: res.focusNodeIds };
+    if (show) shown.set(c.id, { kind: res.kind, message: res.message, options: res.options, ops: res.kind === "ops" ? res.ops : undefined });
     const result: Omit<CaseResult, "pass"> = {
       ...base,
       actualKind: res.kind,
       tier: "ai",
       attempts: res.attempts,
-      totalMs: res.timings.totalMs,
+      // Deployed: what a user waits for, network included. Local: the server-side total.
+      totalMs: baseUrl ? wallMs : res.timings.totalMs,
       usage: res.usage,
       applied: applied?.ok ?? false,
       model: res.model,
@@ -102,6 +136,7 @@ async function runCase(c: EvalCase): Promise<CaseResult> {
     return finish(c, result, outcome);
   } catch (err) {
     const code = err instanceof HarnessError ? err.code : "INTERNAL";
+    if (err instanceof HarnessError && err.retryAfterSeconds) rateLimitWaitMs = Math.min(65_000, err.retryAfterSeconds * 1000 + 500);
     return { ...base, actualKind: "noop", tier: "ai", totalMs: performance.now() - t0, applied: false, pass: false, error: code, failedAssertions: [`error: ${code}`] };
   }
 }
@@ -118,23 +153,36 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 /** About one call's worth of tokens: system prompt + a typical board + output. */
 const CALL_TOKENS = estimateTokens(COMMAND_SYSTEM_PROMPT.length + 3_000, 2_000);
 let warnedDay = false;
+const MAX_RATE_LIMIT_RETRIES = 3;
+const MAX_PRIMARY_WAIT_MS = 65_000;
+let rateLimitWaitMs = 60_000;
 
 const results: CaseResult[] = [];
 for (const c of cases) {
-  if (!fastpathOnly) {
+  if (!fastpathOnly && !baseUrl) {
     const wait = primaryWaitMs(CALL_TOKENS);
-    if (wait === Infinity && !warnedDay) {
+    // Waiting out a per-minute limit keeps results on one model. A longer wait (a daily 429 cools
+    // the model down until Pacific midnight) would stall the run for hours: let the fallbacks serve.
+    if (wait > MAX_PRIMARY_WAIT_MS && !warnedDay) {
       warnedDay = true;
-      console.log(`  (${providerName()} daily quota used: remaining cases go to ${fallbackName() ?? "no fallback"})`);
-    } else if (wait > 0 && wait !== Infinity) {
+      console.log(`  (${providerName()} is out for the day: remaining cases go to the ladder and ${fallbackName() ?? "no fallback"})`);
+    } else if (wait > 0 && wait <= MAX_PRIMARY_WAIT_MS) {
       console.log(`  (waiting ${Math.ceil(wait / 1000)} s for ${providerName()} quota)`);
       await sleep(wait + 250);
     }
   }
-  const r = await runCase(c);
+  let r = await runCase(c);
+  // Every provider was briefly out of room: that's pacing, not an answer. Wait it out and retry
+  // (at most 3 times); any other error is a real failure and is scored as one.
+  for (let retry = 1; r.error === "RATE_LIMITED" && retry <= MAX_RATE_LIMIT_RETRIES; retry++) {
+    console.log(`  (${c.id}: every provider is busy; retry ${retry} in ${Math.ceil(rateLimitWaitMs / 1000)} s)`);
+    await sleep(rateLimitWaitMs);
+    r = await runCase(c);
+  }
   results.push(r);
   const mark = r.pass ? "✓" : "✗";
   const served = r.model ? ` [${r.model}]` : "";
+  if (show && !r.pass && shown.has(c.id)) console.log(`  ${JSON.stringify(shown.get(c.id))}`);
   console.log(`${mark} ${c.id.padEnd(20)} ${r.tier.padEnd(8)} ${r.actualKind.padEnd(7)} ${ms(r.totalMs).padStart(9)}${served}  ${r.failedAssertions?.join(" | ") ?? ""}`);
 }
 
@@ -160,11 +208,11 @@ const run = {
   commit,
   split,
   // Every model that served a case, with counts: fallbacks are part of the result, not hidden.
-  model: fastpathOnly ? "none" : servedModels() || getProvider().model,
-  effort: fastpathOnly ? "none" : getProvider().effort,
+  model: fastpathOnly ? "none" : servedModels() || (baseUrl ? "none answered" : getProvider().model),
+  effort: fastpathOnly ? "none" : baseUrl ? "server config" : getProvider().effort,
   promptHash: createHash("sha256").update(COMMAND_SYSTEM_PROMPT).digest("hex").slice(0, 12),
-  target: "local",
-  environment: { cpu: os.cpus()[0]?.model ?? "unknown", node: process.version },
+  target: baseUrl ? "deployed" : "local",
+  environment: { cpu: os.cpus()[0]?.model ?? "unknown", node: process.version, ...(process.env.EVAL_REGION ? { region: process.env.EVAL_REGION } : {}) },
   metrics,
   byCategory: byCategory(results),
   latency: lat,
@@ -196,5 +244,5 @@ for (const [tier, s] of Object.entries(lat)) {
   console.log(`latency ${tier.padEnd(9)} n=${s.n} P50 ${ms(s.p50)} · P70 ${ms(s.p70)} · P95 ${ms(s.p95)} · P99 ${ms(s.p99)} · P100 ${ms(s.p100)}`);
 }
 console.log(`\nby category: ${Object.entries(run.byCategory).map(([k, v]) => `${k} ${v.pass}/${v.n}`).join(" · ")}`);
-if (!fastpathOnly) console.log(`quota after run: ${JSON.stringify(quotaStatus())}`);
+if (!fastpathOnly && !baseUrl) console.log(`quota after run: ${JSON.stringify(quotaStatus())}`);
 console.log(`wrote ${out}`);

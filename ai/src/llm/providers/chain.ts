@@ -32,7 +32,37 @@ export const DEFAULT_COOLDOWN_MS: Record<string, number> = {
   aborted: 30_000,
 };
 
-export function createChain(links: readonly ChainLink[], log: (event: Record<string, unknown>) => void = () => {}): LlmProvider {
+/**
+ * With a deadline, every link except the last one that has room keeps FINAL_RESERVE_MS for the
+ * provider after it, and a link that would get less than MIN_ATTEMPT_MS is skipped. Without this,
+ * two hung Gemini models used the whole 20 s budget and Groq never got a turn (10 of 58 dev cases
+ * timed out on 2026-10-04 while every answered case passed).
+ */
+export const FINAL_RESERVE_MS = 7_000;
+export const MIN_ATTEMPT_MS = 4_000;
+
+export interface ChainTiming {
+  finalReserveMs: number;
+  minAttemptMs: number;
+}
+
+/** Settle with `work`, or reject with `aborted` when `signal` fires (SDKs don't always honour it). */
+function raceSignal<T>(work: Promise<T>, signal: AbortSignal): Promise<T> {
+  work.catch(() => {}); // a late rejection after we gave up must not be unhandled
+  if (signal.aborted) return Promise.reject(new ProviderError("aborted"));
+  let onAbort = () => {};
+  const aborted = new Promise<never>((_, reject) => {
+    onAbort = () => reject(new ProviderError("aborted"));
+    signal.addEventListener("abort", onAbort, { once: true });
+  });
+  return Promise.race([work, aborted]).finally(() => signal.removeEventListener("abort", onAbort));
+}
+
+export function createChain(
+  links: readonly ChainLink[],
+  log: (event: Record<string, unknown>) => void = () => {},
+  timing: ChainTiming = { finalReserveMs: FINAL_RESERVE_MS, minAttemptMs: MIN_ATTEMPT_MS },
+): LlmProvider {
   if (links.length === 0) throw new Error("provider chain needs at least one provider");
   const primary = links[0]!.provider;
   return {
@@ -45,7 +75,10 @@ export function createChain(links: readonly ChainLink[], log: (event: Record<str
       let lastError: ProviderError | null = null;
       let skipped = false;
 
-      for (const link of links) {
+      const hasRoom = (link: ChainLink) =>
+        link.guard?.check(estimateTokens(chars, link.outputAllowance * req.tokenScale)).ok ?? true;
+
+      for (const [i, link] of links.entries()) {
         if (req.signal.aborted) throw new ProviderError("aborted");
         const tokens = estimateTokens(chars, link.outputAllowance * req.tokenScale);
         const room = link.guard?.check(tokens) ?? { ok: true as const };
@@ -55,9 +88,24 @@ export function createChain(links: readonly ChainLink[], log: (event: Record<str
           log({ event: "provider_skipped", provider: link.provider.name, reason: room.reason });
           continue;
         }
+
+        // Leave time for the next provider that could still answer (see FINAL_RESERVE_MS).
+        let attempt: AbortController | null = null;
+        let timer: ReturnType<typeof setTimeout> | undefined;
+        if (req.deadline !== undefined && links.slice(i + 1).some(hasRoom)) {
+          const allowed = req.deadline - performance.now() - timing.finalReserveMs;
+          if (allowed < timing.minAttemptMs) {
+            log({ event: "provider_skipped", provider: link.provider.name, reason: "keeping time for the fallback" });
+            continue;
+          }
+          attempt = new AbortController();
+          timer = setTimeout(() => attempt!.abort(), allowed);
+        }
+        const signal = attempt ? AbortSignal.any([req.signal, attempt.signal]) : req.signal;
+
         const reservation = link.guard?.reserve(tokens);
         try {
-          const completion = await link.provider.complete(req);
+          const completion = await raceSignal(link.provider.complete({ ...req, signal }), signal);
           const u = completion.usage;
           if (reservation) link.guard!.settle(reservation, u.inputTokens + u.cacheReadTokens + u.outputTokens);
           return completion;
@@ -70,6 +118,8 @@ export function createChain(links: readonly ChainLink[], log: (event: Record<str
           shortestWait = Math.min(shortestWait, wait);
           lastError = err;
           log({ event: "provider_failover", provider: link.provider.name, kind: err.kind });
+        } finally {
+          clearTimeout(timer);
         }
       }
 

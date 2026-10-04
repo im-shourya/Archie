@@ -1,6 +1,6 @@
 # 02 · Requirements
 
-The master checklist. Every requirement has an ID, a priority, a phase, and a test. Status values: `Planned` · `In progress` · `Done` · `Cut`. Last reviewed after Phase 6 (2026-10-04). FR-042: the share-link codec exists (`@archie/database`); the UI is Phase 7.
+The master checklist. Every requirement has an ID, a priority, a phase, and a test. Status values: `Planned` · `In progress` · `Done` · `Cut`. Last reviewed during Phase 7 (2026-10-04): share, export, replay and `/evals` are built; the final eval run and the deployment are still open.
 
 ## Functional requirements
 
@@ -59,9 +59,9 @@ The master checklist. Every requirement has an ID, a priority, a phase, and a te
 |----|-------------|-----|-------|--------|
 | FR-040 | Boards auto-save locally; Home lists recent boards | P0 | 1 | Done |
 | FR-041 | Templates: three-tier, URL shortener, chat | P0 | 1 | Done |
-| FR-042 | Read-only share link (graph in the URL hash) with "Duplicate" | P1 | 7 | In progress |
-| FR-043 | Export Mermaid, PNG/SVG, design doc (Markdown), JSON | P1 | 7 | Planned |
-| FR-044 | Session replay scrubs through the event log | P1 | 7 | Planned |
+| FR-042 | Read-only share link (graph in the URL hash) with "Duplicate" | P1 | 7 | Done |
+| FR-043 | Export Mermaid, PNG/SVG, design doc (Markdown), JSON; Open file imports JSON | P1 | 7 | Done |
+| FR-044 | Session replay scrubs through the event log | P1 | 7 | Done |
 
 ### Interview & review (F-10, F-11)
 
@@ -78,7 +78,7 @@ The master checklist. Every requirement has an ID, a priority, a phase, and a te
 | ID | Requirement | Pri | Phase | Status |
 |----|-------------|-----|-------|--------|
 | FR-060 | `npm run eval` runs every case end to end and writes a results JSON | P0 | 4 | Done |
-| FR-061 | `/evals` renders accuracy per category and latency percentiles per tier | P1 | 7 | Planned |
+| FR-061 | `/evals` renders accuracy per category and latency percentiles per tier | P1 | 7 | Done |
 | FR-062 | Mic button fallback (Web Speech API) for users without Wispr Flow | P1 | 5 | Done |
 
 ## Non-functional requirements
@@ -115,6 +115,6 @@ The master checklist. Every requirement has an ID, a priority, a phase, and a te
 | FR-020–028 | [09](09-simulation-engine.md)–[11](11-failure-model.md) | `simulator/src/sim` | golden tests `sim.golden.test.ts` |
 | FR-040–044 | [17](17-database.md) | `database/src` | `repo.test.ts`, `share.test.ts` |
 | FR-050–054 | [12](12-ai-architecture.md), [34](34-phase-6-plan.md) | `simulator/src/{interview,review}`, `ai/src/llm/{interview,score,review}.ts` | `problems.test.ts`, `rules.test.ts`, `interview.test.ts`, `score.test.ts`, `review.test.ts`, e2e `interview`/`review` |
-| FR-060–061 | [22](22-evaluation.md)–[24](24-latency-benchmark.md) | `evals/` | — |
+| FR-060–061 | [22](22-evaluation.md)–[24](24-latency-benchmark.md) | `evals/`, `frontend/src/app/evals` | `dataset.test.ts`, `report.test.ts`, e2e `evals` |
 | NFR-001–005 | [24](24-latency-benchmark.md), [27](27-performance.md) | — | benches |
 | NFR-009–011 | [20](20-security.md) | `backend/src` | `tests/integration` |

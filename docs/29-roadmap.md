@@ -83,6 +83,8 @@ Where the project is going. Live status is in [31-project-state.md](31-project-s
 
 ## Phase 7 · Evals + ship (F-12, F-13, F-14)
 
+**Status:** 🚧 on `chore/evals-deploy`: dataset, fixes, `/evals`, share, export, replay and the deploy code are done; the final test-split run (Mon after 12:30 IST) and the Render service (needs the owner's account and rotated keys) remain.
+
 **Detailed plan:** [35-phase-7-plan.md](35-phase-7-plan.md) (steps, quota budget across two quota days, host, cut order).
 
 - [ ] 92 cases (≥ 80, every category ≥ 5), dev/test split, run, fix the top failing categories, final test-split run

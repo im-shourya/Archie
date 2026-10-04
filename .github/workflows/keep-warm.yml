@@ -1,0 +1,19 @@
+# Keep the free Render instance awake while the challenge is judged (docs/25 · Cold starts).
+# Free instances sleep after 15 minutes idle. GitHub may run this late, so it reduces cold starts
+# rather than removing them. Set the repository variable ARCHIE_URL. Delete this file after judging.
+name: Keep warm
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    if: vars.ARCHIE_URL != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - run: curl -fsS --max-time 120 "${{ vars.ARCHIE_URL }}/api/health" -o /dev/null
