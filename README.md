@@ -1,92 +1,140 @@
-# Archie
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="frontend/public/brand/logo-mark-dark.svg">
+    <img src="frontend/public/brand/logo-mark-light.svg" width="72" height="72" alt="Archie logo: the letter A drawn as a three-node architecture graph">
+  </picture>
+</p>
 
-**Talk through a system. Watch it run. Watch it break.**
-A voice-first system-design board: describe an architecture out loud, see it drawn live, put real traffic through it, kill components, and get questioned by an AI interviewer whose grading comes from a simulator.
+<h1 align="center">Archie</h1>
 
-> 🎙 Built entirely by voice with [Wispr Flow](https://ref.wisprflow.ai/hhg) for Hacker House Goa 2026.
-> **Status:** in development. See [project state](docs/31-project-state.md).
+<p align="center"><strong>Talk through a system. Watch it run. Watch it break.</strong></p>
 
-<!-- Demo GIF + live link go here once deployed -->
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-2a44c8" alt="MIT license"></a>
+</p>
 
-## What it does
+Archie is a system-design board you talk to. You describe changes out loud ("five replicas of the API", "kill Redis"), the diagram updates, and a simulator shows where the system saturates, which requests fail, and why, with the numbers behind every red component. It's built for engineers sketching a design and for students practising system-design interviews.
 
-```
-🎙 "Users hit two load balancers, thirty API servers, Postgres with two read replicas, and Redis."
-   → the diagram draws itself
-🎙 "Send fifty thousand requests a second, ninety percent reads."
-   → Postgres turns red: ρ = 1.40, 28.6% of requests dropped (with the math)
-🎙 "Shard Postgres into two."   → ρ = 0.70, back to green
-🎙 "Kill Redis."                 → reads flood the DB, p99 spikes
-🎙 "Interview me."               → one sharp question + live SLO checklist
-```
+![The three-tier template at 50,000 requests per second: Postgres is saturated at ρ 1.40 and the bottleneck note explains why](docs/assets/board-bottleneck.png)
 
-## Highlights
+> Built by voice with [Wispr Flow](https://ref.wisprflow.ai/hhg) for Hacker House Goa 2026. **Status:** in development. Phases 0–3 of 8 are done ([roadmap](docs/29-roadmap.md), [project state](docs/31-project-state.md)).
 
-- **Two-tier command engine.** A local grammar handles common commands in milliseconds and abstains when unsure; Claude handles everything else, emitting **validated graph ops** (never a regenerated diagram).
-- **A real simulator.** Deterministic queueing model with cache-aside, read replicas, sharding, queues, failover, and Monte Carlo p50/p99, in < 5 ms.
-- **Guardrails.** Clarifies ambiguity, confirms destructive changes, ignores off-topic input, and repairs invalid output.
-- **Measured.** An eval set with accuracy per category and latency P50/P70/P95/P100 per tier (numbers below once published).
+## What works today
+
+- **Voice commands, applied locally.** Dictate with Wispr Flow (or type) into the command bar. A deterministic parser turns commands like *"Kill Redis"*, *"Shard Postgres into two"* or *"Send fifty thousand requests a second, ninety percent reads"* into graph edits. If a command is ambiguous, compound or unknown, it is **not guessed**: the board stays unchanged and you get a hint.
+- **Hands-free mode.** The command sends itself once your dictation has been still for 1.2 seconds.
+- **A live simulator.** Every change re-runs a queueing model: per-component load and utilization (ρ), cache-aside reads, read replicas, sharding, queues with backlog, failover, end-to-end success rate, p50/p95/p99 latency, throughput and a monthly cost estimate.
+- **Explanations with the math.** The bottleneck gets a note such as *"1,500 reads/s + 5,000 writes/s on 1 shard (capacity 10,000 reads / 4,000 writes per shard) → ρ = 1.40 → 28.6% of its requests dropped."*
+- **Failure injection and blast radius.** *"Kill Redis"* shows success falling from 96.3% to 54.5% and which components became hot.
+- **Boards in your browser.** Templates (three-tier, URL shortener, chat), undo/redo, change history, automatic layout, light and dark themes. Boards are saved in IndexedDB and never leave your browser.
+
+![After "Kill Redis": the blast radius panel shows success falling from 96.3% to 54.5% and both replicas saturating](docs/assets/board-blast-radius.png)
+
+### Planned
+
+| Phase | Feature | Status |
+|-------|---------|--------|
+| 4 | AI tier: full descriptions ("users hit two load balancers…"), clarifying questions, confirmations, grounded answers ([plan](docs/32-phase-4-plan.md)) | 📋 Next |
+| 5 | Design pass: inspector, mobile layout | 📋 Planned |
+| 6 | Interview mode with simulator-checked SLOs, design review | 📋 Planned |
+| 7 | Eval report, share links, exports, deployment | 📋 Planned |
 
 ## Results
 
-| Metric | Value |
-|--------|-------|
-| Task accuracy (held-out) | _pending_ |
-| False-action rate | _pending_ |
-| Fast path P50 / P100 | 0.006 ms / 0.138 ms (Apple M4, 14k samples, commit `c055a5e`) |
-| AI command P50 / P95 | _pending_ |
-| Simulator P95 @ 100 nodes | 2.327 ms (10,000-sample Monte Carlo, commit `58a1fcd`) |
+Measured with the scripts in this repository (`npm run bench:fast`, `npm run bench:sim`; Apple M4, Node 22). Raw results are in [`evals/results/`](evals/results/).
 
-Methodology: [evaluation](docs/22-evaluation.md) · [latency benchmark](docs/24-latency-benchmark.md).
+| What | Result | Target |
+|------|--------|--------|
+| Voice command, parse + apply (fast path) | P50 0.006 ms · P100 0.138 ms over 14,000 runs | P50 < 10 ms |
+| Full simulation incl. 10,000-sample Monte Carlo, 100 components | P95 2.33 ms | P95 < 5 ms |
+| Unit, property and contract tests | 194 passing | — |
+| End-to-end tests (desktop + mobile Chromium) | 30 passing | — |
 
-## Architecture
+The simulator's headline numbers are golden-tested against hand calculations in [docs/10](docs/10-traffic-model.md). It is a teaching model (M/M/1 per replica, steady state), not a vendor benchmark; assumptions are listed in [docs/09](docs/09-simulation-engine.md).
 
+## How it works
+
+```mermaid
+flowchart LR
+    V[Wispr Flow dictation] --> C[Command bar]
+    C --> F{Fast path<br/>deterministic parser}
+    F -- understood --> O[Validated graph ops]
+    F -- unsure --> H[Hint now · AI tier in Phase 4]
+    O --> G[(Board graph)]
+    G --> S[Simulator<br/>queueing + Monte Carlo]
+    S --> U[Canvas · metrics · explanations]
+    G --> D[(IndexedDB)]
 ```
-Wispr Flow → Command bar → fast path ─hit─► ops ─► simulator ─► canvas
-                              │ miss
-                              ▼
-                     /api/command (Hono) → Claude (structured output)
-                              → validate → repair → guardrails → ops
-```
 
-Details: [system architecture](docs/04-system-architecture.md).
+1. You speak a command; Wispr Flow types it into the command bar.
+2. The fast path matches it against an anchored grammar and resolves component names ("the db", "it", "postgres replica one"). It returns nothing unless it is certain.
+3. The result is a batch of typed operations, validated as a whole and applied atomically, so one bad operation changes nothing.
+4. The simulator re-runs on the new graph in a few milliseconds, and the canvas, metrics and explanations update.
 
 ## Tech stack
 
-Next.js · React Flow · elkjs · Zustand · Hono · TypeScript · Zod · Claude API (`claude-opus-5-5`) · IndexedDB · Vitest · Playwright · Vercel
+| Role | Technology |
+|------|------------|
+| App | Next.js 16 (App Router), React 19, TypeScript 6 |
+| Canvas | React Flow, ELK layered layout in a Web Worker |
+| State and storage | Zustand, IndexedDB (`idb`) |
+| API | Hono, mounted at `/api` inside Next.js |
+| Validation and contracts | Zod, JSON Schema + OpenAPI in [`specs/`](specs/) |
+| Design | IBM Plex Sans and Mono, Lucide icons, CSS custom properties |
+| Testing | Vitest, fast-check, Playwright |
+| Voice | Wispr Flow (system-wide dictation) |
+
+## Project structure
+
+```text
+frontend/    Next.js app: pages, canvas, command bar, metrics panel
+backend/     Hono API (health today; the AI endpoint in Phase 4)
+simulator/   graph model, operations and the simulation engine (pure TypeScript)
+ai/          fastpath/ command parser (browser-safe); llm/ arrives in Phase 4
+database/    IndexedDB repository and share-link codec
+evals/       benchmarks and results
+specs/       JSON Schemas, OpenAPI and fixtures (machine-readable contracts)
+tests/       contract and end-to-end tests
+docs/        product and engineering documentation (start with 00-overview)
+```
 
 ## Getting started
 
-Requires Node 22+ (`.nvmrc`).
+**Prerequisites:** Node.js 22 or newer (see `.nvmrc`) and npm.
 
 ```bash
-git clone https://github.com/im-shourya/Archie.git archie && cd archie
-cp .env.example .env.local      # add ANTHROPIC_API_KEY (needed from Phase 4)
+git clone https://github.com/im-shourya/Archie.git
+cd Archie
 npm install
-npm run dev                     # http://localhost:3000  ·  health: /api/health
+npm run dev
 ```
+
+Open <http://localhost:3000>, pick **Open the 50k rps demo**, and try saying *"Shard Postgres into two."*
+
+No environment variables are needed today. [`.env.example`](.env.example) lists the optional ones: `NEXT_PUBLIC_SITE_URL` (canonical URL for social previews in production) and the `ANTHROPIC_API_KEY` that Phase 4 will need.
+
+### Commands
 
 | Command | What it does |
 |---------|--------------|
-| `npm run dev` | Next.js dev server with the API mounted at `/api` |
-| `npm run dev:backend` | Backend alone on `http://localhost:8787/api` |
-| `npm run lint` · `npm run typecheck` | ESLint · TypeScript across all workspaces |
-| `npm test` | Unit and integration tests (Vitest) |
-| `npm run test:e2e` | Playwright end-to-end tests (`npx playwright install chromium` first) |
-| `npm run bench:fast` | Fast-path latency percentiles → `evals/results/bench-fastpath.json` |
-| `npm run bench:sim` | Simulator latency at 10–200 nodes → `evals/results/bench-simulator.json` |
-| `npm run build` | Production build |
+| `npm run dev` | Development server with the API at `/api` |
+| `npm run build` · `npm start` | Production build and server |
+| `npm run lint` · `npm run typecheck` | ESLint and TypeScript across all workspaces |
+| `npm test` | Unit, property and contract tests (Vitest) |
+| `npm run test:e2e` | End-to-end tests (run `npx playwright install chromium` once first) |
+| `npm run bench:fast` · `npm run bench:sim` | Latency benchmarks, written to `evals/results/` |
+| `npm run dev:backend` | The API alone on <http://localhost:8787/api> |
 
-Repository layout: `frontend/` (Next.js) · `backend/` (Hono) · `simulator/` · `ai/` · `database/` · `evals/` · `tests/` · `specs/`. See the [overview](docs/00-overview.md#repository-structure).
+## Built with Wispr Flow
+
+Archie is being built for the Wispr Flow challenge: the coding agent receives its instructions by dictation, the docs in [`docs/`](docs/) are detailed so spoken prompts can stay short (*"Do Phase 3 from doc 29"*), and the product itself is designed for dictation, with one command bar and a hands-free mode. Challenge rules and the submission checklist are in [docs/99](docs/99-challenge.md).
 
 ## Documentation
 
-Start with the [overview](docs/00-overview.md). Product: [idea](docs/01-idea.md) · [requirements](docs/02-requirements.md) · [spec](docs/03-product-spec.md) · [roadmap](docs/29-roadmap.md). Engineering: [architecture](docs/04-system-architecture.md) · [simulator](docs/09-simulation-engine.md) · [AI](docs/12-ai-architecture.md) · [API](docs/16-api.md) · [security](docs/20-security.md) · [decisions](docs/30-architecture-decisions.md). Contracts: [`specs/`](specs/).
+Start with the [overview](docs/00-overview.md). Product: [idea](docs/01-idea.md) · [requirements](docs/02-requirements.md) · [spec](docs/03-product-spec.md) · [roadmap](docs/29-roadmap.md). Engineering: [architecture](docs/04-system-architecture.md) · [simulator](docs/09-simulation-engine.md) · [commands](docs/13-command-understanding.md) · [AI plan](docs/32-phase-4-plan.md) · [security](docs/20-security.md) · [decisions](docs/30-architecture-decisions.md).
 
-## Contributing & security
+## Contributing, security, license
 
-[CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) · [CHANGELOG.md](CHANGELOG.md)
+See [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md). Changes are tracked in [CHANGELOG.md](CHANGELOG.md).
 
-## License
-
-[MIT](LICENSE)
+Licensed under the [MIT License](LICENSE). IBM Plex fonts are used under the SIL Open Font License ([frontend/assets/fonts/OFL-IBM-Plex.txt](frontend/assets/fonts/OFL-IBM-Plex.txt)).

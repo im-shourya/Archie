@@ -4,8 +4,8 @@ import type { BoardEvent } from "@archie/simulator";
 import styles from "./board.module.css";
 
 const SOURCE_LABEL: Record<BoardEvent["source"], string> = {
-  fastpath: "⚡ local",
-  ai: "✦ AI",
+  fastpath: "voice · local",
+  ai: "voice · AI",
   inspector: "edit",
   "review-fix": "review fix",
   undo: "undo",

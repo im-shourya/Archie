@@ -4,7 +4,7 @@ Where the project is **right now**. Update at the end of every phase (and whenev
 
 ## Current phase
 
-**Phase 3 · Simulator**: built on `feat/simulator` (PR pending). Next: Phase 4 (AI harness), see [32-phase-4-plan.md](32-phase-4-plan.md).
+**Phase 3 done** (merged in #5). Brand, SEO and docs audit on `feat/brand-seo`. Next: Phase 4 (AI harness), see [32-phase-4-plan.md](32-phase-4-plan.md).
 
 ## Completed
 
@@ -22,6 +22,7 @@ Where the project is **right now**. Update at the end of every phase (and whenev
 - [x] Phase 1: graph model, op engine (10 ops, 11 error codes), templates, contract tests vs `specs/`, IndexedDB repository + share codec, board store with snapshot undo, React Flow canvas with ELK worker layout, Home + `/b/new` + `/b/[id]`
 - [x] Phase 2: fast path (numbers, normalization, reference resolution, 19 rules, abstains when unsure), command bar with latency badge, hands-free mode, history, toast with Undo, `bench:fast`
 - [x] Phase 3: simulation engine (propagation, cache-aside, SQL clusters + failover, queues, exact success, seeded Monte Carlo, explanations), golden + property + contract tests, `bench:sim`, board UI (status, ρ bars, animated traffic, bottleneck callout, metrics panel, blast radius)
+- [x] Brand and design system (logo, tokens, Plex, Lucide, light/dark), SEO (metadata, OG image, manifest, robots, sitemap, JSON-LD), README rewrite, docs audit (statuses, stale undo/emoji references)
 - [ ] Phase 4: AI harness
 
 ## Blocked
@@ -42,7 +43,7 @@ _Nothing._
 
 1. Sign up for Wispr Flow via <https://ref.wisprflow.ai/hhg>
 2. Test screen recording with the Wispr overlay visible
-3. Merge the Phase 3 PR
+3. Make the repository public before submitting (it's private, so the repo link and README images won't open for judges)
 4. 🎙 Phase 4 per [32-phase-4-plan.md](32-phase-4-plan.md)
 
 ## Metrics snapshot
