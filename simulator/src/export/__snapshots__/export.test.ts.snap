@@ -1,0 +1,54 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`toMermaid > chat matches its snapshot 1`] = `
+"flowchart LR
+  n_client(["Users"])
+  n_gateway["API gateway"]
+  n_chat["Chat service ×8"]
+  n_kafka[["Kafka"]]
+  n_fanout["Fan-out workers ×6"]
+  n_messages[("Messages (Cassandra) 3 shards")]
+  n_presence["Presence (Redis)"]
+  n_client --> n_gateway
+  n_gateway --> n_chat
+  n_chat -->|read| n_presence
+  n_chat -.->|write| n_kafka
+  n_kafka -.->|write| n_fanout
+  n_fanout -->|write| n_messages
+  n_chat -->|read| n_messages
+"
+`;
+
+exports[`toMermaid > three-tier matches its snapshot 1`] = `
+"flowchart LR
+  n_client(["Users"])
+  n_lb["Load balancer ×2"]
+  n_api["API ×30"]
+  n_redis["Redis"]
+  n_pg[("Postgres (primary)")]
+  n_pg_r1[("Postgres replica 1")]
+  n_pg_r2[("Postgres replica 2")]
+  n_client --> n_lb
+  n_lb --> n_api
+  n_api -->|read| n_redis
+  n_api --> n_pg
+  n_pg ==> n_pg_r1
+  n_pg ==> n_pg_r2
+"
+`;
+
+exports[`toMermaid > url-shortener matches its snapshot 1`] = `
+"flowchart LR
+  n_client(["Users"])
+  n_cdn["CDN"]
+  n_lb["Load balancer"]
+  n_shortener["Shortener API ×10"]
+  n_redis["Redis"]
+  n_links[("Links (DynamoDB) 4 shards")]
+  n_client --> n_cdn
+  n_cdn --> n_lb
+  n_lb --> n_shortener
+  n_shortener -->|read| n_redis
+  n_shortener --> n_links
+"
+`;
