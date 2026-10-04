@@ -141,9 +141,11 @@ export class StructuredSession<T> {
   private timedOut = false;
   private readonly timer: ReturnType<typeof setTimeout>;
   private readonly onAbort = () => this.controller.abort();
+  private readonly deadline: number;
 
   constructor(private readonly options: SessionOptions<T>) {
     this.model = options.provider.model;
+    this.deadline = performance.now() + (options.budgetMs ?? TOTAL_BUDGET_MS);
     this.timer = setTimeout(() => {
       this.timedOut = true;
       this.controller.abort();
@@ -165,6 +167,7 @@ export class StructuredSession<T> {
               turns: [...turns],
               tokenScale: truncations === 0 ? 1 : 2,
               signal: this.controller.signal,
+              deadline: this.deadline,
               requestId: this.options.requestId,
             }),
             this.controller.signal,

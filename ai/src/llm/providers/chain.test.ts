@@ -172,3 +172,66 @@ describe("fallback config", () => {
     expect(quotaLimits("groq")).toMatchObject({ rpm: 28, tpm: 7_600, tpd: 190_000 });
   });
 });
+
+describe("provider chain: deadline (a hung model must not starve the fallback)", () => {
+  /** Never settles, and ignores its abort signal (as some SDKs do). */
+  const hang = () => new Promise<Completion>(() => {});
+  const timing = { finalReserveMs: 200, minAttemptMs: 100 };
+  const withDeadline = (ms: number) => ({ ...req(), deadline: performance.now() + ms });
+
+  it("cuts a hung primary off early enough for the last provider to answer", async () => {
+    const a = fake("gemini", hang);
+    const b = fake("gemini", hang);
+    const groq = fake("groq", ok("gpt-oss-120b"));
+    const chain = createChain(
+      [
+        { provider: a, guard: new QuotaGuard("a", {}), outputAllowance: 0 },
+        { provider: b, guard: new QuotaGuard("b", {}), outputAllowance: 0 },
+        { provider: groq, outputAllowance: 0 },
+      ],
+      () => {},
+      timing,
+    );
+    const t0 = performance.now();
+    expect((await chain.complete(withDeadline(600))).model).toBe("gpt-oss-120b");
+    expect(performance.now() - t0).toBeLessThan(600);
+    expect(a.calls).toBe(1);
+    // After the first hang only ~200 ms are left: the second Gemini is skipped, not tried.
+    expect(b.calls).toBe(0);
+  });
+
+  it("gives the whole remaining budget to a link when no later provider has room", async () => {
+    const slow = fake("gemini", () => new Promise((r) => setTimeout(() => r({ text: noop, stop: "end", model: "slow", usage, raw: noop }), 450)));
+    const fullGroq = new QuotaGuard("groq", { rpm: 1 });
+    fullGroq.reserve(1);
+    const chain = createChain(
+      [
+        { provider: slow, guard: new QuotaGuard("a", {}), outputAllowance: 0 },
+        { provider: fake("groq", ok("gpt-oss-120b")), guard: fullGroq, outputAllowance: 0 },
+      ],
+      () => {},
+      timing,
+    );
+    // 450 ms is past "deadline − reserve" (400 ms), but nothing could follow it, so it may finish.
+    expect((await chain.complete(withDeadline(600))).model).toBe("slow");
+  });
+
+  it("treats a per-attempt cutoff as a failover, not a cancellation", async () => {
+    const guard = new QuotaGuard("a", {});
+    const chain = createChain(
+      [
+        { provider: fake("gemini", hang), guard, outputAllowance: 0 },
+        { provider: fake("groq", ok("gpt-oss-120b")), outputAllowance: 0 },
+      ],
+      () => {},
+      timing,
+    );
+    await chain.complete(withDeadline(600));
+    expect(guard.check(1)).toMatchObject({ ok: false, scope: "cooldown" });
+  });
+
+  it("keeps the old behaviour without a deadline", async () => {
+    const chain = createChain([{ provider: fake("gemini", ok("g")), outputAllowance: 0 }], () => {}, timing);
+    expect((await chain.complete(req())).model).toBe("g");
+  });
+});

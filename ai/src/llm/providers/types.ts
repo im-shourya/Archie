@@ -30,6 +30,11 @@ export interface CompletionRequest {
   /** 1 normally, 2 on the max_tokens retry (G-11). */
   tokenScale: 1 | 2;
   signal: AbortSignal;
+  /**
+   * When the request's whole budget runs out (performance.now() ms). The chain uses it to cut a
+   * hung model off early enough for the next provider to answer.
+   */
+  deadline?: number;
   requestId?: string;
 }
 
