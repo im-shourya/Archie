@@ -1,13 +1,23 @@
 "use client";
 
 import { memo } from "react";
+import { X } from "lucide-react";
 import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, type Edge, type EdgeProps } from "@xyflow/react";
 import { compact } from "@/lib/format";
+import { useBoardStore } from "../store/board.store";
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
 import styles from "./board.module.css";
 
 export type TrafficFlowEdge = Edge<
-  { rps: number; errorRps: number; kind: "call" | "async" | "replication"; traffic: "all" | "read" | "write" },
+  {
+    rps: number;
+    errorRps: number;
+    kind: "call" | "async" | "replication";
+    traffic: "all" | "read" | "write";
+    fromLabel: string;
+    toLabel: string;
+    editable: boolean;
+  },
   "traffic"
 >;
 
@@ -19,7 +29,14 @@ export function particleCount(rps: number): number {
   return Math.min(5, Math.max(1, Math.round(Math.log10(rps)) - 1));
 }
 
-function TrafficEdgeImpl({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, markerEnd, data }: EdgeProps<TrafficFlowEdge>) {
+/** Remove a connection: the same validated op as "disconnect A from B", with Undo. */
+export function disconnect(from: string, to: string, fromLabel: string, toLabel: string): void {
+  const { apply, notify } = useBoardStore.getState();
+  const result = apply([{ type: "disconnect", from, to }], { utterance: null, source: "inspector" });
+  if (result.ok) notify(`Disconnected ${fromLabel} → ${toLabel}`, true);
+}
+
+function TrafficEdgeImpl({ id, source, target, selected, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, markerEnd, data }: EdgeProps<TrafficFlowEdge>) {
   const reduced = usePrefersReducedMotion();
   const [path, labelX, labelY] = getSmoothStepPath({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition });
   const rps = data?.rps ?? 0;
@@ -34,7 +51,8 @@ function TrafficEdgeImpl({ id, sourceX, sourceY, targetX, targetY, sourcePositio
         id={id}
         path={path}
         markerEnd={markerEnd}
-        className={[styles.edge, styles[`edge-${data?.kind ?? "call"}`], rps === 0 && styles.edgeIdle].filter(Boolean).join(" ")}
+        className={[styles.edge, styles[`edge-${data?.kind ?? "call"}`], rps === 0 && styles.edgeIdle, selected && styles.edgeSelected].filter(Boolean).join(" ")}
+        interactionWidth={data?.editable ? 18 : 0}
         style={{ strokeWidth: reduced ? width : Math.max(1, width - 0.5) }}
       />
       {!reduced &&
@@ -43,6 +61,20 @@ function TrafficEdgeImpl({ id, sourceX, sourceY, targetX, targetY, sourcePositio
             <animateMotion dur={`${DURATION_S}s`} begin={`${-(i * DURATION_S) / count}s`} repeatCount="indefinite" path={path} />
           </circle>
         ))}
+      {selected && data?.editable && (
+        <EdgeLabelRenderer>
+          <button
+            type="button"
+            className={`${styles.edgeDelete} nodrag nopan`}
+            style={{ transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY + (rps > 0 ? 20 : 0)}px)` }}
+            aria-label={`Disconnect ${data.fromLabel} → ${data.toLabel}`}
+            title="Disconnect (Delete)"
+            onClick={() => disconnect(source, target, data.fromLabel, data.toLabel)}
+          >
+            <X size={14} aria-hidden />
+          </button>
+        </EdgeLabelRenderer>
+      )}
       {rps > 0 && (
         <EdgeLabelRenderer>
           <div

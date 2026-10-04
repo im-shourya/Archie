@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
-import { Background, Controls, MarkerType, ReactFlow, useNodesState } from "@xyflow/react";
+import { Background, Controls, MarkerType, ReactFlow, useEdgesState, useNodesState } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import type { Graph, SimResult, Spof } from "@archie/simulator";
+import { opMessage } from "@/lib/format";
 import { useBoardStore } from "../store/board.store";
 import { ArchNodeCard, type ArchFlowNode } from "./ArchNodeCard";
 import { TrafficEdge, type TrafficFlowEdge } from "./TrafficEdge";
@@ -16,14 +17,24 @@ const nodeTypes = { arch: ArchNodeCard };
 const edgeTypes = { traffic: TrafficEdge };
 const PULSE_MS = 900;
 
-function toEdges(graph: Graph, sim: SimResult): TrafficFlowEdge[] {
+function toEdges(graph: Graph, sim: SimResult, editable: boolean): TrafficFlowEdge[] {
+  const label = (id: string) => graph.nodes.find((n) => n.id === id)?.label ?? id;
   return graph.edges.map((e) => ({
     id: e.id,
     source: e.from,
     target: e.to,
     type: "traffic",
     markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16 },
-    data: { rps: sim.edges[e.id]?.rps ?? 0, errorRps: sim.edges[e.id]?.errorRps ?? 0, kind: e.kind, traffic: e.traffic },
+    selectable: editable,
+    data: {
+      rps: sim.edges[e.id]?.rps ?? 0,
+      errorRps: sim.edges[e.id]?.errorRps ?? 0,
+      kind: e.kind,
+      traffic: e.traffic,
+      fromLabel: label(e.from),
+      toLabel: label(e.to),
+      editable,
+    },
   }));
 }
 
@@ -47,7 +58,17 @@ export function Canvas({
   const setSelection = useBoardStore((s) => s.setSelection);
   const selectRequest = useBoardStore((s) => s.selectRequest);
   const requestSelect = useBoardStore((s) => s.requestSelect);
-  const edges = useMemo(() => toEdges(graph, sim), [graph, sim]);
+  const edges = useMemo(() => toEdges(graph, sim, !readOnly), [graph, sim, readOnly]);
+  // Edges are stateful like nodes so React Flow can select one (click, or focus + Enter).
+  const [flowEdges, setFlowEdges, onEdgesChange] = useEdgesState<TrafficFlowEdge>([]);
+  useEffect(() => {
+    setFlowEdges((prev) => {
+      const selected = new Set(prev.filter((e) => e.selected).map((e) => e.id));
+      return edges.map((e) => ({ ...e, selected: selected.has(e.id) }));
+    });
+  }, [edges, setFlowEdges]);
+  const apply = useBoardStore((s) => s.apply);
+  const notify = useBoardStore((s) => s.notify);
   const fit = useFit();
   const wrapper = useRef<HTMLDivElement>(null);
 
@@ -77,11 +98,12 @@ export function Canvas({
             vertical,
             // On phones the sheet's peek names the bottleneck; a callout would cover the graph.
             callout: !compact,
+            editable: !readOnly,
           },
         };
       });
     });
-  }, [graph, sim, spofs, positions, changed, setNodes, vertical, compact, selectRequest]);
+  }, [graph, sim, spofs, positions, changed, setNodes, vertical, compact, selectRequest, readOnly]);
 
   // A select request is applied once the node has a position (the layout runs after an add).
   useEffect(() => {
@@ -119,7 +141,8 @@ export function Canvas({
     <div ref={wrapper} className={styles.flow}>
     <ReactFlow<ArchFlowNode, TrafficFlowEdge>
       nodes={nodes}
-      edges={edges}
+      edges={flowEdges}
+      onEdgesChange={onEdgesChange}
       nodeTypes={nodeTypes}
       edgeTypes={edgeTypes}
       onNodesChange={onNodesChange}
@@ -130,7 +153,19 @@ export function Canvas({
       nodesDraggable={!readOnly}
       elementsSelectable={!readOnly}
       deleteKeyCode={null}
-      nodesConnectable={false}
+      nodesConnectable={!readOnly}
+      // Drag from a component's handle to another: the same validated op as "connect A to B".
+      isValidConnection={(c) => c.source !== c.target}
+      onConnect={(c) => {
+        const result = apply([{ type: "connect", from: c.source, to: c.target }], { utterance: null, source: "inspector" });
+        const label = (id: string) => graph.nodes.find((n) => n.id === id)?.label ?? id;
+        notify(
+          result.ok ? `Connected ${label(c.source)} → ${label(c.target)}` : opMessage(result.errors[0]?.message ?? "Can’t connect those."),
+          result.ok,
+        );
+      }}
+      connectionRadius={28}
+      edgesFocusable={!readOnly}
       colorMode="system"
       minZoom={0.2}
       maxZoom={2}
