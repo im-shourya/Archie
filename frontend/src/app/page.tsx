@@ -200,6 +200,9 @@ export default function Home() {
         <span>Boards stay in your browser.</span>
         <a href={SITE.repo}>MIT licensed</a>
         <Link href="/evals">Evals</Link>
+        <Link href="/legal/privacy">Privacy</Link>
+        <Link href="/legal/terms">Terms</Link>
+        <Link href="/legal">Legal</Link>
         <Link href="/design">Design system</Link>
       </footer>
     </div>
