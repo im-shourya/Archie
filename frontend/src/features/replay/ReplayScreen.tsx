@@ -14,6 +14,7 @@ import { describeEvent } from "../board/EventLog";
 import { useCompactLayout } from "../board/useCompactLayout";
 import { useSimulation } from "../board/useSimulation";
 import { useSpofScan } from "../board/useSpofScan";
+import { flushWrites } from "../store/board.store";
 import styles from "../board/board.module.css";
 import replayStyles from "./replay.module.css";
 
@@ -151,6 +152,8 @@ export function ReplayScreen({ id }: { id: string }) {
   useEffect(() => {
     let live = true;
     void (async () => {
+      // A change made just before opening replay may still be in its debounced save.
+      await flushWrites();
       const repo = await getRepository();
       const [board, events] = await Promise.all([repo.getBoard(id), repo.listEvents(id)]);
       if (live) setState(board ? { status: "ready", board, events } : { status: "missing" });
