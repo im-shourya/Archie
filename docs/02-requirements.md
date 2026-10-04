@@ -1,6 +1,6 @@
 # 02 · Requirements
 
-The master checklist. Every requirement has an ID, a priority, a phase, and a test. Status values: `Planned` · `In progress` · `Done` · `Cut`. Last reviewed after Phase 5 (2026-10-03). FR-042: the share-link codec exists (`@archie/database`); the UI is Phase 7.
+The master checklist. Every requirement has an ID, a priority, a phase, and a test. Status values: `Planned` · `In progress` · `Done` · `Cut`. Last reviewed after Phase 6 (2026-10-04). FR-042: the share-link codec exists (`@archie/database`); the UI is Phase 7.
 
 ## Functional requirements
 
@@ -39,7 +39,7 @@ The master checklist. Every requirement has an ID, a priority, a phase, and a te
 | FR-024 | Edge animation density is proportional to rps; failed traffic is shown distinctly | P0 | 3 | Done |
 | FR-025 | Nodes can be failed/recovered by voice; effects (reroute, failover, degradation) are simulated | P0 | 3 | Done |
 | FR-026 | Simulation re-runs automatically after every change | P0 | 3 | Done |
-| FR-027 | SPOF scan identifies nodes whose failure drops success below 99% | P1 | 6 | Planned |
+| FR-027 | SPOF scan identifies components whose single-instance loss costs ≥ 5% of successful requests (doc 11) | P1 | 6 | Done |
 | FR-028 | An estimated monthly cost is shown | P1 | 6 | Done |
 
 ### AI & guardrails (F-07, F-08)
@@ -67,11 +67,11 @@ The master checklist. Every requirement has an ID, a priority, a phase, and a te
 
 | ID | Requirement | Pri | Phase | Status |
 |----|-------------|-----|-------|--------|
-| FR-050 | Problem bank with requirements (DAU, peak rps, read ratio, p99, availability) | P1 | 6 | Planned |
-| FR-051 | SLO checks are computed by the simulator, not the LLM | P1 | 6 | Planned |
-| FR-052 | The interviewer asks one question at a time, targeted at the weakest point, optionally read aloud | P1 | 6 | Planned |
-| FR-053 | The scorecard combines SLO checks and a 5-dimension rubric with cited evidence | P1 | 6 | Planned |
-| FR-054 | Design review returns findings with severity and an optional fix as validated ops | P1 | 6 | Planned |
+| FR-050 | Problem bank with requirements (DAU, peak rps, read ratio, p99, availability) | P1 | 6 | Done |
+| FR-051 | SLO checks are computed by the simulator, not the LLM | P1 | 6 | Done |
+| FR-052 | The interviewer asks one question at a time, targeted at the weakest point, optionally read aloud | P1 | 6 | Done |
+| FR-053 | The scorecard combines SLO checks and a 5-dimension rubric with cited evidence | P1 | 6 | Done |
+| FR-054 | Design review returns findings with severity and an optional fix as validated ops | P1 | 6 | Done |
 
 ### Evals (F-14)
 
@@ -114,7 +114,7 @@ The master checklist. Every requirement has an ID, a priority, a phase, and a te
 | FR-014–016 | [06](06-ui-ux.md) | `frontend/src/features/board` | e2e `board.spec.ts` |
 | FR-020–028 | [09](09-simulation-engine.md)–[11](11-failure-model.md) | `simulator/src/sim` | golden tests `sim.golden.test.ts` |
 | FR-040–044 | [17](17-database.md) | `database/src` | `repo.test.ts`, `share.test.ts` |
-| FR-050–054 | [12](12-ai-architecture.md) | `simulator/src/interview`, `ai/src/llm` | `slo.test.ts`, evals |
+| FR-050–054 | [12](12-ai-architecture.md), [34](34-phase-6-plan.md) | `simulator/src/{interview,review}`, `ai/src/llm/{interview,score,review}.ts` | `problems.test.ts`, `rules.test.ts`, `interview.test.ts`, `score.test.ts`, `review.test.ts`, e2e `interview`/`review` |
 | FR-060–061 | [22](22-evaluation.md)–[24](24-latency-benchmark.md) | `evals/` | — |
 | NFR-001–005 | [24](24-latency-benchmark.md), [27](27-performance.md) | — | benches |
 | NFR-009–011 | [20](20-security.md) | `backend/src` | `tests/integration` |

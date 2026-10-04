@@ -74,6 +74,8 @@ Where the project is going. Live status is in [31-project-state.md](31-project-s
 
 ## Phase 6 · Interview, review, SPOF, cost (F-10, F-11, F-15)
 
+**Status:** ✅ built on `feat/interview` (see doc 34 · Outcome).
+
 **Detailed plan:** [34-phase-6-plan.md](34-phase-6-plan.md) (steps, files, tests, quota budget, cut order). Screens: [design/frontend-design.md](design/frontend-design.md).
 
 - [ ] problems + `sloChecks` (tests), SPOF worker, cost
