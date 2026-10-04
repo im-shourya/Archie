@@ -199,7 +199,8 @@ for (const scheme of ["light", "dark"] as const) {
         r.fulfill({ status: 401, json: { error: { code: "ACCESS_CODE_REQUIRED", message: "x" } } }),
       );
       await openThreeTier(page);
-      await say(page, "add a queue");
+      // Placement needs the AI (a bare "add a queue" is now handled locally).
+      await say(page, "add a queue in front of the database writes");
       await expect(page.getByRole("dialog")).toBeVisible();
       await audit(page);
     });
