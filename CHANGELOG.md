@@ -4,6 +4,10 @@ All notable user-visible changes. Format: [Keep a Changelog](https://keepachange
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-04
+
+First release, prepared for the Wispr Flow challenge submission. Live at <https://archie-rb2x.onrender.com>.
+
 ### Fixed
 - When "the database" (or "the service", "the cache") could mean two components, the app now asks which one instead of guessing.
 - Answering a question with an option like "Postgres (primary)" no longer makes the app ask again.
@@ -63,3 +67,6 @@ All notable user-visible changes. Format: [Keep a Changelog](https://keepachange
 - `GET /api/health`, request IDs, structured request logs, 256 KB body limit, standard error shape.
 - ESLint import boundaries, Vitest, Playwright smoke tests.
 - Project documentation (`docs/00–31`), machine-readable contracts (`specs/`), repository scaffolding files.
+
+[Unreleased]: https://github.com/im-shourya/Archie/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/im-shourya/Archie/releases/tag/v1.0.0
