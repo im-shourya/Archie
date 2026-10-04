@@ -188,6 +188,8 @@ export default function EvalsPage() {
                 <tr>
                   <th scope="col">Run</th>
                   <th scope="col">Cases</th>
+                  <th scope="col">Accuracy</th>
+                  <th scope="col">False actions</th>
                   <th scope="col">Date</th>
                   <th scope="col">Commit</th>
                   <th scope="col">Prompt</th>
@@ -199,6 +201,8 @@ export default function EvalsPage() {
                   <tr key={r.label}>
                     <th scope="row">{r.label}</th>
                     <td className={styles.num}>{r.cases}</td>
+                    <td className={styles.num}>{percent(r.taskAccuracy)}</td>
+                    <td className={styles.num}>{percent(r.falseActionRate)}</td>
                     <td>{r.date}</td>
                     <td>
                       <code>{r.commit}</code>

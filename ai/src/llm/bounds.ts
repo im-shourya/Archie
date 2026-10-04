@@ -63,5 +63,6 @@ export function findOutOfBounds(utterance: string): OutOfBounds[] {
 
 /** The clarify round-trip appends "(answer: …)": the user already chose, so don't ask again. */
 export function isClarifyAnswer(utterance: string): boolean {
-  return /\(answer:[^)]*\)\s*$/i.test(utterance);
+  // Greedy to the last ")": option labels can contain parentheses ("Postgres (primary)").
+  return /\(answer:.*\)\s*$/i.test(utterance);
 }

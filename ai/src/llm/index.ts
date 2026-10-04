@@ -29,6 +29,7 @@ export {
   quotaStatus,
 } from "./client";
 export { applyGuardrails, isDestructive } from "./guardrails";
+export { ambiguousRefs, guessedRef, type AmbiguousRef } from "./ambiguity";
 export { createAnthropicProvider, type MessagesClient } from "./providers/anthropic";
 export { createGeminiProvider, type ModelsClient } from "./providers/gemini";
 export { createGroqProvider, type ChatClient } from "./providers/groq";

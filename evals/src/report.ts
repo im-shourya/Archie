@@ -64,6 +64,8 @@ const SimBench = Bench.extend({
 
 export interface ReportInput {
   test: unknown;
+  /** An earlier final run of the test split, kept so every held-out run is published. */
+  earlierTest?: unknown;
   dev?: unknown;
   b0?: unknown;
   deployed?: unknown;
@@ -74,6 +76,8 @@ export interface ReportInput {
 export interface RunMeta {
   label: string;
   cases: number;
+  taskAccuracy: number;
+  falseActionRate: number;
   date: string;
   commit: string;
   model: string;
@@ -137,6 +141,8 @@ function parse<T>(schema: z.ZodType<T>, data: unknown, name: string): T {
 const meta = (label: string, r: RunResult): RunMeta => ({
   label,
   cases: r.cases.length,
+  taskAccuracy: r.metrics.taskAccuracy,
+  falseActionRate: r.metrics.falseActionRate,
   date: r.createdAt.slice(0, 10),
   commit: r.commit,
   model: r.model,
@@ -163,6 +169,7 @@ export function buildReport(input: ReportInput): Report {
   const test = parse(RunResult, input.test, "latest.json");
   if (test.split !== "test") throw new Error(`evals report: latest.json must be a test-split run (got ${test.split})`);
   const dev = input.dev === undefined ? undefined : parse(RunResult, input.dev, "dev run");
+  const earlier = input.earlierTest === undefined ? undefined : parse(RunResult, input.earlierTest, "earlier test run");
   const b0 = input.b0 === undefined ? undefined : parse(RunResult, input.b0, "b0-fastpath.json");
   const deployed = input.deployed === undefined ? undefined : parse(RunResult, input.deployed, "deployed.json");
   const fast = parse(FastBench, input.benchFast, "bench-fastpath.json");
@@ -198,6 +205,7 @@ export function buildReport(input: ReportInput): Report {
     misses: [...misses(test, "test"), ...misses(dev, "dev")],
     runs: [
       meta("Test split (held out)", test),
+      ...(earlier ? [meta("Test split, earlier run", earlier)] : []),
       ...(dev ? [meta("Dev split", dev)] : []),
       ...(b0 ? [meta("Fast path only (B0)", b0)] : []),
       ...(deployed ? [meta("Deployed", deployed)] : []),
