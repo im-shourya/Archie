@@ -176,7 +176,7 @@ components:
           properties:
             code:
               type: string
-              enum: [VALIDATION_ERROR, ACCESS_CODE_REQUIRED, PAYLOAD_TOO_LARGE, LLM_REFUSED, RATE_LIMITED, DAILY_CAP_REACHED, LLM_UPSTREAM, LLM_UNAVAILABLE, INTERNAL]
+              enum: [VALIDATION_ERROR, ACCESS_CODE_REQUIRED, NOT_FOUND, PAYLOAD_TOO_LARGE, LLM_REFUSED, RATE_LIMITED, DAILY_CAP_REACHED, LLM_UPSTREAM, LLM_UNAVAILABLE, INTERNAL]
             message: { type: string }
             details: { type: object }
     Requirements:

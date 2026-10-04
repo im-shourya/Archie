@@ -1,0 +1,16 @@
+{
+  "name": "@archie/database",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Browser persistence: IndexedDB repository, migrations, share-link codec.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@archie/simulator": "0.1.0"
+  }
+}
