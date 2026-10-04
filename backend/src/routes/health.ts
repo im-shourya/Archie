@@ -10,7 +10,13 @@ export const health = new Hono().get("/", (c) =>
     fallback: fallbackName(),
     quota: quotaStatus(),
     model: modelName(),
-    // Vercel sets the commit SHA; the Docker image is stamped with ARCHIE_VERSION at build time.
-    version: (process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.ARCHIE_VERSION)?.slice(0, 7) ?? "dev",
+    // Vercel and Render set the commit SHA; a Docker image built with GIT_SHA is stamped with ARCHIE_VERSION.
+    version: version(),
   }),
 );
+
+/** The deployed commit. An image built without GIT_SHA says "dev", so the host's own value wins then. */
+export function version(env: NodeJS.ProcessEnv = process.env): string {
+  const stamped = env.ARCHIE_VERSION && env.ARCHIE_VERSION !== "dev" ? env.ARCHIE_VERSION : undefined;
+  return (env.VERCEL_GIT_COMMIT_SHA ?? stamped ?? env.RENDER_GIT_COMMIT)?.slice(0, 7) ?? "dev";
+}
