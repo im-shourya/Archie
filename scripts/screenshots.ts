@@ -1,7 +1,7 @@
 /**
- * Visual QA sweep (docs/33 Step 8). Captures Home, the board, the Inspector, the AI panels and
- * the phone sheet at 360, 768, 1280 and 1440 px in light and dark, and refreshes the README
- * images in docs/assets. Run against a running app (production build recommended):
+ * Visual QA sweep (docs/33 Step 8, docs/34 Step 10). Captures Home, the board, the Inspector,
+ * the AI panels, interview mode, the scorecard and review at 360, 768, 1280 and 1440 px in light
+ * and dark, and refreshes the README images in docs/assets. AI routes are mocked: no quota used. Run against a running app (production build recommended):
  *
  *   npm run build && npm start -- -p 3200
  *   npx tsx scripts/screenshots.ts --base http://localhost:3200 [--out <dir>] [--readme]
@@ -47,6 +47,69 @@ async function mockAnswer(page: Page) {
       },
     });
   });
+}
+
+async function mockInterview(page: Page) {
+  await page.route("**/api/interview/turn", (route) =>
+    route.fulfill({
+      json: {
+        question:
+          "Your reads all hit the database. What happens at forty thousand requests a second?",
+        focusNodeIds: ["api", "db"],
+        checks: [],
+        source: "ai",
+        done: false,
+        model: "screenshot",
+        timings: {},
+      },
+    }),
+  );
+  await page.route("**/api/interview/score", (route) =>
+    route.fulfill({
+      json: {
+        overall: 3.4,
+        summary:
+          "A solid read path with a CDN and cache. Make the cache redundant and bring the cost under budget.",
+        rubric: [
+          {
+            dimension: "scalability",
+            score: 4,
+            evidence: "Eight API replicas at rho 0.60 leave headroom at peak.",
+            nodeIds: ["api"],
+            unsupported: false,
+          },
+          {
+            dimension: "availability",
+            score: 2,
+            evidence: "Redis is a single instance; losing it drops success sharply.",
+            nodeIds: ["redis"],
+            unsupported: false,
+          },
+          { dimension: "data-modelling", score: 3, evidence: "", nodeIds: [], unsupported: true },
+          {
+            dimension: "trade-offs",
+            score: 4,
+            evidence: "Chose a CDN over more API replicas, which is cheaper per request.",
+            nodeIds: ["api"],
+            unsupported: false,
+          },
+          {
+            dimension: "communication",
+            score: 4,
+            evidence: "Answered each question directly and with numbers.",
+            nodeIds: [],
+            unsupported: false,
+          },
+        ],
+      },
+    }),
+  );
+  await page.route("**/api/review", (route) =>
+    route.fulfill({
+      status: 503,
+      json: { error: { code: "LLM_UNAVAILABLE", message: "offline" } },
+    }),
+  );
 }
 
 async function main() {
@@ -108,6 +171,107 @@ async function main() {
     await page.waitForTimeout(400);
     await page.screenshot({ path: join(ASSETS, "board-inspector.png") });
     await context.close();
+
+    // Interview mode: three-tier against the URL shortener, one answered question, then the scorecard.
+    const iv = await browser.newContext({
+      viewport: { width: 1440, height: 900 },
+      deviceScaleFactor: 2,
+    });
+    const ip = await iv.newPage();
+    await mockInterview(ip);
+    await ip.goto(`${base}/b/new?problem=url-shortener`);
+    await ip.getByTestId("interview").waitFor();
+    await ip.route("**/api/command", (route) => {
+      const sent = route.request().postDataJSON() as { baseVersion: number };
+      return route.fulfill({
+        json: {
+          kind: "ops",
+          ops: [
+            { type: "addNode", id: "client", kind: "client", label: "Users" },
+            {
+              type: "addNode",
+              id: "lb",
+              kind: "lb",
+              label: "Load balancer",
+              props: { replicas: 2 },
+            },
+            {
+              type: "addNode",
+              id: "api",
+              kind: "service",
+              label: "Shortener API",
+              props: { replicas: 8 },
+            },
+            {
+              type: "addNode",
+              id: "redis",
+              kind: "cache",
+              label: "Redis",
+              props: { hitRate: 0.9 },
+            },
+            {
+              type: "addNode",
+              id: "db",
+              kind: "sql",
+              label: "Links DB",
+              props: { role: "primary", failover: true },
+            },
+            {
+              type: "addNode",
+              id: "db-r1",
+              kind: "sql",
+              label: "Links replica",
+              props: { role: "replica" },
+            },
+            { type: "connect", from: "client", to: "lb" },
+            { type: "connect", from: "lb", to: "api" },
+            { type: "connect", from: "api", to: "redis", traffic: "read" },
+            { type: "connect", from: "api", to: "db" },
+            { type: "connect", from: "db", to: "db-r1", kind: "replication", traffic: "write" },
+          ],
+          message: "Built it.",
+          options: [],
+          focusNodeIds: [],
+          baseVersion: sent.baseVersion,
+          attempts: 1,
+          model: "screenshot",
+          timings: { totalMs: 1 },
+        },
+      });
+    });
+    const command = ip.getByRole("textbox", { name: "Command" });
+    await command.fill(
+      "users hit a load balancer in front of eight API servers with Redis and a replicated Postgres",
+    );
+    await command.press("Enter");
+    await ip.locator(".react-flow__node").nth(5).waitFor();
+    const answer = ip.getByRole("textbox", { name: "Your answer" });
+    await answer.fill(
+      "Reads go through the load balancer to the API, which checks Redis before the database.",
+    );
+    await answer.press("Enter");
+    await ip.getByText("What happens at forty thousand").waitFor();
+    await ip.waitForTimeout(600);
+    await ip.screenshot({ path: join(ASSETS, "board-interview.png") });
+    await ip.getByRole("button", { name: "Finish" }).first().click();
+    await ip.getByRole("dialog").getByRole("button", { name: "Finish" }).click();
+    await ip.getByTestId("scorecard").getByRole("meter").first().waitFor();
+    await ip.waitForTimeout(400);
+    await ip.screenshot({ path: join(ASSETS, "board-scorecard.png") });
+    await iv.close();
+
+    const rv = await browser.newContext({
+      viewport: { width: 1440, height: 900 },
+      deviceScaleFactor: 2,
+    });
+    const rp = await rv.newPage();
+    await mockInterview(rp);
+    await openThreeTier(rp);
+    await rp.getByRole("button", { name: "Review" }).click();
+    await rp.getByTestId("finding-rule:spof:redis").waitFor();
+    await rp.waitForTimeout(400);
+    await rp.screenshot({ path: join(ASSETS, "board-review.png") });
+    await rv.close();
 
     const phone = await browser.newContext({
       viewport: { width: 390, height: 844 },

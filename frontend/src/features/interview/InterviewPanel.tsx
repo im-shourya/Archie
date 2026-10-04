@@ -133,7 +133,9 @@ export function SloChecklist({
             >
               <Icon size={16} strokeWidth={2} aria-hidden className={styles.checkIcon} />
               <span className={styles.checkLabel}>{c.label}</span>
-              <span className={styles.checkActual}>{c.actual}</span>
+              <span className={styles.checkActual} title={c.actual}>
+                {c.actual}
+              </span>
             </li>
           );
         })}
