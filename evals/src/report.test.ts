@@ -62,6 +62,14 @@ describe("buildReport", () => {
     expect(() => buildReport({ ...committed(), test: file("b1-dev.json") })).toThrow(/test-split run/);
   });
 
+  it("adds the deployed run's latency as its own row", () => {
+    const r = buildReport({ ...committed(), deployed: file("deployed.json") });
+    const row = r.latency.find((l) => l.source.startsWith("deployed"));
+    expect(row?.tier).toBe("AI command (warm)");
+    expect(row?.source).toBe("deployed, render-singapore");
+    expect(r.runs.at(-1)?.label).toBe("Deployed");
+  });
+
   it("works without the optional runs", () => {
     const { test, benchFast, benchSim } = committed();
     const r = buildReport({ test, benchFast, benchSim });
