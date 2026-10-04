@@ -4,6 +4,11 @@ All notable user-visible changes. Format: [Keep a Changelog](https://keepachange
 
 ## [Unreleased]
 
+### Added
+- **Add ▾**: put any component type on the board by hand (a 44 px button on phones). The new component opens in the Inspector.
+- **Connect** in the Inspector: link a component to another one (sends to / receives from, all traffic, reads or writes) without the AI.
+- "Add a Redis cache", "add an orders service", "add Kafka called order events" now work by voice locally, with no AI call. Ambiguous or placed requests ("add a database", "a cache in front of Postgres") still go to the AI.
+
 ## [1.0.0] - 2026-10-04
 
 First release, prepared for the Wispr Flow challenge submission. Live at <https://archie-rb2x.onrender.com>.
