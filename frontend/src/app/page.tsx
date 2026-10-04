@@ -7,6 +7,7 @@ import { RecentBoards } from "@/features/home/RecentBoards";
 import styles from "@/features/home/home.module.css";
 import { report } from "@/features/evals/data";
 import { ms, percent } from "@/lib/format";
+import { Reveal } from "@/components/motion/Reveal";
 import { SITE, siteUrl } from "@/lib/site";
 
 const STEPS = [
@@ -110,33 +111,19 @@ export default function Home() {
                   <Plus size={16} weight="bold" aria-hidden /> New board
                 </Link>
               </div>
-              <p className={styles.alsoLinks}>
-                Or <Link href="/interview">practice a system-design interview</Link>, or{" "}
-                <OpenFile />
-              </p>
             </div>
           </div>
-          <figure className={styles.heroVisual}>
-            <picture>
-              {/* Phones get a close-up: the full board would be unreadable at 360 px. */}
-              <source
-                srcSet="/home/board-crop-dark.jpg"
-                media="(max-width: 767px) and (prefers-color-scheme: dark)"
-                width={1280}
-                height={840}
-              />
-              <source srcSet="/home/board-crop-light.jpg" media="(max-width: 767px)" width={1280} height={840} />
-              <source srcSet="/home/board-dark.jpg" media="(prefers-color-scheme: dark)" />
-              <img
-                src="/home/board-light.jpg"
-                width={2160}
-                height={1245}
-                alt="An Archie board at 50,000 requests a second: Postgres is saturated at ρ 1.40, and a note explains the math"
-              />
-            </picture>
-          </figure>
+
         </section>
 
+        <section className={styles.section} style={{ marginTop: '32px' }}>
+          <p className={styles.alsoLinks} style={{ margin: 0 }}>
+            Or <Link href="/interview">practice a system-design interview</Link>, or{" "}
+            <OpenFile />
+          </p>
+        </section>
+
+        <Reveal>
         <section aria-labelledby="how-heading" className={styles.section}>
           <h2 id="how-heading" className={styles.sectionTitle}>
             How it works
@@ -144,17 +131,23 @@ export default function Home() {
           <ol className={styles.steps}>
             {STEPS.map((step, i) => (
               <li key={step.title} className={styles.step}>
-                <span className={styles.stepNumber}>0{i + 1}</span>
-                <p className={styles.utterance}>{step.utterance}</p>
-                <div>
-                  <h3 className={styles.stepTitle}>{step.title}</h3>
-                  <p className={styles.stepBody}>{step.body}</p>
-                </div>
+                <Reveal delay={i * 40}>
+                  <div className={styles.stepInner}>
+                    <span className={styles.stepNumber}>0{i + 1}</span>
+                    <p className={styles.utterance}>{step.utterance}</p>
+                    <div>
+                      <h3 className={styles.stepTitle}>{step.title}</h3>
+                      <p className={styles.stepBody}>{step.body}</p>
+                    </div>
+                  </div>
+                </Reveal>
               </li>
             ))}
           </ol>
         </section>
+        </Reveal>
 
+        <Reveal>
         <section aria-labelledby="measured-heading" className={styles.section}>
           <h2 id="measured-heading" className={styles.sectionTitle}>
             Measured, not claimed
@@ -174,23 +167,28 @@ export default function Home() {
             </Link>
           </p>
         </section>
+        </Reveal>
 
+        <Reveal>
         <section aria-labelledby="templates-heading" className={styles.section}>
           <h2 id="templates-heading" className={styles.sectionTitle}>
             Start from a template
           </h2>
           <ul className={styles.templates}>
-            {(Object.keys(TEMPLATES) as TemplateId[]).map((id) => (
+            {(Object.keys(TEMPLATES) as TemplateId[]).map((id, i) => (
               <li key={id}>
+                <Reveal delay={i * 40}>
                 <Link href={`/b/new?template=${id}`} className={styles.template}>
                   <span className={styles.templateName}>{TEMPLATES[id].name}</span>
                   <span className={styles.templateDesc}>{TEMPLATES[id].description}</span>
                   <ArrowRight size={16} aria-hidden className={styles.templateArrow} />
                 </Link>
+                </Reveal>
               </li>
             ))}
           </ul>
         </section>
+        </Reveal>
 
         <RecentBoards />
       </main>
