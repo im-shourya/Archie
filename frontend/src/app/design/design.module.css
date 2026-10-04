@@ -222,3 +222,14 @@
     gap: 4px;
   }
 }
+
+.subhead {
+  margin: 24px 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.connectSample {
+  max-width: 360px;
+  margin-top: 12px;
+}

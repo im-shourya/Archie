@@ -265,3 +265,13 @@
   outline: 2px solid var(--color-focus);
   outline-offset: 2px;
 }
+
+/* Connect by hand: three choices and a button, stacked to fit the side panel and the phone sheet. */
+.connect {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border-subtle);
+}
+

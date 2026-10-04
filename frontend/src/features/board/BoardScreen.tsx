@@ -22,6 +22,7 @@ import { MetricsPanel } from "../metrics/MetricsPanel";
 import { useBoardStore } from "../store/board.store";
 import { Canvas } from "./Canvas";
 import { BottomSheet, type Snap } from "./BottomSheet";
+import { AddMenu } from "./AddMenu";
 import { OverflowMenu } from "./OverflowMenu";
 import { EventLog } from "./EventLog";
 import { useCompactLayout } from "./useCompactLayout";
@@ -96,10 +97,9 @@ function EmptyBoard() {
     <div className={styles.empty}>
       <h2>Describe your system</h2>
       <p className={styles.muted}>
-        Describing whole systems out loud (
-        <em>“users hit a load balancer in front of three API servers”</em>) arrives with the AI. For
-        now, start from a template, then change it by voice:
-        <em> “kill Redis”</em>, <em>“five replicas of the API”</em>.
+        Say it or type it: <em>“users hit a load balancer in front of three API servers and Postgres”</em>.
+        Or add components one at a time with <strong>Add</strong>, or start from a template and change
+        it by voice: <em>“kill Redis”</em>, <em>“five replicas of the API”</em>.
       </p>
       <div className={styles.emptyActions}>
         {(Object.keys(TEMPLATES) as TemplateId[]).map((id) => (
@@ -359,6 +359,7 @@ function TopActions({ compact, interview, hasNodes, onFinish, onRename }: TopAct
 
   return (
     <div className={styles.topActions}>
+      <AddMenu compact={compact} />
       {!compact && hasNodes && (
         <>
           <button type="button" className={styles.textButton} onClick={share}>

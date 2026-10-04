@@ -60,6 +60,12 @@ export function isKindWord(phrase: string): boolean {
   return KIND_WORDS.has(tokens(phrase).join(" "));
 }
 
+/** The kinds a kind word can mean: "redis" → cache; "database" → sql or nosql. */
+export function kindsOf(phrase: string): readonly NodeKind[] {
+  // A kind is listed under its own name and as an alias ("cache"), so de-duplicate.
+  return [...new Set(KIND_WORDS.get(tokens(phrase).join(" ")) ?? [])];
+}
+
 function decide(candidates: ArchNode[], spanTokens: readonly string[]): Resolution | null {
   if (candidates.length === 0) return null;
   if (candidates.length === 1) return { kind: "ok", node: candidates[0]! };

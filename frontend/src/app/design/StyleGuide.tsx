@@ -25,7 +25,9 @@ import {
 import { NODE_KINDS, type ArchNode, type NodeMetrics } from "@archie/simulator";
 import { LogoMark, Wordmark } from "@/components/brand/LogoMark";
 import { KindIcon } from "@/components/icons/KindIcon";
+import { AddMenu } from "@/features/board/AddMenu";
 import { ArchNodeCard, type ArchFlowNode } from "@/features/board/ArchNodeCard";
+import { ConnectForm } from "@/features/inspector/Inspector";
 import { SloChecklist } from "@/features/interview/InterviewPanel";
 import { RubricBar } from "@/features/interview/Scorecard";
 import { FindingCard } from "@/features/review/ReviewPanel";
@@ -386,6 +388,18 @@ export function StyleGuide() {
               <button type="button" className={review.fix}>
                 <Wrench size={14} aria-hidden /> Apply fix
               </button>
+            </div>
+            <h3 className={styles.subhead}>Manual editing</h3>
+            <p className={styles.muted}>
+              Add ▾ (top bar; a 44 px icon button on phones) and the Inspector&rsquo;s Connect form. Both
+              apply the same validated ops as voice, so every change can be undone.
+            </p>
+            <div className={styles.row}>
+              <AddMenu compact={false} />
+              <AddMenu compact />
+            </div>
+            <div className={styles.connectSample}>
+              <ConnectForm node={sampleGraph.nodes[1]!} graph={sampleGraph} onConnect={() => false} />
             </div>
           </section>
 
