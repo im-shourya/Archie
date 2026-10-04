@@ -52,6 +52,13 @@ const nextConfig: NextConfig = {
   turbopack: { root },
   outputFileTracingRoot: root,
   poweredByHeader: false,
+  // Short, memorable addresses for the legal pages (docs/legal).
+  async redirects() {
+    return [
+      { source: "/privacy", destination: "/legal/privacy", permanent: false },
+      { source: "/terms", destination: "/legal/terms", permanent: false },
+    ];
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
