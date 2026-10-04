@@ -4,7 +4,7 @@ Where the project is **right now**. Update at the end of every phase (and whenev
 
 ## Current phase
 
-**Phase 7 in progress** (`chore/evals-deploy`, [35-phase-7-plan.md](35-phase-7-plan.md)). Done: the dataset is at 92 cases (58 dev / 34 test, frozen per line), B0 and benches refreshed, dev-driven fixes (an outage rule in the prompt, a deadline-aware provider chain, two runner fixes), `/evals`, share links with Duplicate, exports (JSON, Mermaid, design doc, SVG, PNG) with Open file, replay, and the deploy code (`render.yaml`, the client-IP header, `deploy-smoke.sh`, keep-warm). **Open:** the final held-out test-split run (Mon 5 Oct after the 12:30 IST quota reset) and the Render service, which needs the owner's account and rotated keys.
+**Phase 7 done** (merged in #12, deployed at <https://archie-rb2x.onrender.com>; [35-phase-7-plan.md](35-phase-7-plan.md)). Final held-out test split 91.2% with one false action; deployed eval 6/6, warm P50 2.4 s. Next: Phase 8, record and submit ([36-phase-8-plan.md](36-phase-8-plan.md)). Done: the dataset is at 92 cases (58 dev / 34 test, frozen per line), B0 and benches refreshed, dev-driven fixes (an outage rule in the prompt, a deadline-aware provider chain, two runner fixes), `/evals`, share links with Duplicate, exports (JSON, Mermaid, design doc, SVG, PNG) with Open file, replay, and the deploy code (`render.yaml`, the client-IP header, `deploy-smoke.sh`, keep-warm). **Open:** the final held-out test-split run (Mon 5 Oct after the 12:30 IST quota reset) and the Render service, which needs the owner's account and rotated keys.
 
 **Phase 6 done** (`feat/interview`) ([34-phase-6-plan.md](34-phase-6-plan.md)): SPOF scan, six interview problems with simulator-computed SLO checks and golden-tested reference designs, `/api/interview/turn`, `/api/interview/score` and `/api/review` on a shared structured-output session, interview mode with a live checklist, grounded questions and a scorecard, design review with simulator-proven fixes, the phone ⋯ menu and the `/design` style guide. `zod/mini` on the client closed the bundle gap (318.7 → 260.6 KB). Every acceptance criterion met.
 
@@ -57,12 +57,14 @@ _None open._ Fixed in Phase 5: wide graphs rendered tiny on phones and portrait 
 
 ## Next tasks
 
-1. Sign up for Wispr Flow via <https://ref.wisprflow.ai/hhg>
-2. Test screen recording with the Wispr overlay visible
-3. Make the repository public before submitting (it's private, so the repo link and README images won't open for judges)
-4. Rotate the Gemini and Groq keys (they were pasted in chat). **Before** the Phase 7 deploy: the live service only gets the new keys
-5. Create a Render account (free web service) for the Phase 7 deploy
-6. 🎙 Phase 7 from [doc 35](35-phase-7-plan.md): evals to 92 cases, share/export, deploy the Docker image (ADR-018) on Render
+Phase 8 from [doc 36](36-phase-8-plan.md):
+
+1. Confirm the Wispr Flow signup via <https://ref.wisprflow.ai/hhg> (the submission doesn't count otherwise)
+2. Rotate the Gemini and Groq keys used for the test deploy; update Render and `.env.local`; redeploy and smoke
+3. Set the repository variable `ARCHIE_URL` (keep-warm)
+4. Optional, cut in order: ambiguous-reference guard + test re-run (both runs published) · CHANGELOG `v1.0.0` · dev re-run
+5. Rehearse and record the demo (doc 36 script); add the video link to the README
+6. Make the repository public, check the README logged-out, submit the form by 21:00 IST
 
 ## Metrics snapshot
 

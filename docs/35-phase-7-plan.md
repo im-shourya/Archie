@@ -191,7 +191,7 @@ Files: `frontend/src/app/b/[id]/replay/page.tsx`, `features/replay/{Replay,useRe
 - [x] AI warm P50 < 3 s (2.3 s) reported; P95 6.7 s missed the 6 s target on the free tier and the README says so
 - [x] Share link round-trips; malformed and oversized links render EF-05; Duplicate saves an editable copy (FR-042, T-06)
 - [x] JSON, Mermaid, design doc, SVG and PNG export; JSON re-imports (FR-043)
-- [ ] The Docker image runs on Render: `deploy-smoke.sh` passes against the live URL, `/api/health` shows the deployed commit, the client IP can't be forged, and the keys are the rotated ones
+- [x] The Docker image runs on Render: `deploy-smoke.sh` passes against the live URL, `/api/health` shows the deployed commit, the client IP can't be forged. **Keys: rotation after the test deploy is the owner's next step**
 - [x] axe 0 serious/critical on `/evals`, `/s`, the error page, the Export menu and replay, in both themes, desktop and phone; board route < 300 KB (263.8)
 - [ ] `npm test`, lint, typecheck, build, e2e and CI green; the quota budget kept, with ≥ 30 calls left for Phase 8
 - [ ] Docs, README and CHANGELOG `v1.0.0` updated; history scanned; the repo is public
@@ -236,8 +236,8 @@ Built on `chore/evals-deploy`, one commit per step plus fix commits. Validation 
 | 4 `/evals` | ✅ Static page from the committed results, with answered vs. no-answer counts |
 | 5 Share | ✅ `/s`, Duplicate, EF-05 for six kinds of broken link |
 | 6 Export | ✅ JSON, Mermaid, design doc, SVG, PNG; Open file |
-| 7 Deploy | 🚧 Code done (`render.yaml`, build arg, client-IP header, version fallback, `deploy-smoke.sh` passing against a local production build, keep-warm). **The Render service needs the owner's account and the rotated keys** |
-| 8 Final runs | ✅ Test split run once on Sun 4 Oct (the owner's new Gemini account had fresh quota): 91.2%, 1 false action, P50 2.3 s. 🚧 Deployed eval waits for the Render service (`--base-url` is built and checked) |
+| 7 Deploy | ✅ Live at <https://archie-rb2x.onrender.com>. Smoke green; `ARCHIE_CLIENT_IP_HEADER=cf-connecting-ip` (Cloudflare in front), forged `X-Forwarded-For` checked (429) |
+| 8 Final runs | ✅ Test split run once on Sun 4 Oct (the owner's new Gemini account had fresh quota): 91.2%, 1 false action, P50 2.3 s. ✅ Deployed eval: 6/6, warm P50 2.43 s, P95 3.92 s |
 | 9 Replay | ✅ `/b/[id]/replay` |
 | 10 Release | 🚧 Docs, README and screenshots (share, export, replay) done; the whole history scanned clean (no key-shaped strings, no `.env`, `.claude/` or work log ever committed). The CHANGELOG `v1.0.0`, the `/evals` screenshot and going public come after Step 8 |
 

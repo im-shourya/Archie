@@ -35,8 +35,10 @@ Written into `evals/results/latest.json` → `latency` ([`specs/evaluation-schem
 | Tier | N | P50 | P70 | P95 | P99 | P100 |
 |------|---|-----|-----|-----|-----|------|
 | Fast path (Apple M4, Node 22, `c055a5e`) | 14000 | 0.006 ms | 0.008 ms | 0.014 ms | 0.015 ms | 0.138 ms |
-| AI (warm) | — | — | — | — | — | — |
-| AI (cold) | — | — | — | — | — | — |
+| AI (warm), local, test split (`84949a6`, free-tier Gemini) | 30 | 2,269 ms | 3,773 ms | 6,741 ms | 7,047 ms | 7,047 ms |
+| AI (cold), local, test split | 1 | 3,569 ms | — | — | — | 3,569 ms |
+| AI (warm), **deployed** (Render Singapore, measured from India, network included) | 5 | 2,430 ms | 2,457 ms | 3,922 ms | 3,922 ms | 3,922 ms |
+| AI (cold), deployed | 1 | 6,727 ms | — | — | — | 6,727 ms |
 | Simulator @100 nodes (Apple M4, `58a1fcd`) | 200 | 2.11 ms | 2.173 ms | 2.327 ms | 2.471 ms | 4.508 ms |
 | Layout @50 | — | — | — | — | — | — |
 
