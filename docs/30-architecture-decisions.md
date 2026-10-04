@@ -73,3 +73,17 @@ Format: Context → Decision → Alternatives → Consequences. Status: `Accepte
 **Decision:** `/s#v1:<lz-string>`. The hash is never sent to the server. Validated on decode, capped at 32 KB.
 **Alternatives:** Paste services; GitHub gists; a server KV.
 **Consequences:** Private, free, works offline. Very large boards need JSON export instead.
+
+## ADR-011 · Undo restores graph snapshots instead of inverse ops
+**Status:** Accepted · 2026-10-01 · amends ADR-005
+**Context:** Inverse ops can't restore a graph exactly: re-added nodes change array order, and status/pins need ops that don't exist. Exact undo is a requirement (FR-012), and graphs are small (≤ 200 nodes).
+**Decision:** `applyBatch` returns the new graph only. The store keeps up to 200 previous graphs for undo/redo. The event log keeps forward ops for replay.
+**Alternatives:** Inverse ops (lossy ordering, more code); command pattern with per-op undo.
+**Consequences:** Exact, simple undo. Memory is bounded and cheap thanks to structural sharing. Replay still works from forward ops.
+
+## ADR-012 · ELK via elk-api + raw worker script, with a deterministic fallback layout
+**Status:** Accepted · 2026-10-01 · refines ADR-009
+**Context:** `elkjs/lib/elk.bundled.js` breaks under Turbopack's CommonJS interop ("Cannot call a class as a function").
+**Decision:** The main thread uses `elkjs/lib/elk-api.js` with a `workerFactory` that starts our worker, which only imports `elk-worker.min.js`. If ELK can't start, errors, or takes over 3 s, a longest-path layered fallback is used.
+**Alternatives:** dagre (weaker layering); ELK on the main thread.
+**Consequences:** Layout stays off the main thread and the canvas never stays empty.
