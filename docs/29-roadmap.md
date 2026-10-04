@@ -82,10 +82,14 @@ Where the project is going. Live status is in [31-project-state.md](31-project-s
 - [ ] `/api/interview/turn|score`, `/api/review`; interview panel + TTS + scorecard; review findings + apply fix
 
 ## Phase 7 · Evals + ship (F-12, F-13, F-14)
-- [ ] ≥ 92 cases, dev/test split, run, fix the top failing categories, final test-split run
+
+**Detailed plan:** [35-phase-7-plan.md](35-phase-7-plan.md) (steps, quota budget across two quota days, host, cut order).
+
+- [ ] 92 cases (≥ 80, every category ≥ 5), dev/test split, run, fix the top failing categories, final test-split run
 - [ ] All benches; `results/latest.json` committed; `/evals` page
-- [ ] Share links, exports, replay (if not cut)
-- [ ] Deploy the Docker image (ADR-018, doc 25 · Docker) as a single instance on a container host; README via **readme-maintenance**; CHANGELOG `v1.0.0`
+- [ ] Share links, exports (+ JSON import), replay (if not cut)
+- [ ] Deploy the Docker image (ADR-018, doc 25 · Docker) as a single instance on Render's free tier, with the rotated keys; README via **readme-maintenance**; CHANGELOG `v1.0.0`; history scan, then make the repo public
+> 🎙 *"Create branch chore/evals-deploy. Do Phase 7 from doc 35, step by step."*
 
 ## Phase 8 · Record + submit
 - [ ] Follow [99-challenge.md](99-challenge.md): video script + submission checklist
