@@ -1,0 +1,24 @@
+# Local agent config + skills — never commit or push
+.claude/
+CLAUDE.local.md
+
+# Dependencies / build
+node_modules/
+.next/
+out/
+dist/
+coverage/
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+
+# Local data
+*.db
+*.db-journal
+*.sqlite
+
+# OS / editor
+.DS_Store
+*.log
