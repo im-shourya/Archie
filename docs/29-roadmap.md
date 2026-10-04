@@ -94,6 +94,9 @@ Where the project is going. Live status is in [31-project-state.md](31-project-s
 > 🎙 *"Create branch chore/evals-deploy. Do Phase 7 from doc 35, step by step."*
 
 ## Phase 8 · Record + submit
+
+**Detailed plan:** [36-phase-8-plan.md](36-phase-8-plan.md) (pre-flight, optional fixes with a cut order, quota, the demo script with tested commands, submission checklist).
+
 - [ ] Follow [99-challenge.md](99-challenge.md): video script + submission checklist
 
 ## After the challenge (v1.x / v2)
