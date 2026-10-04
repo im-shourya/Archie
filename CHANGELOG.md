@@ -5,6 +5,9 @@ All notable user-visible changes. Format: [Keep a Changelog](https://keepachange
 ## [Unreleased]
 
 ### Fixed
+- When an AI model hangs, the request now leaves time for the fallback provider instead of timing out.
+- "Kill Redis and send sixty thousand requests a second" fails Redis instead of deleting it.
+- Rate limits can't be bypassed by sending a fake `X-Forwarded-For` header behind a proxy (set `ARCHIE_CLIENT_IP_HEADER`).
 - Failed components stay readable: they're dimmed with colour instead of transparency, which had dropped their text below the contrast minimum.
 - Components no longer blink after every change, and Escape from the Inspector always returns focus to the component.
 - Undo and other shortcuts work while a checkbox has focus.
@@ -21,6 +24,11 @@ All notable user-visible changes. Format: [Keep a Changelog](https://keepachange
 - Commands the fast path doesn't understand now go to the AI tier instead of showing a hint.
 
 ### Added
+- Share links: **Share** copies a link to a read-only copy of the board with the live simulation, and **Duplicate** saves an editable copy. The design travels in the link's `#` fragment, so it never reaches the server; broken or oversized links show a clear error page.
+- Export: JSON (re-importable with **Open file** on the home page), a Mermaid diagram, a Markdown design doc with the simulator's numbers, single points of failure and review findings, and SVG or PNG images.
+- Replay: step through a board's changes, undo included, with play, scrub and a list of every change.
+- `/evals`: the eval report, built from the committed results: per-category accuracy on the held-out split, false actions, cases with no answer from any provider, and latency percentiles per tier.
+- Render deployment: a `render.yaml` blueprint and a deploy smoke test for any URL.
 - Docker image: `docker compose up --build` runs the production app on one long-running container (non-root, health check, no secrets in the image).
 - Interview practice: six problems with requirements, a live checklist of the SLOs your design meets at peak (computed by the simulator), an interviewer that asks one grounded question at a time (read aloud if you like), and a scorecard with the computed checks and an evidence-based rubric.
 - Design review: ranked findings for any board, each fix proven by the simulator to clear its finding, plus AI findings when available; apply a fix in one click and undo it.

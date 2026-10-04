@@ -81,8 +81,13 @@ Results table (filled by `npm run eval -- --report`):
 | B1 test (v1 prompt) | 83.3% | **25%** | 0% | 2.7 s | 3.65 s | Held out. bounds-02 "fifty million rps" was **applied** (clamped) instead of clarified |
 | **B1 dev (v2)** | **94.7%** | **0%** | 0% | 1.9 s | 9.8 s | prompt `531e9fe02e1c` + G-05 in code. Miss: workload-01 "fifty k rps ninety percent reads" → answer. `evals/results/b1-dev.json` |
 | **B1 test (v2)** | **91.7%** | **0%** | 0% | 1.8 s | 11.9 s | Held out. Kind accuracy 100%. Miss: dictation-noise-02 (no replica nodes). P95 = one case that failed over Gemini 503 → 429 → Groq. `evals/results/latest.json` |
+| B0 (92 cases) | 8.7% | 0% | 0% | — | — | 2026-10-04 · fast path handles 8/92, precision 100%. `evals/results/b0-fastpath.json` |
+| B1 dev, 39 new cases (v2) | 82.1% | 0% | 0% | 2.6 s | 5.5 s | Prompt `531e9fe02e1c`. 32/33 answered cases correct; 6 got no answer (quota pauses, scored before the runner retried them). The miss, compound-03 ("kill redis and send sixty thousand rps"), removed Redis. `b1-dev-new-cases-prompt-v2.json` |
+| **B1 dev, 58 cases (v3)** | 82.8% | **0%** | 0% | 4.4 s | 17.7 s | Prompt `8259bf6e5201`. **48/48 answered cases correct**; 10 timed out at 20 s on an overloaded free tier, all before the chain kept time for the fallback (`10f0e67`). `evals/results/b1-dev.json` |
 
 **v1 → v2:** G-05 is now enforced in code (`ai/src/llm/bounds.ts`: an out-of-bounds number becomes a clarify stating the limit, never a clamped edit), plus prompt rules for bounds and for "delete everything → confirm". Both changes came from **dev** failures (bounds-01, injection-01). Under the decision rule: task accuracy up, false actions 25% → 0%, P50 unchanged. P95 went up because of fallback hops on the free tier, not prompt cost. All 31 cases: **29/31 = 93.5%, 0 false actions.** Free-tier runs mix models; each case records its model.
+
+**v2 → v3 (Phase 7, from dev failures only):** one prompt rule ("kill, take down, crash… = fail; only remove/delete removes", also inside compound requests), and two harness fixes that change availability, not understanding: the chain now cuts a hung model off early enough to leave 7 s for the next provider, and the runner waits out a full quota instead of scoring it. The held-out test split is run once on the final build (doc 35 Step 8).
 
 **Decision rule:** a change ships only if task accuracy doesn't drop, false-action stays ≤ 2%, and P95 latency doesn't regress > 20%. One metric improving isn't enough.
 

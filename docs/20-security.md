@@ -15,10 +15,10 @@ Follows `.claude/skills/security`. Any security-sensitive change must be called 
 |----|--------|------|------------|--------|
 | T-01 | API key leaks into the client bundle | High | Key read only in `ai/llm` (server-only); ESLint import ban; CI greps `.next/static` for `sk-ant` | Planned |
 | T-02 | API key committed to git | High | `.env*` gitignored, `.env.example` only; CI secret scan (gitleaks) | Planned |
-| T-03 | Budget / free-quota drain (scripted calls) | High | Per-IP rate limit, daily cap, optional access code, per-provider quota guards with fallback (ADR-017), Console spend limit if Claude is used | Done (in-memory, best-effort per instance) |
+| T-03 | Budget / free-quota drain (scripted calls) | High | Per-IP rate limit keyed on a header the host's proxy sets (`ARCHIE_CLIENT_IP_HEADER`, so a forged `X-Forwarded-For` gets no fresh bucket), daily cap, optional access code, per-provider quota guards with fallback (ADR-017), Console spend limit if Claude is used | Done (in memory; exact on the single container, ADR-018) |
 | T-04 | Prompt injection via utterance or node labels | Medium | Untrusted-data rule in prompt; output limited to schema'd ops/text; ops validated; no tools, no code execution, no URLs fetched | Planned |
-| T-05 | XSS via labels, AI messages, share links | High | React escaping only; no `dangerouslySetInnerHTML` for user or AI content (the single use is the Home page JSON-LD, built from constants); Mermaid/SVG export escaped; CSP | Partial (rendering safe; CSP in prod) |
-| T-06 | Malicious share link (huge / malformed) | Medium | Size cap 32 KB, Zod validation, bounds; errors render a safe page | Planned |
+| T-05 | XSS via labels, AI messages, share links | High | React escaping only; no `dangerouslySetInnerHTML` for user or AI content (the single use is the Home page JSON-LD, built from constants); Mermaid labels entity-escaped, SVG and design-doc text escaped (unit-tested with `<script>` labels); CSP in production | Done |
+| T-06 | Malicious share link or board file (huge / malformed) | Medium | Links: 32 KB cap, Zod validation, bounds; files: 1 MB cap, same validation, errors never echo the file. Broken links render EF-05 (e2e: oversized, truncated, invalid, out-of-bounds, wrong version) | Done |
 | T-07 | Oversized request bodies (DoS) | Medium | 256 KB cap, ≤ 200 nodes, utterance ≤ 4,000 chars | Planned |
 | T-08 | Leaking provider errors / stack traces | Low | Error mapper returns codes only; details logged server-side | Planned |
 | T-09 | Logging user content | Medium | Logs contain requestId, route, timings, usage, kind. **Never** utterance or graph | Planned |
