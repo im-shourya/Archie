@@ -75,6 +75,7 @@ export function CommandBar() {
   const undo = useBoardStore((s) => s.undo);
   const redo = useBoardStore((s) => s.redo);
   const notice = useBoardStore((s) => s.notice);
+  const interviewMode = useBoardStore((s) => s.board?.mode === "interview");
   const { getNodes, zoomIn, zoomOut } = useReactFlow();
   const fit = useFit();
 
@@ -365,7 +366,9 @@ export function CommandBar() {
           className={styles.input}
           value={text}
           rows={1}
-          placeholder={`Try: “${EXAMPLES[exampleIndex]}”`}
+          placeholder={
+            interviewMode ? "Change the board: “add a Redis cache in front of Postgres”" : `Try: “${EXAMPLES[exampleIndex]}”`
+          }
           aria-label="Command"
           aria-describedby="command-help"
           autoComplete="off"

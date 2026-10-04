@@ -2,17 +2,19 @@ import { z } from "zod";
 import {
   atPeak,
   CHECK_IDS,
+  fallbackQuestion,
   GraphSchema,
   PROBLEM_IDS,
   PROBLEMS,
   simulate,
   sloChecks,
   spofScan,
-  type CheckId,
   type Graph,
   type Problem,
   type SloCheck,
 } from "@archie/simulator";
+
+export { fallbackQuestion };
 import { getProvider, isConfigured, keyEnv } from "./client";
 import { escapeText, graphDsl, simSummary } from "./context";
 import { INTERVIEW_SYSTEM_PROMPT } from "./prompts/interview";
@@ -65,9 +67,6 @@ export interface InterviewTurnResponse {
 
 const INTERVIEW_OUTPUT = { name: "interview_turn", schema: InterviewTurnWireSchema };
 
-/** Order in which failing checks are probed when falling back: the most fundamental first. */
-const PRIORITY: CheckId[] = ["availability", "headroom", "spof", "p99-read", "p99-write", "cost"];
-
 const ms = (start: number) => Math.round((performance.now() - start) * 10) / 10;
 
 export function problemBlock(problem: Problem): string {
@@ -110,29 +109,6 @@ export function interviewContext(graph: Graph, problem: Problem) {
     spofs,
   ].join("\n");
   return { peak, sim, checks, board };
-}
-
-/** The next unused hint for the weakest failing check (or a general one): no model call. */
-export function fallbackQuestion(
-  problem: Problem,
-  checks: readonly SloCheck[],
-  transcript: readonly TranscriptTurn[],
-): { question: string; focusNodeIds: string[] } {
-  const asked = new Set(transcript.filter((t) => t.role === "interviewer").map((t) => t.text));
-  const failing = PRIORITY.filter((id) => checks.find((c) => c.id === id)?.pass === false);
-  const order: (CheckId | "general")[] = [
-    ...failing,
-    "general",
-    ...PRIORITY.filter((id) => !failing.includes(id)),
-  ];
-  for (const check of order) {
-    const hint = problem.hints.find((h) => h.check === check && !asked.has(h.question));
-    if (hint) {
-      const focus = check === "general" ? [] : (checks.find((c) => c.id === check)?.nodeIds ?? []);
-      return { question: hint.question, focusNodeIds: focus };
-    }
-  }
-  return { question: problem.hints[0]!.question, focusNodeIds: [] };
 }
 
 /** Keep only grounded output (docs/14): real node ids, a check that is actually failing. */

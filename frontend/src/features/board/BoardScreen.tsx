@@ -6,8 +6,9 @@ import { LogoMark } from "@/components/brand/LogoMark";
 import { percent } from "@/lib/format";
 import { isTyping } from "@/lib/keyboard";
 import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { ReactFlowProvider, useReactFlow } from "@xyflow/react";
-import { TEMPLATES, type Graph, type TemplateId } from "@archie/simulator";
+import { PROBLEMS, TEMPLATES, type Graph, type Problem, type ProblemId, type TemplateId } from "@archie/simulator";
 import { CommandBar } from "../commandbar/CommandBar";
 import { Inspector } from "../inspector/Inspector";
 import { MetricsPanel } from "../metrics/MetricsPanel";
@@ -19,6 +20,11 @@ import { useCompactLayout } from "./useCompactLayout";
 import { useFit } from "./useFit";
 import { useSimulation } from "./useSimulation";
 import { useSpofScan } from "./useSpofScan";
+import { readInterview, type InterviewState } from "../interview/state";
+import { passing, useSloChecks } from "../interview/useSloChecks";
+
+// Interview UI loads only on interview boards (NFR-015).
+const InterviewPanel = dynamic(() => import("../interview/InterviewPanel").then((m) => m.InterviewPanel), { ssr: false });
 import styles from "./board.module.css";
 
 /** Board shortcuts (docs/05 · Keyboard). Lives inside the provider to read the selection. */
@@ -81,14 +87,21 @@ function EmptyBoard() {
   );
 }
 
-type PanelTab = "metrics" | "inspector" | "history";
+type PanelTab = "interview" | "metrics" | "inspector" | "history";
 
-const TAB_LABEL: Record<PanelTab, string> = { metrics: "Metrics", inspector: "Inspector", history: "History" };
+const TAB_LABEL: Record<PanelTab, string> = {
+  interview: "Interview",
+  metrics: "Metrics",
+  inspector: "Inspector",
+  history: "History",
+};
+const DESIGN_TABS: PanelTab[] = ["metrics", "inspector", "history"];
+const INTERVIEW_TABS: PanelTab[] = ["interview", "metrics", "inspector", "history"];
 
-function PanelTabs({ tab, onChange }: { tab: PanelTab; onChange: (t: PanelTab) => void }) {
+function PanelTabs({ tabs, tab, onChange }: { tabs: PanelTab[]; tab: PanelTab; onChange: (t: PanelTab) => void }) {
   return (
     <div className={styles.tabs} role="tablist" aria-label="Side panel">
-      {(["metrics", "inspector", "history"] as const).map((t) => (
+      {tabs.map((t) => (
         <button
           key={t}
           type="button"
@@ -122,10 +135,20 @@ function useLastInputWasKeyboard() {
   return keyboard;
 }
 
-/** Canvas + side panel for a non-empty board; the simulation runs on every change. */
-function SimulatedBoard({ graph, tab, onTab }: { graph: Graph; tab: PanelTab; onTab: (t: PanelTab) => void }) {
+interface BoardProps {
+  graph: Graph;
+  tab: PanelTab;
+  onTab: (t: PanelTab) => void;
+  /** Interview mode: the problem and the board's interview state. */
+  problem: Problem | null;
+  interview: InterviewState | null;
+}
+
+/** Canvas + side panel; the simulation runs on every change. Interview boards use it even when empty. */
+function SimulatedBoard({ graph, tab, onTab, problem, interview }: BoardProps) {
   const { sim, baseline } = useSimulation(graph);
   const scan = useSpofScan(graph);
+  const slo = useSloChecks(graph, problem);
   const selection = useBoardStore((s) => s.selection);
   const events = useBoardStore((s) => s.events);
   const selected = selection.length === 1 ? graph.nodes.find((n) => n.id === selection[0]) : undefined;
@@ -153,8 +176,11 @@ function SimulatedBoard({ graph, tab, onTab }: { graph: Graph; tab: PanelTab; on
   const label = (id: string) => graph.nodes.find((n) => n.id === id)?.label ?? id;
   const body = (
     <>
-      <PanelTabs tab={tab} onChange={onTab} />
+      <PanelTabs tabs={problem ? INTERVIEW_TABS : DESIGN_TABS} tab={tab} onChange={onTab} />
       <div id="side-panel-body" role="tabpanel" aria-labelledby={`tab-${tab}`}>
+        {tab === "interview" && problem && interview && (
+          <InterviewPanel graph={graph} problem={problem} interview={interview} checks={slo.checks} pending={slo.pending} />
+        )}
         {tab === "metrics" && <MetricsPanel graph={graph} sim={sim} baseline={baseline} scan={scan} />}
         {tab === "inspector" &&
           (selected ? (
@@ -180,13 +206,31 @@ function SimulatedBoard({ graph, tab, onTab }: { graph: Graph; tab: PanelTab; on
     <>
       <section className={styles.canvas} aria-label="Board">
         <Canvas graph={graph} sim={sim} spofs={scan.spofs} />
+        {graph.nodes.length === 0 && (
+          <p className={styles.canvasHint}>
+            Design by voice: <em>“users hit a load balancer in front of three API servers and Postgres”</em>
+          </p>
+        )}
       </section>
       {compact ? (
         <BottomSheet
           snap={snap}
           onSnap={setSnap}
           peek={
-            sim.bottleneck ? (
+            problem ? (
+              slo.checks.every((c) => c.pass !== false) ? (
+                <>
+                  <strong>All SLOs passing</strong> · Finish when ready
+                </>
+              ) : (
+                <>
+                  <strong>
+                    SLOs {passing(slo.checks)} of {slo.checks.length} passing
+                  </strong>{" "}
+                  · next: {slo.checks.find((c) => c.pass === false)?.label}
+                </>
+              )
+            ) : sim.bottleneck ? (
               <>
                 <strong>Bottleneck</strong> · {label(sim.bottleneck.id)} · ρ {sim.bottleneck.rho.toFixed(2)}
               </>
@@ -218,6 +262,15 @@ export function BoardScreen({ id }: { id: string }) {
     void load(id);
   }, [id, load]);
 
+  const problem = board?.mode === "interview" && board.problemId ? (PROBLEMS[board.problemId as ProblemId] ?? null) : null;
+  const interview = problem ? readInterview(board?.interview) : null;
+  // Interview boards open on the Interview tab.
+  const boardId = board?.id;
+  const interviewMode = !!problem;
+  useEffect(() => {
+    if (boardId) setTab(interviewMode ? "interview" : "metrics");
+  }, [boardId, interviewMode]);
+
   if (status === "missing") {
     return (
       <main className={styles.message}>
@@ -248,6 +301,7 @@ export function BoardScreen({ id }: { id: string }) {
             <LogoMark size={20} />
             <span>Archie</span>
           </Link>
+          {problem && <span className={styles.modeTag}>Interview ·</span>}
           <input
             key={board.name}
             className={styles.name}
@@ -274,7 +328,7 @@ export function BoardScreen({ id }: { id: string }) {
           </p>
         )}
         <main className={styles.main}>
-          {board.graph.nodes.length === 0 ? (
+          {board.graph.nodes.length === 0 && !problem ? (
             <>
               <section className={styles.canvas} aria-label="Board">
                 <EmptyBoard />
@@ -285,7 +339,7 @@ export function BoardScreen({ id }: { id: string }) {
               </aside>
             </>
           ) : (
-            <SimulatedBoard graph={board.graph} tab={tab} onTab={setTab} />
+            <SimulatedBoard graph={board.graph} tab={tab} onTab={setTab} problem={problem} interview={interview} />
           )}
         </main>
         <CommandBar />

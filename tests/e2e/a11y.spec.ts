@@ -126,6 +126,21 @@ for (const scheme of ["light", "dark"] as const) {
       await audit(page);
     });
 
+    test("interview problem picker", async ({ page }) => {
+      await page.goto("/interview");
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      await audit(page);
+    });
+
+    test("interview panel", async ({ page, isMobile }) => {
+      await page.goto("/b/new?problem=url-shortener");
+      await expect(page).toHaveURL(/\/b\/[0-9a-z]+$/);
+      if (isMobile) await page.getByRole("button", { name: "Expand panel" }).click();
+      await expect(page.getByTestId("interview")).toBeVisible();
+      await expect(page.getByTestId("slo-count")).toHaveText("0 of 6 passing");
+      await audit(page);
+    });
+
     test("access-code dialog", async ({ page }) => {
       await page.route("**/api/command", (r) =>
         r.fulfill({ status: 401, json: { error: { code: "ACCESS_CODE_REQUIRED", message: "x" } } }),

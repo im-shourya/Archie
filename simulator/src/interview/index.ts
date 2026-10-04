@@ -3,3 +3,4 @@
 export * from "./types";
 export { PROBLEMS, PROBLEM_LIST } from "./problems";
 export { atPeak, HEADROOM_RHO, sloChecks } from "./checks";
+export { fallbackQuestion, PROBE_ORDER } from "./fallback";

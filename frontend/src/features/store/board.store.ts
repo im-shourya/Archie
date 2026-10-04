@@ -63,6 +63,8 @@ interface BoardState {
   redo(): boolean;
   setPinned(nodeId: string, position: { x: number; y: number } | null): void;
   rename(name: string): void;
+  /** Interview mode: replace the board's interview state (transcript, scorecard) and save it. */
+  setInterview(interview: unknown): void;
 }
 
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
@@ -182,6 +184,14 @@ export const useBoardStore = create<BoardState>()((set, get) => {
         return position ? { ...rest, pinned: position } : rest;
       });
       const next = { ...board, graph: { ...board.graph, nodes }, updatedAt: Date.now() };
+      set({ board: next });
+      scheduleSave(next);
+    },
+
+    setInterview(interview) {
+      const { board } = get();
+      if (!board) return;
+      const next = { ...board, interview, updatedAt: Date.now() };
       set({ board: next });
       scheduleSave(next);
     },
