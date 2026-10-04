@@ -12,7 +12,7 @@ health=$(curl -s "$BASE/api/health")
 echo "health: $(echo "$health" | head -c 120)"
 echo "$health" | grep -q '"version":"dev"' && [ -n "${EXPECT_VERSION:-}" ] && fail "image was not stamped with a version"
 
-for path in / /interview /design /b/new /robots.txt; do
+for path in / /interview /design /evals /s /b/new /robots.txt; do
   code=$(curl -s -o /dev/null -w '%{http_code}' "$BASE$path")
   [ "$code" = "200" ] || fail "$path returned $code"
   echo "$path → $code"
