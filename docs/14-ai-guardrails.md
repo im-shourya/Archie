@@ -18,6 +18,7 @@ Guardrails decide **when not to act**. They are enforced in code (`ai/src/llm/gu
 | G-10 | Model refusal | `stop_reason: refusal` (after server fallback) | `LLM_REFUSED` → toast | unit test (mocked) |
 | G-11 | Truncated output | `stop_reason: max_tokens` | Retry once with a 2× cap → else `LLM_UPSTREAM` | unit test (mocked) |
 | G-12 | Empty or no-op ops for `kind: ops` | `EMPTY_BATCH` | Downgrade to `noop` with the model's message | `repair` |
+| G-13 | Guessing between components | **In code:** a definite generic reference ("the database", "the service") resolves (fast-path resolver, cluster rule) to 2+ components and the edit touches some but not all of them. Names ("the users database"), plurals, "a …" and clarify answers are exempt | `clarify` "Which database do you mean: …?" with the candidates as options. A dataset test checks it can only flag cases that expect clarify or confirm | `ambiguity` |
 
 ## Prompt-level rules (in `command.system.md`)
 
