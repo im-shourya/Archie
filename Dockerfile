@@ -20,7 +20,9 @@ RUN npm ci --no-audit --no-fund
 # 2. Build: Next's standalone output (a minimal server.js plus only the traced node_modules).
 FROM node:${NODE_VERSION}-alpine AS build
 WORKDIR /app
-ENV NEXT_TELEMETRY_DISABLED=1 ARCHIE_STANDALONE=1
+# Next inlines NEXT_PUBLIC_* at build time: the canonical URL for metadata, OG tags and the sitemap.
+ARG NEXT_PUBLIC_SITE_URL=
+ENV NEXT_TELEMETRY_DISABLED=1 ARCHIE_STANDALONE=1 NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
