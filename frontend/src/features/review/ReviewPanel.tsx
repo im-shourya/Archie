@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CircleCheck, Info, OctagonAlert, Sparkles, TriangleAlert, Wrench, X } from "lucide-react";
+import { CheckCircle, Cloud, Info, Warning, WarningOctagon, Wrench, X } from "@phosphor-icons/react/dist/ssr";
 import { ruleFindings, type Finding, type Graph, type Problem } from "@archie/simulator";
 import { useBoardStore } from "../store/board.store";
 import styles from "./review.module.css";
@@ -13,8 +13,8 @@ import styles from "./review.module.css";
  */
 
 const SEVERITY = {
-  high: { icon: OctagonAlert, label: "HIGH" },
-  medium: { icon: TriangleAlert, label: "MEDIUM" },
+  high: { icon: WarningOctagon, label: "HIGH" },
+  medium: { icon: Warning, label: "MEDIUM" },
   low: { icon: Info, label: "LOW" },
 } as const;
 
@@ -128,7 +128,7 @@ export function ReviewPanel({ graph, problem }: { graph: Graph; problem: Problem
           if (resolved.has(f.id)) {
             return (
               <li key={f.id} className={styles.resolved} data-testid={`finding-${f.id}`}>
-                <CircleCheck size={16} aria-hidden /> Resolved: {f.title}
+                <CheckCircle size={16} aria-hidden /> Resolved: {f.title}
                 <button
                   type="button"
                   className={styles.link}
@@ -174,11 +174,11 @@ export function FindingCard({
     <li className={styles.card} data-severity={f.severity} data-testid={`finding-${f.id}`}>
       <div className={styles.cardHead}>
         <span className={styles.severity}>
-          <Icon size={14} strokeWidth={2.25} aria-hidden /> {severity}
+          <Icon size={14} weight="bold" aria-hidden /> {severity}
         </span>
         {f.source === "ai" && (
           <span className={styles.ai}>
-            <Sparkles size={12} strokeWidth={2} aria-hidden /> AI
+            <Cloud size={12} weight="bold" aria-hidden /> AI
           </span>
         )}
       </div>

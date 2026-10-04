@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { History } from "lucide-react";
+import { ClockCounterClockwise } from "@phosphor-icons/react/dist/ssr";
 import type { BoardEvent } from "@archie/simulator";
 import { useBoardStore } from "../store/board.store";
 import styles from "./board.module.css";
@@ -33,7 +33,7 @@ export function EventLog({ events }: { events: BoardEvent[] }) {
     <>
       {boardId && (
         <Link href={`/b/${boardId}/replay`} className={styles.replayLink}>
-          <History size={16} aria-hidden /> Replay this session
+          <ClockCounterClockwise size={16} aria-hidden /> Replay this session
         </Link>
       )}
       <ol className={styles.log} aria-label="Change history">
