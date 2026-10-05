@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowLeft, Redo2, Undo2 } from "lucide-react";
 import { LogoMark } from "@/components/brand/LogoMark";
+import { percent } from "@/lib/format";
 import { useEffect, useRef, useState } from "react";
 import { ReactFlowProvider, useReactFlow } from "@xyflow/react";
 import { TEMPLATES, type Graph, type TemplateId } from "@archie/simulator";
@@ -11,7 +12,10 @@ import { Inspector } from "../inspector/Inspector";
 import { MetricsPanel } from "../metrics/MetricsPanel";
 import { useBoardStore } from "../store/board.store";
 import { Canvas } from "./Canvas";
+import { BottomSheet, type Snap } from "./BottomSheet";
 import { EventLog } from "./EventLog";
+import { useCompactLayout } from "./useCompactLayout";
+import { useFit } from "./useFit";
 import { useSimulation } from "./useSimulation";
 import styles from "./board.module.css";
 
@@ -21,7 +25,8 @@ function isTyping(target: EventTarget | null): boolean {
 
 /** Board shortcuts (docs/05 · Keyboard). Lives inside the provider to read the selection. */
 function BoardKeyboard() {
-  const { getNodes, fitView } = useReactFlow();
+  const { getNodes } = useReactFlow();
+  const fit = useFit();
   const undo = useBoardStore((s) => s.undo);
   const redo = useBoardStore((s) => s.redo);
   const apply = useBoardStore((s) => s.apply);
@@ -46,12 +51,12 @@ function BoardKeyboard() {
           { utterance: null, source: "inspector" },
         );
       } else if (!mod && e.key.toLowerCase() === "f") {
-        void fitView({ padding: 0.2, duration: 250 });
+        void fit();
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [getNodes, fitView, undo, redo, apply]);
+  }, [getNodes, fit, undo, redo, apply]);
 
   return null;
 }
@@ -131,9 +136,12 @@ function SimulatedBoard({ graph, tab, onTab }: { graph: Graph; tab: PanelTab; on
   // Selecting one component opens the Inspector (FR-016); by keyboard, focus follows it.
   const selectedId = selected?.id;
   const pendingFocus = useRef(false);
+  const { compact } = useCompactLayout();
+  const [snap, setSnap] = useState<Snap>("peek");
   useEffect(() => {
     if (!selectedId) return;
     onTab("inspector");
+    setSnap((s) => (s === "peek" ? "half" : s));
     pendingFocus.current = keyboard.current;
   }, [selectedId, onTab, keyboard]);
   // Runs after the Inspector has mounted (the tab switch is a separate render).
@@ -143,32 +151,59 @@ function SimulatedBoard({ graph, tab, onTab }: { graph: Graph; tab: PanelTab; on
     heading.current.focus();
   });
 
+  const label = (id: string) => graph.nodes.find((n) => n.id === id)?.label ?? id;
+  const body = (
+    <>
+      <PanelTabs tab={tab} onChange={onTab} />
+      <div id="side-panel-body" role="tabpanel" aria-labelledby={`tab-${tab}`}>
+        {tab === "metrics" && <MetricsPanel graph={graph} sim={sim} baseline={baseline} />}
+        {tab === "inspector" &&
+          (selected ? (
+            <Inspector
+              ref={heading}
+              graph={graph}
+              sim={sim}
+              node={selected}
+              onEscape={() =>
+                document.querySelector<HTMLElement>(`.react-flow__node[data-id="${CSS.escape(selected.id)}"]`)?.focus()
+              }
+            />
+          ) : (
+            <p className={styles.muted}>Select a component on the canvas to inspect and edit it.</p>
+          ))}
+        {tab === "history" && <EventLog events={events} />}
+      </div>
+    </>
+  );
+
   return (
     <>
       <section className={styles.canvas} aria-label="Board">
         <Canvas graph={graph} sim={sim} />
       </section>
-      <aside className={styles.panel} aria-label="Side panel">
-        <PanelTabs tab={tab} onChange={onTab} />
-        <div id="side-panel-body" role="tabpanel" aria-labelledby={`tab-${tab}`}>
-          {tab === "metrics" && <MetricsPanel graph={graph} sim={sim} baseline={baseline} />}
-          {tab === "inspector" &&
-            (selected ? (
-              <Inspector
-                ref={heading}
-                graph={graph}
-                sim={sim}
-                node={selected}
-                onEscape={() =>
-                  document.querySelector<HTMLElement>(`.react-flow__node[data-id="${CSS.escape(selected.id)}"]`)?.focus()
-                }
-              />
+      {compact ? (
+        <BottomSheet
+          snap={snap}
+          onSnap={setSnap}
+          peek={
+            sim.bottleneck ? (
+              <>
+                <strong>Bottleneck</strong> · {label(sim.bottleneck.id)} · ρ {sim.bottleneck.rho.toFixed(2)}
+              </>
             ) : (
-              <p className={styles.muted}>Select a component on the canvas to inspect and edit it.</p>
-            ))}
-          {tab === "history" && <EventLog events={events} />}
-        </div>
-      </aside>
+              <>
+                <strong>Success {percent(sim.e2e.successRate)}</strong> · no bottleneck
+              </>
+            )
+          }
+        >
+          {body}
+        </BottomSheet>
+      ) : (
+        <aside className={styles.panel} aria-label="Side panel">
+          {body}
+        </aside>
+      )}
     </>
   );
 }
@@ -206,7 +241,7 @@ export function BoardScreen({ id }: { id: string }) {
   return (
     <ReactFlowProvider>
       <BoardKeyboard />
-      <div className={styles.screen}>
+      <div className={styles.screen} data-screen>
         <header className={styles.topbar}>
           <Link href="/" className={styles.brand} aria-label="Archie home">
             <ArrowLeft size={16} aria-hidden />

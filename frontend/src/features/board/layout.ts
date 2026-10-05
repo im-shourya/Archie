@@ -1,7 +1,10 @@
 import type { ElkNode } from "elkjs/lib/elk-api";
 import type { Graph } from "@archie/simulator";
 
-/** Layered left → right layout (ADR-009). Positions are node top-left corners. */
+/**
+ * Layered layout (ADR-009): left → right, or top → bottom on portrait phones so wide graphs
+ * stay legible. Positions are node top-left corners.
+ */
 
 export const NODE_WIDTH = 184;
 export const NODE_HEIGHT = 72;
@@ -9,13 +12,14 @@ const LAYER_GAP = 96;
 const NODE_GAP = 36;
 
 export type Positions = Record<string, { x: number; y: number }>;
+export type Direction = "RIGHT" | "DOWN";
 
-export function toElkGraph(graph: Graph): ElkNode {
+export function toElkGraph(graph: Graph, direction: Direction = "RIGHT"): ElkNode {
   return {
     id: "root",
     layoutOptions: {
       "elk.algorithm": "layered",
-      "elk.direction": "RIGHT",
+      "elk.direction": direction,
       "elk.spacing.nodeNode": String(NODE_GAP),
       "elk.layered.spacing.nodeNodeBetweenLayers": String(LAYER_GAP),
       "elk.layered.nodePlacement.strategy": "BRANDES_KOEPF",
@@ -35,7 +39,7 @@ export function positionsFrom(result: ElkNode): Positions {
  * Deterministic fallback: longest-path layering, nodes stacked per layer in graph order.
  * Used when ELK is unavailable or slow, so the canvas never stays empty.
  */
-export function fallbackLayout(graph: Graph): Positions {
+export function fallbackLayout(graph: Graph, direction: Direction = "RIGHT"): Positions {
   const layer = new Map(graph.nodes.map((n) => [n.id, 0]));
   // Relax edges |V| times (graph is acyclic over call edges; async loops just stop growing).
   for (let i = 0; i < graph.nodes.length; i++) {
@@ -56,7 +60,10 @@ export function fallbackLayout(graph: Graph): Positions {
     const l = layer.get(node.id) ?? 0;
     const row = rows.get(l) ?? 0;
     rows.set(l, row + 1);
-    positions[node.id] = { x: l * (NODE_WIDTH + LAYER_GAP), y: row * (NODE_HEIGHT + NODE_GAP) };
+    positions[node.id] =
+      direction === "RIGHT"
+        ? { x: l * (NODE_WIDTH + LAYER_GAP), y: row * (NODE_HEIGHT + NODE_GAP) }
+        : { x: row * (NODE_WIDTH + NODE_GAP), y: l * (NODE_HEIGHT + LAYER_GAP) };
   }
   return positions;
 }

@@ -3,7 +3,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import ElkApi from "elkjs/lib/elk-api.js";
 import { topologyKey, type Graph } from "@archie/simulator";
-import { elkConstructor, fallbackLayout, positionsFrom, toElkGraph, type ElkLayout, type Positions } from "./layout";
+import {
+  elkConstructor,
+  fallbackLayout,
+  positionsFrom,
+  toElkGraph,
+  type Direction,
+  type ElkLayout,
+  type Positions,
+} from "./layout";
 
 const LAYOUT_TIMEOUT_MS = 3000;
 
@@ -24,20 +32,20 @@ function getElk(): ElkLayout | null {
   return elk;
 }
 
-async function layout(graph: Graph): Promise<Positions> {
+async function layout(graph: Graph, direction: Direction): Promise<Positions> {
   const engine = getElk();
-  if (!engine) return fallbackLayout(graph);
+  if (!engine) return fallbackLayout(graph, direction);
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
     return await Promise.race([
-      engine.layout(toElkGraph(graph)).then(positionsFrom),
+      engine.layout(toElkGraph(graph, direction)).then(positionsFrom),
       new Promise<never>((_, reject) => {
         timer = setTimeout(() => reject(new Error("layout timed out")), LAYOUT_TIMEOUT_MS);
       }),
     ]);
   } catch (err) {
     console.warn("[archie] ELK layout failed, using fallback layout", err);
-    return fallbackLayout(graph);
+    return fallbackLayout(graph, direction);
   } finally {
     clearTimeout(timer);
   }
@@ -47,9 +55,9 @@ async function layout(graph: Graph): Promise<Positions> {
  * Positions for every node. Re-runs only when the topology changes (props-only edits keep
  * positions). Pinned nodes keep their pinned position (FR-014).
  */
-export function useLayout(graph: Graph | null): Positions | null {
+export function useLayout(graph: Graph | null, direction: Direction = "RIGHT"): Positions | null {
   const [computed, setComputed] = useState<{ key: string; positions: Positions } | null>(null);
-  const key = graph ? topologyKey(graph) : null;
+  const key = graph ? `${direction}|${topologyKey(graph)}` : null;
   const latestGraph = useRef(graph);
   useEffect(() => {
     latestGraph.current = graph;
@@ -59,13 +67,13 @@ export function useLayout(graph: Graph | null): Positions | null {
     const current = latestGraph.current;
     if (key === null || !current) return;
     let cancelled = false;
-    void layout(current).then((positions) => {
+    void layout(current, direction).then((positions) => {
       if (!cancelled) setComputed({ key, positions });
     });
     return () => {
       cancelled = true;
     };
-  }, [key]);
+  }, [key, direction]);
 
   // Memoized: a new object every render would re-trigger the canvas sync effect forever.
   return useMemo(() => {
