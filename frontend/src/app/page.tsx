@@ -1,7 +1,9 @@
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Plus } from "@phosphor-icons/react/dist/ssr";
+import { ArrowRight, ArrowUpRight, CaretRight, Plus } from "@phosphor-icons/react/dist/ssr";
 import { TEMPLATES, type TemplateId } from "@archie/simulator";
-import { Wordmark } from "@/components/brand/LogoMark";
+import { SiteFooter } from "@/components/site/SiteFooter";
+import { SiteHeader } from "@/components/site/SiteHeader";
+import { Reveal, ScrollProgress, WordReveal } from "@/features/home/Motion";
 import { OpenFile } from "@/features/home/OpenFile";
 import { RecentBoards } from "@/features/home/RecentBoards";
 import styles from "@/features/home/home.module.css";
@@ -80,72 +82,72 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <JsonLd />
-      <header className={styles.header}>
-        <Link href="/" className={styles.brandLink} aria-label="Archie home">
-          <Wordmark size={24} />
-        </Link>
-        <nav className={styles.nav} aria-label="Site">
-          <Link href="/evals">Evals</Link>
-          <a href={SITE.repo}>GitHub</a>
-        </nav>
-      </header>
+      <SiteHeader />
 
       <main className={styles.main}>
         <section className={styles.hero} aria-labelledby="hero-title">
-          <div className={styles.heroText}>
-            <h1 id="hero-title" className={styles.title}>
-              {first}.<span className={styles.titleRest}>{rest.join(". ")}</span>
-            </h1>
-            <p className={styles.lede}>
-              Archie is a system-design board you talk to. Describe an architecture, put real
-              traffic through it, and see where it fails and why, before an interviewer or
-              production does.
-            </p>
-            <div className={styles.heroCtas}>
-              <div className={styles.actions}>
-                <Link href="/b/new?template=three-tier" className={styles.primary}>
-                  Open the 50k rps demo <ArrowRight size={16} weight="bold" aria-hidden />
-                </Link>
-                <Link href="/b/new" className={styles.secondary}>
-                  <Plus size={16} weight="bold" aria-hidden /> New board
-                </Link>
-              </div>
-              <p className={styles.alsoLinks}>
-                Or <Link href="/interview">practice a system-design interview</Link>, or{" "}
-                <OpenFile />
-              </p>
-            </div>
+          <h1 id="hero-title" className={styles.title}>
+            <span className={styles.titleFirst}>{first}.</span>
+            <span className={styles.titleRest}>{rest.join(". ")}</span>
+          </h1>
+          <p className={styles.lede}>
+            Archie is a system-design board you talk to. Describe an architecture, put real traffic
+            through it, and see where it fails and why, before an interviewer or production does.
+          </p>
+          <div className={styles.actions}>
+            <Link href="/b/new?template=three-tier" className={styles.primary}>
+              Open the 50k rps demo <ArrowRight size={16} weight="bold" aria-hidden />
+            </Link>
+            <Link href="/b/new" className={styles.secondary}>
+              <Plus size={16} weight="bold" aria-hidden /> New board
+            </Link>
           </div>
-          <figure className={styles.heroVisual}>
-            <picture>
-              {/* Phones get a close-up: the full board would be unreadable at 360 px. */}
-              <source
-                srcSet="/home/board-crop-dark.jpg"
-                media="(max-width: 767px) and (prefers-color-scheme: dark)"
-                width={1280}
-                height={840}
-              />
-              <source srcSet="/home/board-crop-light.jpg" media="(max-width: 767px)" width={1280} height={840} />
-              <source srcSet="/home/board-dark.jpg" media="(prefers-color-scheme: dark)" />
-              <img
-                src="/home/board-light.jpg"
-                width={2160}
-                height={1245}
-                alt="An Archie board at 50,000 requests a second: Postgres is saturated at ρ 1.40, and a note explains the math"
-              />
-            </picture>
-          </figure>
+          <p className={styles.alsoLinks}>
+            Or <Link href="/interview">practice a system-design interview</Link>, or <OpenFile />
+          </p>
         </section>
 
+        {/* The board rises and flattens as you scroll (scroll-scrubbed; static with reduced motion). */}
+        <ScrollProgress mode="pin" as="section" className={styles.stage}>
+          <div className={styles.stageSticky}>
+            <figure className={styles.heroVisual}>
+              <picture>
+                {/* Phones get a close-up: the full board would be unreadable at 360 px. */}
+                <source
+                  srcSet="/home/board-crop-dark.jpg"
+                  media="(max-width: 767px) and (prefers-color-scheme: dark)"
+                  width={1280}
+                  height={840}
+                />
+                <source srcSet="/home/board-crop-light.jpg" media="(max-width: 767px)" width={1280} height={840} />
+                <source srcSet="/home/board-dark.jpg" media="(prefers-color-scheme: dark)" />
+                <img
+                  src="/home/board-light.jpg"
+                  width={2160}
+                  height={1245}
+                  fetchPriority="high"
+                  alt="An Archie board at 50,000 requests a second: Postgres is saturated at ρ 1.40, and a note explains the math"
+                />
+              </picture>
+              <figcaption className={styles.stageCaption}>
+                50,000 requests a second. Postgres saturates at ρ 1.40, and the board says why.
+              </figcaption>
+            </figure>
+          </div>
+        </ScrollProgress>
+
         <section aria-labelledby="how-heading" className={styles.section}>
-          <h2 id="how-heading" className={styles.sectionTitle}>
-            How it works
-          </h2>
+          <Reveal>
+            <h2 id="how-heading" className={styles.sectionTitle}>
+              Say it. Load it. Break it.
+            </h2>
+            <p className={styles.sectionLede}>Three sentences, out loud, from an empty board to a failure you can explain.</p>
+          </Reveal>
           <ol className={styles.steps}>
             {STEPS.map((step, i) => (
               <li key={step.title} className={styles.step}>
                 <span className={styles.stepNumber}>0{i + 1}</span>
-                <p className={styles.utterance}>{step.utterance}</p>
+                <WordReveal text={step.utterance} className={styles.utterance} />
                 <div>
                   <h3 className={styles.stepTitle}>{step.title}</h3>
                   <p className={styles.stepBody}>{step.body}</p>
@@ -156,36 +158,40 @@ export default function Home() {
         </section>
 
         <section aria-labelledby="measured-heading" className={styles.section}>
-          <h2 id="measured-heading" className={styles.sectionTitle}>
-            Measured, not claimed
-          </h2>
+          <Reveal>
+            <h2 id="measured-heading" className={styles.sectionTitle}>
+              Measured, not claimed.
+            </h2>
+            <p className={styles.sectionLede}>Straight from the committed eval and bench results.</p>
+          </Reveal>
           <dl className={styles.measured}>
-            {measured().map((m) => (
-              <div key={m.label} className={styles.metric}>
+            {measured().map((m, i) => (
+              <Reveal key={m.label} className={styles.metric} delay={i * 80}>
                 <dt>{m.label}</dt>
                 <dd>{m.value}</dd>
-              </div>
+              </Reveal>
             ))}
           </dl>
           <p className={styles.sectionLink}>
             <Link href="/evals">
-              Every run, case and percentile on the evals page{" "}
-              <ArrowUpRight size={14} aria-hidden />
+              Every run, case and percentile on the evals page <ArrowUpRight size={14} aria-hidden />
             </Link>
           </p>
         </section>
 
-        <section aria-labelledby="templates-heading" className={styles.section}>
-          <h2 id="templates-heading" className={styles.sectionTitle}>
-            Start from a template
-          </h2>
+        <section id="templates" aria-labelledby="templates-heading" className={styles.section}>
+          <Reveal>
+            <h2 id="templates-heading" className={styles.sectionTitle}>
+              Start from a template.
+            </h2>
+          </Reveal>
           <ul className={styles.templates}>
             {(Object.keys(TEMPLATES) as TemplateId[]).map((id) => (
               <li key={id}>
                 <Link href={`/b/new?template=${id}`} className={styles.template}>
                   <span className={styles.templateName}>{TEMPLATES[id].name}</span>
                   <span className={styles.templateDesc}>{TEMPLATES[id].description}</span>
-                  <ArrowRight size={16} aria-hidden className={styles.templateArrow} />
+                  <CaretRight size={16} weight="bold" aria-hidden className={styles.templateArrow} />
                 </Link>
               </li>
             ))}
@@ -193,18 +199,21 @@ export default function Home() {
         </section>
 
         <RecentBoards />
+
+        <Reveal as="section" className={styles.closing}>
+          <h2 className={styles.closingTitle}>Find the bottleneck before it finds you.</h2>
+          <div className={styles.actions}>
+            <Link href="/b/new?template=three-tier" className={styles.primary}>
+              Open the demo <ArrowRight size={16} weight="bold" aria-hidden />
+            </Link>
+            <Link href="/interview" className={styles.secondary}>
+              Practice an interview
+            </Link>
+          </div>
+        </Reveal>
       </main>
 
-      <footer className={styles.footer}>
-        <span>Built by voice with Wispr Flow.</span>
-        <span>Boards stay in your browser.</span>
-        <a href={SITE.repo}>MIT licensed</a>
-        <Link href="/evals">Evals</Link>
-        <Link href="/legal/privacy">Privacy</Link>
-        <Link href="/legal/terms">Terms</Link>
-        <Link href="/legal">Legal</Link>
-        <Link href="/design">Design system</Link>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

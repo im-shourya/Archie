@@ -60,6 +60,8 @@ for (const scheme of ["light", "dark"] as const) {
     test("Home", async ({ page }) => {
       await page.goto("/");
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      // Audit the settled page, not the hero's entrance animation mid-fade.
+      await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished)));
       await audit(page);
     });
 
