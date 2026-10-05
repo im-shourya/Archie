@@ -48,6 +48,14 @@
   --color-state-down: #636366;
   --color-edge: #b8b8bf;
 
+  /* Component families (docs/06 · Node shapes and logos): tints the glyph only, never state. */
+  --color-family-users: #6e6e73;
+  --color-family-edge: #8944ab;
+  --color-family-compute: #3a5bc7;
+  --color-family-data: #0b7285;
+  --color-family-async: #b02f73;
+  --color-family-outside: #6e6e73;
+
   /* Materials: "liquid glass" for chrome that floats over content (nav, menus, toasts).
      Translucent fill + blur + saturation, a specular top edge and a hairline rim. */
   --glass-fill: rgb(255 255 255 / 0.72);
@@ -110,6 +118,13 @@
     --color-state-saturated: #ff707b;
     --color-state-down: #8e8e93;
     --color-edge: #3a3a3e;
+
+    --color-family-users: #a1a1a6;
+    --color-family-edge: #c991e8;
+    --color-family-compute: #8fa7ff;
+    --color-family-data: #4fc3d4;
+    --color-family-async: #f07ab8;
+    --color-family-outside: #a1a1a6;
 
     --glass-fill: rgb(22 22 23 / 0.66);
     --glass-fill-strong: rgb(29 29 31 / 0.82);
