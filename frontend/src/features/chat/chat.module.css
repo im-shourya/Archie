@@ -4,7 +4,6 @@
   grid-template-rows: auto 1fr auto;
   gap: 12px;
   min-height: 360px;
-  height: 100%;
 }
 
 .head {
@@ -146,7 +145,11 @@
   height: 0;
 }
 
+/* Sticks to the bottom of the side panel, so the box stays in reach however long the log is. */
 .composer {
+  position: sticky;
+  bottom: 0;
+  box-shadow: 0 -12px 12px -4px var(--color-surface);
   display: flex;
   align-items: flex-end;
   gap: 8px;
@@ -202,4 +205,15 @@
     opacity: 0;
     transform: translateY(4px);
   }
+}
+
+/* Covers the side panel's bottom padding, so scrolled messages don't show under the box. */
+.composer::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: -1px;
+  right: -1px;
+  height: 16px;
+  background: var(--color-surface);
 }
