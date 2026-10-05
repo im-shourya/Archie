@@ -4,6 +4,16 @@ All notable user-visible changes. Format: [Keep a Changelog](https://keepachange
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-05
+
+### Added
+- **Chat**: a new side-panel tab that keeps every message and Archie's reply with the board, labelled with how each one was handled (local change, AI change, answer, question, confirmation, no change, not done). Replies that point at components highlight them. You can type commands and questions in the chat box too; they run exactly like the command bar. Clearing the chat asks first.
+- **Conversation memory**: the AI now gets the last 10 chat turns with each command, so follow-ups like "what's the bottleneck?" then "fix it" work. The chat is saved in your browser only and isn't included in share links or exports.
+- **Brand logos**: components named after a product ("Redis", "Postgres", "Kafka", "Stripe", "Cloudflare" and about 30 more) show that product's logo instead of the generic icon.
+
+### Changed
+- Components now have shapes that match what they are: cylinders for databases, caches, search and storage, a pipe for queues, a hexagon for CDNs, load balancers and gateways, a pill for users and a dotted outline for external APIs. Icons are tinted by family. Load, failures and selection show on the outline of every shape.
+
 ## [1.1.0] - 2026-10-05
 
 ### Added
@@ -83,6 +93,7 @@ First release, prepared for the Wispr Flow challenge submission. Live at <https:
 - ESLint import boundaries, Vitest, Playwright smoke tests.
 - Project documentation (`docs/00–31`), machine-readable contracts (`specs/`), repository scaffolding files.
 
-[Unreleased]: https://github.com/im-shourya/Archie/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/im-shourya/Archie/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/im-shourya/Archie/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/im-shourya/Archie/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/im-shourya/Archie/releases/tag/v1.0.0

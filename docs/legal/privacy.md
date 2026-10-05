@@ -15,7 +15,7 @@ Archie is a system-design board you talk to. It is an open-source project mainta
 
 | What | Where | How long |
 |------|-------|----------|
-| Your boards, their change history and your settings | Your browser's IndexedDB storage | Until you delete them, or clear your browser's site data |
+| Your boards, their change history, their chat and your settings | Your browser's IndexedDB storage | Until you delete them (or clear the chat), or clear your browser's site data |
 | An access code, only if the demo asks for one | Your browser's session storage | Until you close the tab |
 | Exported files (JSON, Markdown, Mermaid, SVG, PNG) | Wherever your browser saves downloads | Up to you |
 
@@ -26,6 +26,7 @@ Most of Archie works entirely in your browser: drawing and editing boards, the s
 Only the AI features talk to our server: commands that the local parser doesn't understand, questions about your design, design review, and interview questions and scoring. For those, your browser sends:
 
 - the words you typed or dictated,
+- for commands, up to 10 earlier messages from the board's chat (what you said and what Archie replied), so the AI can follow up on them,
 - your current board (its components, connections and workload),
 - for interviews, the problem, your answers so far and the interviewer's questions.
 

@@ -130,3 +130,17 @@ Format: Context → Decision → Alternatives → Consequences. Status: `Accepte
 **Decision:** A multi-stage `Dockerfile` builds Next's standalone output (`ARCHIE_STANDALONE=1`: a minimal `server.js` plus only the traced `node_modules`) into a non-root `node:22-alpine` image with a `HEALTHCHECK` on `/api/health`. Keys are runtime environment variables (`--env-file`), never in the build context (`.dockerignore`) or the image. The image is stamped with its git SHA (`ARCHIE_VERSION`, shown by `/api/health`). CI builds it and smoke-tests the running container on every PR (`scripts/docker-smoke.sh`). Deploy it as a single instance on any container host.
 **Alternatives:** Vercel serverless (no ops, but per-instance quota state; would need Redis/KV for shared counters, which conflicts with ADR-003's no-server-state); `next start` on a VM (works, but no reproducible artifact).
 **Consequences:** Quota and rate limits are exact for a single instance; scaling out later needs a shared store for the counters. Standalone output is opt-in, so `npm start` and the e2e suite are unchanged. The image runs anywhere Docker does, so a reviewer can try it locally with `docker compose up --build`.
+
+## ADR-019 · Conversation memory lives on the board, client-side
+**Status:** Accepted · 2026-10-05
+**Context:** The AI only saw the last five utterances that changed the board, never its own answers, so follow-ups ("what's the bottleneck?" → "fix it") had nothing to refer to. Users also had no record of questions and answers once the answer card closed.
+**Decision:** Each board keeps a `chat` log (≤ 200 turns) in IndexedDB next to its graph, shown in a Chat tab. Each `/api/command` call sends the last 10 non-error turns as `conversation` (≤ 600 chars each), rendered as an escaped `<conversation>` block and treated as untrusted data (G-07).
+**Alternatives:** Server-side sessions (breaks ADR-003's no-server-state and the privacy promise); send the whole log (unbounded tokens on free tiers); keep only `history` (no answers, the original problem).
+**Consequences:** The server stays stateless and logs no text; the token cost is bounded (≈ 1.5k worst case). Share links and exports don't carry the chat. The single-turn eval numbers don't measure multi-turn behaviour; a follow-up eval category is future work.
+
+## ADR-020 · Node shapes by family; brand logos only from labels
+**Status:** Accepted · 2026-10-05 · extends docs/06 · Icons
+**Context:** Every node was the same rectangle with a grey glyph, so a board didn't read like an architecture diagram at a glance.
+**Decision:** Shapes by family (pill, hexagon, rect, cylinder, pipe, dotted rect) drawn as SVG paths inside the unchanged 184×72 footprint; state drives the stroke through CSS variables. Brand marks (simple-icons, CC0, monochrome) appear only when the label names the product and the kind fits, loaded as a lazy chunk.
+**Alternatives:** Brand logo per kind (claims a product the user never chose and the simulator doesn't model); full-colour logos (clash with the palette and the state colours); a different footprint per shape (would change ELK layout and edge anchoring).
+**Consequences:** Layout, handles, tests and export geometry are unchanged; the board route stays under budget (291.6 KB). The SVG/PNG export still draws rectangles (simulator/export), which is future work.

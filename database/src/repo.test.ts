@@ -47,6 +47,23 @@ describe.each<[string, () => BoardRepository]>([
     expect(await repo.getBoard("missing")).toBeNull();
   });
 
+  it("round-trips a board's chat log, and loads boards saved before it", async () => {
+    const chat = [
+      { id: "t1", at: 1, role: "user" as const, text: "what's the bottleneck?" },
+      { id: "t2", at: 2, role: "assistant" as const, text: "Postgres at ρ 0.91.", kind: "answer" as const, focus: ["db"] },
+    ];
+    const b = board({ chat });
+    await repo.saveBoard(b);
+    expect((await repo.getBoard(b.id))?.chat).toEqual(chat);
+    const legacy = board();
+    await repo.saveBoard(legacy);
+    expect((await repo.getBoard(legacy.id))?.chat).toBeUndefined();
+  });
+
+  it("rejects a chat turn with an unknown role", async () => {
+    await expect(repo.saveBoard(board({ chat: [{ id: "t", at: 1, role: "system" as "user", text: "x" }] }))).rejects.toThrow();
+  });
+
   it("lists boards newest first with node counts", async () => {
     await repo.saveBoard(board({ id: "a", name: "Old", updatedAt: 10 }));
     await repo.saveBoard(board({ id: "b", name: "New", updatedAt: 20 }));
