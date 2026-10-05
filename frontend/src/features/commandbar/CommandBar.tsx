@@ -7,6 +7,7 @@ import { parseCommand, type FastPathAction } from "@archie/ai/fastpath";
 import { getRepository } from "@archie/database";
 import { useFit } from "../board/useFit";
 import { recentNodeIds, useBoardStore } from "../store/board.store";
+import { AccessCodeDialog } from "./AccessCodeDialog";
 import { AnswerCard } from "./AnswerCard";
 import { ClarifyChips } from "./ClarifyChips";
 import { ConfirmDialog } from "./ConfirmDialog";
@@ -409,6 +410,14 @@ export function CommandBar() {
           <AudioLines size={14} strokeWidth={2} aria-hidden /> Hands-free
         </button>
       </div>
+      {ai.state.phase === "code" && (
+        <AccessCodeDialog
+          error={ai.state.error}
+          retryAt={ai.state.retryAt}
+          onSubmit={ai.submitCode}
+          onCancel={ai.cancel}
+        />
+      )}
       {ai.state.phase === "confirm" && (
         <ConfirmDialog message={ai.state.message} count={ai.state.ops.length} onConfirm={ai.confirm} onCancel={ai.cancel} />
       )}
