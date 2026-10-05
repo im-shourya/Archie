@@ -2,7 +2,7 @@ import type { ElkNode } from "elkjs/lib/elk-api";
 import type { Graph } from "@archie/simulator";
 
 /**
- * Layered layout (ADR-009): left → right, or top → bottom on portrait phones so wide graphs
+ * Layered layout (ADR-009): left → right, or top → bottom on portrait phones and tablets so wide graphs
  * stay legible. Positions are node top-left corners.
  */
 
