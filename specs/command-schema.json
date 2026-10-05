@@ -122,6 +122,20 @@
         "baseVersion": { "type": "integer", "minimum": 0 },
         "selection": { "type": "array", "maxItems": 50, "items": { "$ref": "graph-schema.json#/$defs/NodeId" } },
         "history": { "type": "array", "maxItems": 5, "items": { "type": "string", "maxLength": 4000 } },
+        "conversation": {
+          "description": "Earlier chat turns, oldest first (docs/12 · Conversation memory).",
+          "type": "array",
+          "maxItems": 10,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["role", "text"],
+            "properties": {
+              "role": { "type": "string", "enum": ["user", "assistant"] },
+              "text": { "type": "string", "maxLength": 600 }
+            }
+          }
+        },
         "mode": { "type": "string", "enum": ["design", "interview"], "default": "design" }
       }
     },
