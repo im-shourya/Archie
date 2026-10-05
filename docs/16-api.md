@@ -58,6 +58,10 @@ The AI tier of the command bar. It's only called when the fast path returns `nul
   "graph": { "nodes": [], "edges": [], "workload": { "rps": 20000, "readRatio": 0.9, "peakMultiplier": 1 }, "version": 12 },
   "selection": ["api"],
   "history": ["users hit a load balancer...", "send twenty thousand rps"],
+  "conversation": [
+    { "role": "user", "text": "what's the bottleneck?" },
+    { "role": "assistant", "text": "Postgres (primary) at ρ 1.40." }
+  ],
   "mode": "design",
   "baseVersion": 12
 }
@@ -70,6 +74,7 @@ The AI tier of the command bar. It's only called when the fast path returns `nul
 | `graph` | valid `Graph`, ≤ 200 nodes |
 | `selection` | node ids, optional |
 | `history` | ≤ 5 previous utterances |
+| `conversation` | optional, ≤ 10 earlier chat turns `{ role: "user" \| "assistant", text ≤ 600 }`, oldest first ([12 · Conversation memory](12-ai-architecture.md)) |
 | `mode` | `design` \| `interview` |
 
 **Response `200`**: one of five kinds.
