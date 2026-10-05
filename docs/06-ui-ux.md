@@ -20,36 +20,39 @@ Decided on 2026-10-01 with the **design-system-decision** skill. Tokens live in 
 |----------|-------------------|
 | Who | Engineers and interview-prep students at a laptop, often screen-recorded → high contrast, legible numbers at 1080p |
 | What matters most | The *state* of the system and its numbers → colour is reserved for state; numbers in mono with tabular figures |
-| Mood | A precise instrument with the restraint of a good developer tool → a crisp, barely warm whiteboard, near-black ink, one accent, hairlines before shadows, no gradients or glow (redesign, 2026-10-04) |
+| Mood | A precise instrument with Apple's product-page polish → SF Pro, a cool `#f5f5f7` page with white panels and `#1d1d1f` ink, one blue, glass only on floating chrome, scroll-scrubbed motion on the home page (redesign, 2026-10-05) |
 | What should be memorable | The graph is the product → the logo is an "A" drawn as a three-node graph; the health ramp is the colour story |
 
 ### Brand
 
 - **Mark:** the letter A as a tiny architecture graph: an apex node and two base nodes joined by edges, with the crossbar as a third edge. The apex is the primary colour (the component that's "listening"); the rest is ink. Source: `frontend/src/components/brand/LogoMark.tsx`, `frontend/src/app/icon.svg` (adapts to dark mode), `frontend/public/brand/logo-mark-{light,dark}.svg`.
-- **Wordmark:** "Archie" in Geist 600 next to the mark.
+- **Wordmark:** "Archie" in SF Pro 600 next to the mark.
 - **Social card / icons:** `opengraph-image.tsx` (1200×630, a real simulator readout), `apple-icon.tsx` (180×180), `manifest.ts`.
 
 ### Colour roles
 
 | Token | Light | Dark | Use |
 |-------|-------|------|-----|
-| `--color-background` | `#fafaf9` | `#0a0a0a` | page and canvas (dominant, ~60%) |
-| `--color-surface` / `-sunken` | `#ffffff` / `#f4f4f2` | `#121212` / `#1c1c1c` | cards, panels, icon wells |
-| `--color-text-primary` / `-secondary` / `-muted` | `#0a0a0a` / `#52525b` / `#6b6b72` | `#ededed` / `#a3a3a3` / `#8e8e8e` | text hierarchy |
-| `--color-border-subtle` / `-default` / `-strong` | `#ececea` / `#deded9` / `#a3a39d` | `#2a2a2a` / `#363636` / `#555555` | structure |
-| `--color-primary` (+ hover, foreground, subtle) | `#2a44c8` | `#93a5ff` | actions, focus, the mic. **Never** used for state |
+| `--color-background` | `#f5f5f7` | `#000000` | page and canvas (dominant, ~60%) |
+| `--color-surface` / `-sunken` | `#ffffff` / `#efeff2` | `#161617` / `#232326` | cards, panels, footer, icon wells |
+| `--color-text-primary` / `-secondary` / `-muted` | `#1d1d1f` / `#515154` / `#636366` | `#f5f5f7` / `#a1a1a6` / `#8e8e93` | text hierarchy |
+| `--color-border-subtle` / `-default` / `-strong` | `#e5e5ea` / `#d2d2d7` / `#a1a1a6` | `#2a2a2d` / `#38383c` / `#5a5a5f` | structure |
+| `--color-primary` (+ subtle, focus) | `#0066cc` | `#2997ff` | blue as text: links, numbers, focus, the mic. **Never** used for state |
+| `--color-primary-fill` (+ hover, foreground) | `#0071e3` / `#0062c4` | `#0071e3` / `#0062c4` | solid buttons, white text (≥ 4.7:1) |
 | `--color-state-healthy` | `#1e7a58` | `#41c493` | ρ < 0.7 |
 | `--color-state-warm` | `#925b00` | `#e5ac3e` | 0.7 ≤ ρ < 0.9 |
 | `--color-state-hot` | `#ab4716` | `#f28a4e` | 0.9 ≤ ρ < 1 |
 | `--color-state-saturated` | `#c0283a` | `#ff707b` | ρ ≥ 1, failing traffic |
-| `--color-state-down` | `#646a77` | `#8e8e8e` | failed component |
+| `--color-state-down` | `#636366` | `#8e8e93` | failed component |
 
-Every text-bearing role (including all state colours, which colour ρ values and "fail" labels) is **≥ 4.5:1** on background, surface and sunken in both themes (computed with the WCAG formula; lowest is light `muted`/`healthy` on sunken at 4.79:1). Warm and hot were darkened slightly in the redesign to clear the light sunken and accent-subtle surfaces. State is never shown by colour alone: each node also has a text status (`ρ 1.40`, `down`, `idle`), a utilization bar and an aria-label.
+**Materials.** `--glass-fill` (nav) and `--glass-fill-strong` (menus, toasts) are translucent fills used with `--glass-blur` (`saturate(180%) blur(20px)`) and `--shadow-glass` (a specular top edge and a hairline rim). They fall back to the opaque surface without `backdrop-filter` or with `prefers-reduced-transparency`. Glass is only for chrome that floats over content.
+
+Every text-bearing role (including all state colours, which colour ρ values and "fail" labels) is **≥ 4.5:1** on background, surface and sunken in both themes (computed with the WCAG formula; lowest is light `healthy` on sunken, above 4.5:1). Warm and hot were darkened slightly in the redesign to clear the light sunken and accent-subtle surfaces. State is never shown by colour alone: each node also has a text status (`ρ 1.40`, `down`, `idle`), a utilization bar and an aria-label.
 
 ### Typography
 
-- **Geist** (400/500/600) for UI and **Geist Mono** (400/500/600) for numbers, ids, utterances and latency: a precise engineering pair that keeps dense simulator numbers legible. Loaded with `next/font` (self-hosted, no layout shift); SIL OFL 1.1. Headings are tightened (−0.02em; display −0.035em). The OG image still renders in Plex: its renderer can't read Geist's woff2 files.
-- Scale in use: 11 (node load) · 12 (captions) · 13 (panel headings: sentence case, semibold, primary ink; no forced uppercase) · 14 (body small) · 16 (body, inputs) · 17–19 (lede, `clamp`) · 22–28 (section titles) · 40–76 (display, `clamp`).
+- **SF Pro** for UI and **SF Mono** for numbers, ids and latency, from the system stack (`-apple-system`, `ui-monospace`): Apple's licence doesn't allow serving SF Pro as a web font, so Apple devices render it natively and download nothing. Elsewhere the stack falls back to **Inter** and **Geist Mono** (SIL OFL 1.1, self-hosted by `next/font`, not preloaded). Body text is tracked −0.011em; display sizes −0.03 to −0.045em, following SF Pro Display. The OG image still renders in Plex.
+- Scale in use: 11 (node load) · 12 (captions) · 13 (panel headings: sentence case, semibold, primary ink; no forced uppercase) · 14 (body small) · 16 (body, inputs) · 17–19 (lede, `clamp`) · 32–56 (section titles, `clamp`) · 44–80 (display, `clamp`).
 - Tabular numerals for every metric.
 
 ### Icons
@@ -60,7 +63,7 @@ Every text-bearing role (including all state colours, which colour ρ values and
 
 ### Shape and spacing
 
-4 px spacing base · radius `--radius-sm` 4 / `--radius-md` 8 / `--radius-lg` 12 · elevation `--shadow-raised` (cards) and `--shadow-overlay` (toasts, callouts) · touch targets ≥ 44 px on Home actions.
+4 px spacing base · radius `--radius-sm` 8 / `--radius-md` 10 (inputs, menus) / `--radius-button` 12 (buttons, as on apple.com) / `--radius-lg` 18 (panels) · elevation `--shadow-raised` (cards) and `--shadow-overlay` (toasts, callouts) · touch targets ≥ 44 px on Home actions.
 
 ### Audit (2026-10-03, Phase 5)
 
@@ -118,6 +121,7 @@ Guarded by `tests/contracts/design-tokens.test.ts`: no raw colour literals in an
 - Layout transitions 250 ms ease-out; node enter scale 0.96 → 1.
 - Particles run at most 60 per edge, paused when the tab is hidden.
 - `prefers-reduced-motion`: no particles (static thickness ∝ rps instead), no pulse (outline flash only), instant layout (NFR-014).
+- **Home page (scroll-scrubbed, `features/home/Motion.tsx`).** The scroll position is the timeline: each animated element gets a `--p` from 0 to 1 and CSS maps it to transforms and colours, so stopping the scroll freezes the animation. The board tilts up from the page and flattens as it scrolls (pinned on ≥ 768 px), the three spoken commands light up word by word (muted → ink, so every frame keeps AA contrast; screen readers get the sentence once), and sections fade, lift and un-blur once on entry. The hero title rises with a short blur-in on load. No scroll-jacking: native scrolling, one passive listener per element batched into `requestAnimationFrame`, only while near the viewport. No pre-rendered frame sequence: the product is a live app, so the real screenshot is transformed instead. Without scripting or with reduced motion everything renders in its final state.
 
 ## Empty, loading and error states
 

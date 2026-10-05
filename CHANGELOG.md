@@ -4,18 +4,20 @@ All notable user-visible changes. Format: [Keep a Changelog](https://keepachange
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-05
+
 ### Added
 - Legal pages: a privacy policy, terms of use, third-party services and open-source notices, and an accessibility statement, at `/legal` (with `/privacy` and `/terms`). They are rendered from `docs/legal`, so the site and the repository always agree.
-
-### Changed
-- Visual redesign: Geist type, Phosphor icons, a crisp neutral palette in light and dark (contrast-checked), sentence-case headings, quieter shadows and quick, reduced-motion-safe button feedback.
-- A new home page: a two-line headline, the real board front and centre (a close-up on phones), the three spoken steps, real measured numbers from the evals, and templates as a simple list.
-
-### Added
 - **Add ▾**: put any component type on the board by hand (a 44 px button on phones). The new component opens in the Inspector.
 - Connect and disconnect on the canvas: drag from one component's handle to another; select a connection and press × or Delete to remove it. Invalid connections (a loop of synchronous calls) explain why.
 - **Connect** in the Inspector: link a component to another one (sends to / receives from, all traffic, reads or writes) without the AI.
 - "Add a Redis cache", "add an orders service", "add Kafka called order events" now work by voice locally, with no AI call. Ambiguous or placed requests ("add a database", "a cache in front of Postgres") still go to the AI.
+- A shared navigation bar and a full footer (product, resources, support and legal links, copyright, licence and version) on the home, interview, evals and legal pages.
+
+### Changed
+- A new look inspired by Apple's product pages: SF Pro and SF Mono (the system fonts on Apple devices; Inter elsewhere), Phosphor icons, a new palette with a cool light-grey page, white panels and Apple blue, 12 px button corners and sentence-case headings. Every text colour meets WCAG AA in light and dark.
+- "Liquid glass": the site navigation, menus and toasts are translucent and blur what's behind them. They turn opaque when the browser can't blur or "reduce transparency" is on.
+- A new home page that moves as you scroll: the real board tilts up and flattens (a close-up on phones), the three spoken commands light up word by word, real measured numbers from the evals fade in, and templates sit in a grouped list. Scrolling stays native, and with reduced motion nothing moves.
 
 ## [1.0.0] - 2026-10-04
 
@@ -81,5 +83,6 @@ First release, prepared for the Wispr Flow challenge submission. Live at <https:
 - ESLint import boundaries, Vitest, Playwright smoke tests.
 - Project documentation (`docs/00–31`), machine-readable contracts (`specs/`), repository scaffolding files.
 
-[Unreleased]: https://github.com/im-shourya/Archie/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/im-shourya/Archie/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/im-shourya/Archie/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/im-shourya/Archie/releases/tag/v1.0.0

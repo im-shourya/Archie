@@ -6,6 +6,8 @@ export const SITE = {
   description:
     "A voice-first system-design board. Describe an architecture out loud, see it drawn, put real traffic through it, and see exactly where and why it fails.",
   repo: "https://github.com/im-shourya/Archie",
+  /** The released version (root package.json and CHANGELOG.md). */
+  version: "1.1.0",
   author: "Shourya",
   keywords: [
     "system design",
@@ -16,7 +18,7 @@ export const SITE = {
     "voice",
     "Wispr Flow",
   ],
-  colors: { background: "#f6f5f1", ink: "#16181d", primary: "#2a44c8", darkBackground: "#111317" },
+  colors: { background: "#f5f5f7", ink: "#1d1d1f", primary: "#0071e3", darkBackground: "#000000" },
 } as const;
 
 /** Absolute base URL for metadata. Set NEXT_PUBLIC_SITE_URL in production. */
