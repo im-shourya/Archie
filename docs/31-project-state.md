@@ -56,7 +56,7 @@ _None open._ Fixed in Phase 5: wide graphs rendered tiny on phones and portrait 
 3. Make the repository public before submitting (it's private, so the repo link and README images won't open for judges)
 4. Rotate the Gemini and Groq keys (they were pasted in chat)
 5. Bundle: move client-side validation to `zod/mini` (NFR-015), then drop the CI ratchet to 300 KB
-6. 🎙 Phase 6: interview mode and design review
+6. 🎙 Phase 6 per [34-phase-6-plan.md](34-phase-6-plan.md) (screens in [design/frontend-design.md](design/frontend-design.md))
 
 ## Metrics snapshot
 
