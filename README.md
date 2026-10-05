@@ -25,7 +25,9 @@ Archie is a system-design board you talk to. You describe changes out loud ("fiv
 
 - **Voice commands, applied locally.** Dictate with Wispr Flow (or type) into the command bar. A deterministic parser turns commands like *"Kill Redis"*, *"Shard Postgres into two"* or *"Send fifty thousand requests a second, ninety percent reads"* into graph edits. Anything it isn't certain about is **not guessed** locally: it goes to the AI tier instead.
 - **An AI tier for everything else.** Full descriptions (*"users hit two load balancers, thirty API servers, Postgres with two read replicas, and Redis"*) become validated edits. When a reference is ambiguous it asks (*"Which database?"* with tappable answers), big deletions wait for your confirmation, questions get answers that cite the simulator's numbers and highlight the components, and off-topic requests change nothing. The model only ever proposes operations: every one is validated, invalid ones get one repair attempt, and the guardrails are enforced in code.
+- **A chat that remembers.** The **Chat** tab keeps every message and Archie's reply with the board, labelled with how each was handled (local, AI change, answer, question). The last 10 turns go to the AI with each command, so *"What's the bottleneck?"* followed by *"fix it"* just works. You can type there too: it runs the same pipeline as the command bar. The chat stays in your browser and is never put in share links or exports.
 - **Hands-free mode.** The command sends itself once your dictation has been still for 1.2 seconds.
+- **Diagrams that read like diagrams.** Components take the shape people draw on whiteboards: databases and caches are cylinders, queues are pipes, load balancers and gateways are hexagons, users are pills, external APIs are dotted. Name a product in a label (*"Redis"*, *"Kafka"*, *"Stripe"*, *"Cloudflare"*) and its logo replaces the generic icon.
 - **A live simulator.** Every change re-runs a queueing model: per-component load and utilization (ρ), cache-aside reads, read replicas, sharding, queues with backlog, failover, end-to-end success rate, p50/p95/p99 latency, throughput and a monthly cost estimate.
 - **Explanations with the math.** The bottleneck gets a note such as *"1,500 reads/s + 5,000 writes/s on 1 shard (capacity 10,000 reads / 4,000 writes per shard) → ρ = 1.40 → 28.6% of its requests dropped."*
 - **Failure injection and blast radius.** *"Kill Redis"* shows success falling from 96.3% to 54.5% and which components became hot.
@@ -109,7 +111,7 @@ flowchart LR
 
 1. You speak a command; Wispr Flow types it into the command bar.
 2. The fast path matches it against an anchored grammar and resolves component names ("the db", "it", "postgres replica one"). It returns nothing unless it is certain.
-3. Otherwise `/api/command` sends the board (as a compact text form), the simulator summary and the utterance to the model (a ladder of Gemini free-tier models, each with its own daily quota, then Groq's free tier when Gemini is busy or out of quota; Claude optional), which returns structured output: edits, a question, a confirmation request, an answer or a no-op. Edits are validated; invalid ones get one repair turn and then become a question.
+3. Otherwise `/api/command` sends the board (as a compact text form), the simulator summary, the last few chat turns and the utterance to the model (a ladder of Gemini free-tier models, each with its own daily quota, then Groq's free tier when Gemini is busy or out of quota; Claude optional), which returns structured output: edits, a question, a confirmation request, an answer or a no-op. Edits are validated; invalid ones get one repair turn and then become a question.
 4. The result is a batch of typed operations, validated as a whole and applied atomically, so one bad operation changes nothing.
 5. The simulator re-runs on the new graph in a few milliseconds, and the canvas, metrics and explanations update.
 
@@ -122,7 +124,7 @@ flowchart LR
 | State and storage | Zustand, IndexedDB (`idb`) |
 | API | Hono, mounted at `/api` inside Next.js |
 | Validation and contracts | Zod, JSON Schema + OpenAPI in [`specs/`](specs/) |
-| Design | SF Pro / SF Mono system stack (Inter and Geist Mono elsewhere), Phosphor icons, CSS custom properties (tokens in `globals.css`) |
+| Design | SF Pro / SF Mono system stack (Inter and Geist Mono elsewhere), Phosphor icons, Simple Icons brand marks, CSS custom properties (tokens in `globals.css`) |
 | Testing | Vitest, fast-check, Playwright |
 | Voice | Wispr Flow (system-wide dictation) |
 
