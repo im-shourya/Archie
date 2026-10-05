@@ -19,7 +19,7 @@ Archie is a system-design board you talk to. You describe changes out loud ("fiv
 
 ![The three-tier template at 50,000 requests per second: Postgres is saturated at ρ 1.40 and the bottleneck note explains why](docs/assets/board-bottleneck.png)
 
-> Built by voice with [Wispr Flow](https://ref.wisprflow.ai/hhg) for Hacker House Goa 2026. **Status:** Phases 0–7 are done and the app is deployed; Phase 8 (record and submit) is next ([roadmap](docs/29-roadmap.md), [project state](docs/31-project-state.md)).
+> Built by voice with [Wispr Flow](https://ref.wisprflow.ai/hhg) for Hacker House Goa 2026. **Status:** Phases 0–7 are done and the app is deployed (1.2.0: chat with conversation memory, diagram shapes and logos); Phase 8 (record and submit) is next ([roadmap](docs/29-roadmap.md), [project state](docs/31-project-state.md)).
 
 ## What works today
 
@@ -39,6 +39,8 @@ Archie is a system-design board you talk to. You describe changes out loud ("fiv
 - **Share, export and replay.** **Share** copies a link that opens a read-only copy with the live simulation; the design travels in the link's `#` fragment, which browsers never send to the server, and **Duplicate** saves an editable copy. **Export** downloads JSON (re-importable with **Open file** on the home page), a Mermaid diagram, a Markdown design doc with the simulator's numbers and the review findings, or an SVG/PNG image. **Replay** steps through a session's changes, undo included.
 - **Boards in your browser.** Templates (three-tier, URL shortener, chat), undo/redo, change history, automatic layout, light and dark themes. Boards are saved in IndexedDB and never leave your browser unless you share or export them.
 - **A public eval report.** [`/evals`](docs/22-evaluation.md) renders the committed results: accuracy per category on the held-out test split, false actions, cases with no answer from any free-tier provider, and latency percentiles for every tier.
+
+![The Chat tab: a question, an answer citing the simulator, and "do what you suggested" sharding Postgres because Archie remembers the conversation; the board shows cylinders for databases, a pipe for Kafka and product logos](docs/assets/board-chat.png)
 
 ![After "Kill Redis": the blast radius panel shows success falling from 96.3% to 54.5% and both replicas saturating](docs/assets/board-blast-radius.png)
 
@@ -68,6 +70,9 @@ Archie is a system-design board you talk to. You describe changes out loud ("fiv
 | 5 | Design pass: Inspector, phone layout, mic fallback, access-code dialog, accessibility gate ([plan](docs/33-phase-5-plan.md)) | ✅ Done |
 | 6 | Interview mode with simulator-checked SLOs and a scorecard, design review, SPOF scan, `/design` style guide ([plan](docs/34-phase-6-plan.md)) | ✅ Done |
 | 7 | 92 eval cases, `/evals`, share links, exports and Open file, replay, deployment on Render ([plan](docs/35-phase-7-plan.md)) | ✅ Done (#12) |
+| 1.1 | Apple-inspired redesign, manual editing (Add ▾, canvas connect), legal pages | ✅ Done (#16–#21) |
+| 1.2 | Chat tab with conversation memory, node shapes by family, brand logos ([ADR-019/020](docs/30-architecture-decisions.md)) | ✅ Done (#22) |
+| Next | Shapes in the SVG/PNG export; a multi-turn eval category | Planned |
 
 ## Results
 
@@ -98,6 +103,7 @@ The simulator's headline numbers are golden-tested against hand calculations in 
 ```mermaid
 flowchart LR
     V[Wispr Flow dictation] --> C[Command bar]
+    C <--> H[(Chat log<br/>last 10 turns)]
     C --> F{Fast path<br/>deterministic parser}
     F -- understood --> O[Validated graph ops]
     F -- unsure --> A[AI tier · /api/command<br/>Gemini → Groq fallback<br/>+ validation + guardrails]
@@ -131,11 +137,11 @@ flowchart LR
 ## Project structure
 
 ```text
-frontend/    Next.js app: pages, canvas, command bar, metrics panel
+frontend/    Next.js app: pages, canvas (family shapes, brand logos), command bar, chat, metrics panel
 backend/     Hono API: /api/health and /api/command (rate limit, optional access code)
 simulator/   graph model, operations and the simulation engine (pure TypeScript)
 ai/          fastpath/ command parser (browser-safe); llm/ server-only model harness (Gemini → Groq, or Claude) with quota guards
-database/    IndexedDB repository and share-link codec
+database/    IndexedDB repository (boards, events, chat log) and share-link codec
 evals/       eval runner, cases, fixtures, benchmarks and results
 specs/       JSON Schemas, OpenAPI and fixtures (machine-readable contracts)
 tests/       contract and end-to-end tests

@@ -174,6 +174,45 @@ async function main() {
     await page.screenshot({ path: join(ASSETS, "board-inspector.png") });
     await context.close();
 
+    // Chat: a question, an answer that cites the simulator, then a follow-up that relies on it.
+    const cc = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 });
+    const cp = await cc.newPage();
+    let call = 0;
+    await cp.route("**/api/command", (route) => {
+      const sent = route.request().postDataJSON() as { baseVersion: number };
+      call += 1;
+      const reply =
+        call === 1
+          ? {
+              kind: "answer",
+              ops: [],
+              message:
+                "Postgres (primary) is the bottleneck at ρ 1.40: 9,500 reads/s + 5,000 writes/s on one shard. Sharding it into two brings ρ to 0.70.",
+              focusNodeIds: ["pg"],
+            }
+          : {
+              kind: "ops",
+              ops: [{ type: "updateNode", id: "pg", props: { shards: 2 } }],
+              message: "Sharded Postgres (primary) into 2, as discussed.",
+              focusNodeIds: ["pg"],
+            };
+      return route.fulfill({
+        json: { options: [], attempts: 1, model: "screenshot", timings: { totalMs: 1400, llmMs: 1380 }, baseVersion: sent.baseVersion, ...reply },
+      });
+    });
+    await openThreeTier(cp);
+    const chatBar = cp.getByRole("textbox", { name: "Command" });
+    for (const text of ["Add a queue called Kafka.", "What's the bottleneck right now?", "Do what you suggested."]) {
+      await chatBar.fill(text);
+      await chatBar.press("Enter");
+      await cp.waitForTimeout(700);
+    }
+    await cp.getByRole("button", { name: "Dismiss answer" }).click().catch(() => {});
+    await cp.getByRole("tab", { name: "Chat" }).click();
+    await cp.waitForTimeout(500);
+    await cp.screenshot({ path: join(ASSETS, "board-chat.png") });
+    await cc.close();
+
     // Interview mode: three-tier against the URL shortener, one answered question, then the scorecard.
     const iv = await browser.newContext({
       viewport: { width: 1440, height: 900 },
