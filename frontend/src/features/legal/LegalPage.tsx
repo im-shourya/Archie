@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Fragment, type ReactNode } from "react";
-import { Wordmark } from "@/components/brand/LogoMark";
+import { SiteFooter } from "@/components/site/SiteFooter";
+import { SiteHeader } from "@/components/site/SiteHeader";
 import { slug, type Block, type Inline } from "@/lib/markdown";
 import type { LegalDoc } from "./docs";
 import styles from "./legal.module.css";
@@ -87,29 +88,28 @@ const NAV = [
 export function LegalPage({ doc, current }: { doc: LegalDoc; current: string }) {
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <Link href="/" className={styles.brand} aria-label="Archie home">
-          <Wordmark size={22} />
-        </Link>
-        <nav aria-label="Legal" className={styles.nav}>
+      <SiteHeader />
+      <nav aria-label="Legal" className={styles.header}>
+        <div className={styles.nav}>
           {NAV.map((n) => (
             <Link key={n.href} href={n.href} aria-current={n.href === current ? "page" : undefined}>
               {n.label}
             </Link>
           ))}
-        </nav>
-      </header>
+        </div>
+      </nav>
       <main className={styles.main}>
         <article className={styles.doc}>
           <h1>{doc.title}</h1>
           {doc.effective && <p className={styles.effective}>{doc.effective}</p>}
           {doc.blocks.map(renderBlock)}
+          <p className={styles.footer}>
+            <Link href="/">Back to Archie</Link>
+            <a href="https://github.com/im-shourya/Archie/tree/main/docs/legal">Source on GitHub</a>
+          </p>
         </article>
       </main>
-      <footer className={styles.footer}>
-        <Link href="/">Back to Archie</Link>
-        <a href="https://github.com/im-shourya/Archie/tree/main/docs/legal">Source on GitHub</a>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
