@@ -33,6 +33,7 @@ Archie is MIT-licensed and stands on these projects. Each is used unmodified, un
 | lz-string | Share-link compression | MIT |
 | ulid | Ids | MIT |
 | Phosphor Icons | Icons | MIT |
+| Simple Icons | Brand logos on components named after a product | CC0-1.0 (the brands themselves are trademarks of their owners, shown only to identify the product) |
 | Geist, Geist Mono | Type | SIL Open Font License 1.1 |
 | IBM Plex Sans | Type in the social preview image | SIL Open Font License 1.1 ([licence file](https://github.com/im-shourya/Archie/blob/main/frontend/assets/fonts/OFL-IBM-Plex.txt)) |
 | @google/genai | Gemini client | Apache-2.0 |
