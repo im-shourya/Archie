@@ -227,7 +227,7 @@ test("errors: toast with Retry and request id; Retry re-sends", async ({ page })
   );
   await openThreeTier(page);
   await say(page, "make the api tier sturdier");
-  const toast = page.getByRole("status").filter({ hasText: "The AI service returned an error." });
+  const toast = page.getByRole("alert").filter({ hasText: "The AI service returned an error." });
   await expect(toast).toContainText("ref req-abcd");
   await toast.getByRole("button", { name: "Retry" }).click();
   await expect(page.getByTestId("node-api")).toContainText("×4");
@@ -240,7 +240,7 @@ test("degraded: 2 consecutive 503s show the banner, and the fast path keeps work
   );
   await openThreeTier(page);
   await say(page, "add a search cluster");
-  await expect(page.getByRole("status").filter({ hasText: "Couldn't reach the AI." })).toBeVisible();
+  await expect(page.getByRole("alert").filter({ hasText: "Couldn't reach the AI." })).toBeVisible();
   await expect(page.getByTestId("degraded-banner")).toHaveCount(0);
 
   await say(page, "add a search cluster");

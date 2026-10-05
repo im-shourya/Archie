@@ -5,13 +5,17 @@ import { useReactFlow } from "@xyflow/react";
 import { AudioLines, Mic, Sparkles, Zap } from "lucide-react";
 import { parseCommand, type FastPathAction } from "@archie/ai/fastpath";
 import { getRepository } from "@archie/database";
+import { useFit } from "../board/useFit";
 import { recentNodeIds, useBoardStore } from "../store/board.store";
+import { AccessCodeDialog } from "./AccessCodeDialog";
 import { AnswerCard } from "./AnswerCard";
 import { ClarifyChips } from "./ClarifyChips";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { DegradedBanner } from "./DegradedBanner";
+import { MicButton } from "./MicButton";
 import styles from "./commandbar.module.css";
 import { useCommand, type AiOutcome } from "./useCommand";
+import { speechErrorMessage, useSpeech } from "./useSpeech";
 
 /** Hands-free submits once dictation has been still this long (docs/03 · F-01). */
 export const SETTLE_MS = 1200;
@@ -40,6 +44,8 @@ interface Toast {
   /** Utterance to re-send from the toast's Retry button (AI errors). */
   retry?: string | null;
   requestId?: string | null;
+  /** Errors are announced assertively (doc 06 · Accessibility); everything else politely. */
+  error?: boolean;
 }
 
 function formatMs(ms: number): string {
@@ -71,7 +77,9 @@ export function CommandBar() {
   const apply = useBoardStore((s) => s.apply);
   const undo = useBoardStore((s) => s.undo);
   const redo = useBoardStore((s) => s.redo);
-  const { getNodes, fitView, zoomIn, zoomOut } = useReactFlow();
+  const notice = useBoardStore((s) => s.notice);
+  const { getNodes, zoomIn, zoomOut } = useReactFlow();
+  const fit = useFit();
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [text, setText] = useState("");
@@ -105,7 +113,7 @@ export function CommandBar() {
         return;
       case "error":
         setBadge({ tier: "none" });
-        setToast({ id, message: outcome.message, undoable: false, retry: outcome.retry, requestId: outcome.requestId });
+        setToast({ id, message: outcome.message, undoable: false, retry: outcome.retry, requestId: outcome.requestId, error: true });
     }
   }, []);
   const ai = useCommand(onOutcome);
@@ -126,6 +134,11 @@ export function CommandBar() {
     return () => clearInterval(id);
   }, []);
 
+  // Edits made elsewhere (the Inspector) report through the same toast, with Undo.
+  useEffect(() => {
+    if (notice) setToast({ id: notice.id, message: notice.message, undoable: notice.undoable });
+  }, [notice]);
+
   useEffect(() => {
     if (!toast) return;
     const id = setTimeout(() => setToast(null), TOAST_MS);
@@ -143,12 +156,12 @@ export function CommandBar() {
     (action: FastPathAction) => {
       if (action === "undo") return undo();
       if (action === "redo") return redo();
-      if (action === "fit") void fitView({ padding: 0.2, duration: 250 });
+      if (action === "fit") void fit();
       if (action === "zoomIn") void zoomIn({ duration: 200 });
       if (action === "zoomOut") void zoomOut({ duration: 200 });
       return true;
     },
-    [undo, redo, fitView, zoomIn, zoomOut],
+    [undo, redo, fit, zoomIn, zoomOut],
   );
 
   const submit = useCallback(
@@ -213,6 +226,28 @@ export function CommandBar() {
     [graph, events, apply, getNodes, runAction, ai, history],
   );
 
+  // Browser speech fallback (FR-062): interim text streams into the bar; the final result submits.
+  const speech = useSpeech({
+    onInterim: (interim) => {
+      setText(interim);
+      setHistoryIndex(null);
+    },
+    onFinal: (final) => {
+      setText(final);
+      submit(final);
+    },
+    onError: (error) => setToast({ id: Date.now(), message: speechErrorMessage(error), undoable: false, error: true }),
+  });
+
+  useEffect(() => {
+    if (!speech.listening) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") speech.stop();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [speech]);
+
   // Hands-free: submit once the dictated text stops changing (docs/03 · F-01).
   useEffect(() => {
     if (!handsFree || wordCount(text) < MIN_HANDS_FREE_WORDS || text === pausedText) {
@@ -248,6 +283,7 @@ export function CommandBar() {
   function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
+      speech.stop();
       submit(text);
     } else if (ai.state.phase === "clarify" && text === "" && /^[1-4]$/.test(e.key)) {
       const choice = ai.state.options[Number(e.key) - 1];
@@ -288,7 +324,7 @@ export function CommandBar() {
           <AnswerCard message={ai.state.message} focus={ai.state.focus} onHighlight={ai.setFocus} onDismiss={ai.cancel} />
         )}
         {toast && (
-          <div className={styles.toast} key={toast.id} role="status">
+          <div className={styles.toast} key={toast.id} role={toast.error ? "alert" : "status"}>
             <span>{toast.message}</span>
             {toast.undoable && (
               <button
@@ -322,7 +358,11 @@ export function CommandBar() {
         {hint && <p className={styles.hint}>{hint}</p>}
       </div>
       <div className={styles.bar}>
-        <Mic className={styles.mic} size={18} strokeWidth={1.75} aria-hidden />
+        {speech.supported ? (
+          <MicButton listening={speech.listening} onToggle={speech.listening ? speech.stop : speech.start} />
+        ) : (
+          <Mic className={styles.mic} size={18} strokeWidth={1.75} aria-hidden />
+        )}
         <textarea
           ref={inputRef}
           className={styles.input}
@@ -372,6 +412,14 @@ export function CommandBar() {
           <AudioLines size={14} strokeWidth={2} aria-hidden /> Hands-free
         </button>
       </div>
+      {ai.state.phase === "code" && (
+        <AccessCodeDialog
+          error={ai.state.error}
+          retryAt={ai.state.retryAt}
+          onSubmit={ai.submitCode}
+          onCancel={ai.cancel}
+        />
+      )}
       {ai.state.phase === "confirm" && (
         <ConfirmDialog message={ai.state.message} count={ai.state.ops.length} onConfirm={ai.confirm} onCancel={ai.cancel} />
       )}
