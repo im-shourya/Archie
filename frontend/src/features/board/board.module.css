@@ -309,25 +309,104 @@
   text-align: center;
 }
 
-/* Node card */
+/* Node card (docs/06 · Node shapes and logos). The outline is an SVG path per family (shapes.ts);
+   state only changes the variables below, so every shape shows warm/hot/saturated/down alike. */
 .node {
+  --node-stroke: var(--color-border-default);
+  --node-stroke-width: 1.5px;
+  --node-fill: var(--color-surface);
+  --node-glow: color-mix(in srgb, var(--color-text-primary) 14%, transparent);
+  --family: var(--color-family-compute);
+  --pad-x: 12px;
+  --pad-right: var(--pad-x);
+  --pad-y: 8px;
+  --bar-inset: 12px;
+  --bar-inset-right: var(--bar-inset);
+  --bar-bottom: 6px;
+  --mark-top: 4px;
+  --mark-right: 6px;
   position: relative;
+  isolation: isolate;
   display: flex;
   align-items: center;
   gap: 10px;
   width: 184px;
   height: 72px;
-  padding: 8px 12px 12px;
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
+  padding: var(--pad-y) var(--pad-right) calc(var(--pad-y) + 4px) var(--pad-x);
   color: var(--color-text-primary);
-  box-shadow: var(--shadow-raised);
+}
+
+.node[data-family="users"] {
+  --family: var(--color-family-users);
+  --pad-x: 20px;
+}
+
+.node[data-family="edge"] {
+  --family: var(--color-family-edge);
+  --pad-x: 20px;
+  --bar-inset: 22px;
+  --mark-right: 20px;
+}
+
+.node[data-family="data"] {
+  --family: var(--color-family-data);
+  --pad-y: 11px;
+  --bar-inset: 20px;
+  --bar-bottom: 7px;
+  --mark-top: 12px;
+  --mark-right: 10px;
+}
+
+.node[data-family="async"] {
+  --family: var(--color-family-async);
+  --pad-x: 18px;
+  --pad-right: 26px;
+  --bar-inset: 16px;
+  --bar-inset-right: 26px;
+  --mark-right: 26px;
+}
+
+.node[data-family="outside"] {
+  --family: var(--color-family-outside);
+}
+
+.shape {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 1px 2px var(--node-glow));
+}
+
+.outline {
+  fill: var(--node-fill);
+  stroke: var(--node-stroke);
+  stroke-width: var(--node-stroke-width);
+  stroke-linejoin: round;
+}
+
+.detail {
+  fill: none;
+  stroke: var(--node-stroke);
+  stroke-width: 1px;
+  opacity: 0.7;
+}
+
+.node[data-family="outside"] .outline {
+  stroke-dasharray: 2 4;
+  stroke-linecap: round;
 }
 
 .selected {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 35%, transparent);
+  --node-stroke: var(--color-primary);
+  --node-stroke-width: 2px;
+  --node-glow: color-mix(in srgb, var(--color-primary) 45%, transparent);
+}
+
+.selected .shape {
+  filter: drop-shadow(0 0 3px var(--node-glow));
 }
 
 .glyph {
@@ -337,8 +416,8 @@
   width: 34px;
   height: 34px;
   border-radius: var(--radius-sm);
-  background: var(--color-surface-sunken);
-  color: var(--color-text-secondary);
+  background: color-mix(in srgb, var(--family) 14%, var(--color-surface));
+  color: var(--family);
 }
 
 .text {
@@ -371,16 +450,21 @@
 
 /* Simulation state (docs/06): colour + label + bar, never colour alone. */
 .node[data-sim="warm"] {
-  border-color: var(--color-state-warm);
+  --node-stroke: var(--color-state-warm);
 }
 
 .node[data-sim="hot"] {
-  border-color: var(--color-state-hot);
+  --node-stroke: var(--color-state-hot);
 }
 
 .node[data-sim="saturated"] {
-  border-color: var(--color-state-saturated);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-state-saturated) 30%, transparent);
+  --node-stroke: var(--color-state-saturated);
+  --node-stroke-width: 2px;
+  --node-glow: color-mix(in srgb, var(--color-state-saturated) 45%, transparent);
+}
+
+.node[data-sim="saturated"] .shape {
+  filter: drop-shadow(0 0 4px var(--node-glow));
 }
 
 .node[data-sim="saturated"] .load {
@@ -389,9 +473,13 @@
 
 /* Down: dimmed with tokens, not opacity, so the label and numbers keep AA contrast. */
 .node[data-sim="down"] {
-  border-style: dashed;
-  border-color: var(--color-state-down);
-  background: var(--color-surface-sunken);
+  --node-stroke: var(--color-state-down);
+  --node-fill: var(--color-surface-sunken);
+  --family: var(--color-state-down);
+}
+
+.node[data-sim="down"] .outline {
+  stroke-dasharray: 6 4;
 }
 
 .node[data-sim="down"] .label,
@@ -405,15 +493,15 @@
 
 /* Nodes an AI answer or question refers to (docs/16 · answer → highlight focusNodeIds). */
 .node[data-focus] {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 3px;
+  --node-stroke: var(--color-focus);
+  --node-stroke-width: 2.5px;
 }
 
 .rhoTrack {
   position: absolute;
-  left: 12px;
-  right: 12px;
-  bottom: 6px;
+  left: var(--bar-inset);
+  right: var(--bar-inset-right);
+  bottom: var(--bar-bottom);
   height: 3px;
   border-radius: 2px;
   background: var(--color-border-subtle);
@@ -560,8 +648,8 @@
 
 .downMark {
   position: absolute;
-  top: 4px;
-  right: 6px;
+  top: var(--mark-top);
+  right: var(--mark-right);
   color: var(--color-state-down);
 }
 
@@ -627,16 +715,20 @@
   }
 }
 
-.pulse {
+.pulse .shape {
   animation: pulse 900ms ease-out;
 }
 
+/* Traces the node's own outline, whatever its shape. */
 @keyframes pulse {
   0% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 60%, transparent);
+    filter: drop-shadow(0 0 0 color-mix(in srgb, var(--color-primary) 80%, transparent));
+  }
+  30% {
+    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--color-primary) 60%, transparent));
   }
   100% {
-    box-shadow: 0 0 0 12px transparent;
+    filter: drop-shadow(0 0 12px transparent);
   }
 }
 
@@ -749,9 +841,13 @@
     transition: none;
   }
 
-  .pulse {
+  .pulse .shape {
     animation: none;
+  }
+
+  .pulse {
     outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
   }
 }
 
