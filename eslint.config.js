@@ -2,7 +2,7 @@ import js from "@eslint/js";
 import reactHooks from "eslint-plugin-react-hooks";
 import tseslint from "typescript-eslint";
 
-const llmImports = ["@archie/ai/llm", "@archie/ai/llm/*", "@anthropic-ai/sdk"];
+const llmImports = ["@archie/ai/llm", "@archie/ai/llm/*", "@anthropic-ai/sdk", "@google/genai", "groq-sdk"];
 
 export default tseslint.config(
   {

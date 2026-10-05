@@ -1,6 +1,10 @@
 # Local agent config + skills — never commit or push
 .claude/
 CLAUDE.local.md
+WORKLOG.local.md
+# Re-created by `next dev` on every run
+frontend/AGENTS.md
+frontend/CLAUDE.md
 
 # Dependencies / build
 node_modules/

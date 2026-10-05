@@ -4,7 +4,7 @@ Where the project is **right now**. Update at the end of every phase (and whenev
 
 ## Current phase
 
-**Phase 3 done** (merged in #5). Brand, SEO and docs audit on `feat/brand-seo`. Next: Phase 4 (AI harness), see [32-phase-4-plan.md](32-phase-4-plan.md).
+**Phase 4 built** on `feat/ai-harness` ([32-phase-4-plan.md](32-phase-4-plan.md)): schemas + context DSL, system prompt, harness with repair and guardrails, `/api/command` with rate limiting, the AI tier in the command bar, and the eval runner with 31 cases. All of it is tested with a mocked model. Running on free tiers: a Gemini model ladder → Groq fallback with quota guards ([ADR-016/017](30-architecture-decisions.md)). **Phase 4 acceptance criteria all met (2026-10-02):** 29/31 eval cases (93.5%), 0 false actions, warm P50 1.8–1.9 s. Out-of-bounds numbers are now caught in code (G-05). Not pushed yet.
 
 ## Completed
 
@@ -23,11 +23,15 @@ Where the project is **right now**. Update at the end of every phase (and whenev
 - [x] Phase 2: fast path (numbers, normalization, reference resolution, 19 rules, abstains when unsure), command bar with latency badge, hands-free mode, history, toast with Undo, `bench:fast`
 - [x] Phase 3: simulation engine (propagation, cache-aside, SQL clusters + failover, queues, exact success, seeded Monte Carlo, explanations), golden + property + contract tests, `bench:sim`, board UI (status, ρ bars, animated traffic, bottleneck callout, metrics panel, blast radius)
 - [x] Brand and design system (logo, tokens, Plex, Lucide, light/dark), SEO (metadata, OG image, manifest, robots, sitemap, JSON-LD), README rewrite, docs audit (statuses, stale undo/emoji references)
-- [ ] Phase 4: AI harness
+- [x] Phase 4 code: harness, `/api/command`, command bar AI tier, eval runner + 31 cases (mocked-model tests)
+- [x] Phase 4 real-model checks: schema accepted live, B1 dev + test run
+- [x] Out-of-bounds numbers → clarify (G-05 in code + prompt); re-run dev 94.7%, test 91.7%, 0 false actions
+- [x] Request budget enforced even when an SDK ignores abort (a live case hung for 96 s)
+- [ ] Push `feat/ai-harness`, open the PR, squash-merge
 
 ## Blocked
 
-_Nothing._
+_Nothing._ Free quotas are about 20 calls/day per Gemini model (4-model ladder) plus Groq. Eval runs are budgeted accordingly.
 
 ## Known bugs
 
@@ -44,18 +48,22 @@ _Nothing._
 1. Sign up for Wispr Flow via <https://ref.wisprflow.ai/hhg>
 2. Test screen recording with the Wispr overlay visible
 3. Make the repository public before submitting (it's private, so the repo link and README images won't open for judges)
-4. 🎙 Phase 4 per [32-phase-4-plan.md](32-phase-4-plan.md)
+4. Push `feat/ai-harness` and open the Phase 4 PR
+5. Rotate the Gemini and Groq keys (they were pasted in chat)
+6. 🎙 Phase 5 per [29-roadmap.md](29-roadmap.md)
 
 ## Metrics snapshot
 
 | Metric | Value |
 |--------|-------|
-| Eval cases | 0 / 92 |
-| Task accuracy (test) | — |
+| Eval cases | 31 / 92 (19 dev, 12 test) |
+| Task accuracy (dev / test) | 94.7% / 91.7% (all 31: 93.5%) |
+| False-action rate (dev / test) | 0% / 0% |
 | Fast-path P50 / P100 | 0.006 ms / 0.138 ms |
 | Simulator P95 @ 100 nodes | 2.327 ms |
-| AI P50 / P95 | — |
+| Fast path on eval cases (B0) | 2/31 handled, precision 100% |
+| AI warm P50 / P95 (test) | 1.8 s / 11.9 s (P95 = a fallback hop on the free tier) |
 
 ## Last updated
 
-2026-10-01
+2026-10-02

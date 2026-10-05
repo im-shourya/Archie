@@ -15,7 +15,7 @@ The **full** production path, not just the model:
 
 ```
 case.utterance + fixtures[case.fixture]
-  → fastpath.parse → (null) → harness.run (real Claude) → guardrails
+  → fastpath.parse → (null) → harness.run (real model: Gemini by default, Claude via ARCHIE_PROVIDER) → guardrails
   → applyBatch → simulate → assertions
 ```
 
@@ -52,6 +52,18 @@ Structural, not exact-match, so different-but-correct op lists pass:
 { "focusIncludes": ["pg"] }
 ```
 
+Added in Phase 4 (needed by the acceptance criteria):
+
+```json
+{ "reachable": { "fromKind": "queue", "to": "pg" } }
+{ "optionsMention": ["orders", "users"] }
+{ "loadDrops": { "node": "pg", "class": "read" } }
+{ "nodeCount": { "kind": "sql", "role": "replica", "eq": 2 } }
+{ "nodeExists": { "id": "api", "labelIncludes": "checkout" } }
+```
+
+`reachable` accepts inline inserts that add hops. `optionsMention` checks that the clarify options name each candidate. `loadDrops` compares the simulator before and after (for example, a cache taking reads off the database).
+
 ## Baseline & comparisons
 
 | Run | Description |
@@ -64,8 +76,13 @@ Results table (filled by `npm run eval -- --report`):
 
 | Run | Task acc. | False-action | Over-clarify | AI P50 | AI P95 | Notes |
 |-----|-----------|--------------|--------------|--------|--------|-------|
-| B0 | — | — | — | — | — | |
-| B1 | — | — | — | — | — | |
+| B0 | 6.5% | 0% | 0% | — | — | 31 cases (all splits). Fast path handled 2/31 with precision 100%, abstaining on everything else. `evals/results/b0-fastpath.json` |
+| B1 dev (v1 prompt) | 84.2% | 0% | 0% | 1.9 s | 4.5 s | 2026-10-02 · 19 cases · prompt `d7d3db96cf14` |
+| B1 test (v1 prompt) | 83.3% | **25%** | 0% | 2.7 s | 3.65 s | Held out. bounds-02 "fifty million rps" was **applied** (clamped) instead of clarified |
+| **B1 dev (v2)** | **94.7%** | **0%** | 0% | 1.9 s | 9.8 s | prompt `531e9fe02e1c` + G-05 in code. Miss: workload-01 "fifty k rps ninety percent reads" → answer. `evals/results/b1-dev.json` |
+| **B1 test (v2)** | **91.7%** | **0%** | 0% | 1.8 s | 11.9 s | Held out. Kind accuracy 100%. Miss: dictation-noise-02 (no replica nodes). P95 = one case that failed over Gemini 503 → 429 → Groq. `evals/results/latest.json` |
+
+**v1 → v2:** G-05 is now enforced in code (`ai/src/llm/bounds.ts`: an out-of-bounds number becomes a clarify stating the limit, never a clamped edit), plus prompt rules for bounds and for "delete everything → confirm". Both changes came from **dev** failures (bounds-01, injection-01). Under the decision rule: task accuracy up, false actions 25% → 0%, P50 unchanged. P95 went up because of fallback hops on the free tier, not prompt cost. All 31 cases: **29/31 = 93.5%, 0 false actions.** Free-tier runs mix models; each case records its model.
 
 **Decision rule:** a change ships only if task accuracy doesn't drop, false-action stays ≤ 2%, and P95 latency doesn't regress > 20%. One metric improving isn't enough.
 

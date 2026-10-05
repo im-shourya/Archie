@@ -124,6 +124,196 @@
   color: var(--color-text-secondary);
 }
 
+.badge[data-tier="ai"] {
+  color: var(--color-primary);
+}
+
+.badge[data-tier="thinking"] {
+  background: linear-gradient(
+      90deg,
+      var(--color-text-muted) 0%,
+      var(--color-text-primary) 50%,
+      var(--color-text-muted) 100%
+    )
+    0 0 / 200% 100%;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 1.4s linear infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* AI result panels above the bar: clarify, answer (docs/16 · client behaviour). */
+.panel {
+  pointer-events: auto;
+  display: grid;
+  gap: 10px;
+  width: min(640px, 100%);
+  padding: 12px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-overlay);
+}
+
+.panel:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.panelHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.panelIcon {
+  flex: none;
+  margin-top: 2px;
+  color: var(--color-primary);
+}
+
+.panelText {
+  flex: 1;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.iconButton {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  margin: -4px -4px 0 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.iconButton:hover {
+  background: var(--color-surface-sunken);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 4px 12px 4px 6px;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.chip:hover {
+  border-color: var(--color-primary);
+}
+
+.chipKey {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+  color: var(--color-text-secondary);
+  font: 600 11px/1 var(--font-mono), monospace;
+}
+
+.banner {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: min(640px, 100%);
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--color-state-warm);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-state-warm) 12%, var(--color-surface));
+  color: var(--color-text-primary);
+  font-size: 14px;
+}
+
+.requestId {
+  font: 11px/1 var(--font-mono), monospace;
+  color: var(--color-text-muted);
+}
+
+.dialog {
+  width: min(420px, calc(100vw - 32px));
+  padding: 20px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-overlay);
+}
+
+.dialog::backdrop {
+  background: color-mix(in srgb, var(--color-text-primary) 30%, transparent);
+}
+
+.dialogTitle {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.dialogText {
+  margin: 0 0 20px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+.dialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.secondaryButton,
+.dangerButton {
+  min-height: 36px;
+  padding: 6px 14px;
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.secondaryButton {
+  border: 1px solid var(--color-border-default);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+}
+
+.dangerButton {
+  border: 1px solid var(--color-state-saturated);
+  background: var(--color-state-saturated);
+  color: var(--color-background);
+}
+
 .handsFree {
   display: inline-flex;
   align-items: center;
@@ -146,7 +336,11 @@
 }
 
 .handsFree:focus-visible,
-.toastButton:focus-visible {
+.toastButton:focus-visible,
+.iconButton:focus-visible,
+.chip:focus-visible,
+.secondaryButton:focus-visible,
+.dangerButton:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
@@ -161,7 +355,8 @@
 }
 
 @media (max-width: 767px) {
-  .badge {
+  /* Keep "thinking…" visible on phones; latency badges are desktop detail. */
+  .badge:not([data-tier="thinking"]) {
     display: none;
   }
 
@@ -172,6 +367,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .badge[data-tier="thinking"] {
+    animation: none;
+    background: none;
+    color: var(--color-text-secondary);
+  }
+
   .ring {
     animation: none;
     background: var(--color-primary);

@@ -257,6 +257,12 @@
   opacity: 0.8;
 }
 
+/* Nodes an AI answer or question refers to (docs/16 · answer → highlight focusNodeIds). */
+.node[data-focus] {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
 .rhoTrack {
   position: absolute;
   left: 12px;
