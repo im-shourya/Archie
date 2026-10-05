@@ -7,7 +7,7 @@ import {
   type EventSource,
   type Graph,
 } from "@archie/simulator";
-import { getRepository, newId, type Board } from "@archie/database";
+import { getRepository, MAX_CHAT_TURNS, newId, type Board, type ChatTurn } from "@archie/database";
 
 /**
  * Board store (docs/04 · State). Single source of truth for the open board.
@@ -32,6 +32,20 @@ export function recentNodeIds(events: readonly BoardEvent[]): string[] {
   return [];
 }
 const SAVE_DEBOUNCE_MS = 500;
+/** How many earlier chat turns go to the AI with each command (docs/12 · Conversation memory). */
+export const CONVERSATION_TURNS = 10;
+const TURN_CHARS = 600;
+
+/**
+ * The chat turns sent to /api/command as context: oldest first, errors left out (they say
+ * nothing about the design), each cut to the API's 600-character limit.
+ */
+export function conversationContext(chat: readonly ChatTurn[] | undefined): { role: ChatTurn["role"]; text: string }[] {
+  return (chat ?? [])
+    .filter((t) => t.kind !== "error")
+    .slice(-CONVERSATION_TURNS)
+    .map((t) => ({ role: t.role, text: t.text.length > TURN_CHARS ? `${t.text.slice(0, TURN_CHARS - 1)}…` : t.text }));
+}
 
 export interface ApplyMeta {
   utterance: string | null;
@@ -69,6 +83,16 @@ interface BoardState {
   redo(): boolean;
   setPinned(nodeId: string, position: { x: number; y: number } | null): void;
   rename(name: string): void;
+  /** Append one line to the board's chat log (docs/17 · Chat) and save it. */
+  addChat(turn: Omit<ChatTurn, "id" | "at">): void;
+  clearChat(): void;
+  /**
+   * Text typed in the Chat panel, waiting for the command bar to run it through the same
+   * fast path → AI pipeline as the bar itself. The command bar consumes and clears it.
+   */
+  chatSubmit: { id: number; text: string } | null;
+  submitFromChat(text: string): void;
+  consumeChatSubmit(): void;
   /** Interview mode: replace the board's interview state (transcript, scorecard) and save it. */
   setInterview(interview: unknown): void;
   /**
@@ -156,6 +180,7 @@ export const useBoardStore = create<BoardState>()((set, get) => {
     focus: [],
     notice: null,
     finishPending: false,
+    chatSubmit: null,
     sheetRequest: 0,
     reviewOpen: false,
 
@@ -192,7 +217,7 @@ export const useBoardStore = create<BoardState>()((set, get) => {
     },
 
     async load(id) {
-      set({ status: "loading", board: null, events: [], undoStack: [], redoStack: [], selection: [], focus: [], reviewOpen: false });
+      set({ status: "loading", board: null, events: [], undoStack: [], redoStack: [], selection: [], focus: [], reviewOpen: false, chatSubmit: null });
       await flushWrites();
       const repo = await getRepository();
       const [board, events] = await Promise.all([repo.getBoard(id), repo.listEvents(id)]);
@@ -253,6 +278,33 @@ export const useBoardStore = create<BoardState>()((set, get) => {
       const next = { ...board, graph: { ...board.graph, nodes }, updatedAt: Date.now() };
       set({ board: next });
       scheduleSave(next);
+    },
+
+    addChat(turn) {
+      const { board } = get();
+      const text = turn.text.trim().slice(0, 4000);
+      if (!board || !text) return;
+      const at = Date.now();
+      const chat = [...(board.chat ?? []), { ...turn, text, id: newId(), at }].slice(-MAX_CHAT_TURNS);
+      const next = { ...board, chat, updatedAt: at };
+      set({ board: next });
+      scheduleSave(next);
+    },
+
+    clearChat() {
+      const { board } = get();
+      if (!board?.chat?.length) return;
+      const next = { ...board, chat: [], updatedAt: Date.now() };
+      set({ board: next });
+      scheduleSave(next);
+    },
+
+    submitFromChat(text) {
+      if (text.trim()) set({ chatSubmit: { id: Date.now(), text: text.trim() } });
+    },
+
+    consumeChatSubmit() {
+      set({ chatSubmit: null });
     },
 
     setInterview(interview) {

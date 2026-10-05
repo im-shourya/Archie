@@ -7,7 +7,7 @@ import { parseCommand, type FastPathAction } from "@archie/ai/fastpath";
 import { getRepository } from "@archie/database";
 import { isTyping } from "@/lib/keyboard";
 import { useFit } from "../board/useFit";
-import { recentNodeIds, useBoardStore } from "../store/board.store";
+import { conversationContext, recentNodeIds, useBoardStore } from "../store/board.store";
 import { AccessCodeDialog } from "./AccessCodeDialog";
 import { AnswerCard } from "./AnswerCard";
 import { ClarifyChips } from "./ClarifyChips";
@@ -76,6 +76,9 @@ export function CommandBar() {
   const redo = useBoardStore((s) => s.redo);
   const notice = useBoardStore((s) => s.notice);
   const interviewMode = useBoardStore((s) => s.board?.mode === "interview");
+  const addChat = useBoardStore((s) => s.addChat);
+  const chatSubmit = useBoardStore((s) => s.chatSubmit);
+  const consumeChatSubmit = useBoardStore((s) => s.consumeChatSubmit);
   const { getNodes, zoomIn, zoomOut } = useReactFlow();
   const fit = useFit();
 
@@ -93,6 +96,7 @@ export function CommandBar() {
   /** The utterance being handled by the AI, so a late result only clears the bar if it's unchanged. */
   const submitted = useRef("");
 
+  // Every AI outcome is also a line in the board's chat log (docs/17 · Chat).
   const onOutcome = useCallback((outcome: AiOutcome) => {
     const id = Date.now();
     switch (outcome.type) {
@@ -100,25 +104,50 @@ export function CommandBar() {
         setBadge({ tier: "ai", ms: outcome.ms });
         setText((t) => (t.trim() === submitted.current ? "" : t));
         setToast({ id, message: outcome.message, undoable: true });
+        addChat({ role: "assistant", text: outcome.message || "Done.", kind: "ops" });
         return;
       case "noop":
         setBadge(null);
         setToast({ id, message: outcome.message, undoable: false });
+        addChat({ role: "assistant", text: outcome.message || "Nothing to change.", kind: "noop" });
         return;
-      case "stale":
+      case "reply": {
+        const options = outcome.options?.length ? ` (${outcome.options.join(" · ")})` : "";
+        addChat({
+          role: "assistant",
+          text: outcome.message + options,
+          kind: outcome.kind,
+          ...(outcome.focus.length ? { focus: outcome.focus.slice(0, 20) } : {}),
+        });
+        return;
+      }
+      case "stale": {
+        const message = "The board changed while I was thinking. Please say that again.";
         setBadge(null);
-        setToast({ id, message: "The board changed while I was thinking. Please say that again.", undoable: false });
+        setToast({ id, message, undoable: false });
+        addChat({ role: "assistant", text: message, kind: "error" });
         return;
+      }
       case "error":
         setBadge({ tier: "none" });
         setToast({ id, message: outcome.message, undoable: false, retry: outcome.retry, requestId: outcome.requestId, error: true });
+        addChat({ role: "assistant", text: outcome.message, kind: "error" });
     }
-  }, []);
+  }, [addChat]);
   const ai = useCommand(onOutcome);
 
   const history = useMemo(
     () => events.map((e) => e.utterance).filter((u): u is string => !!u),
     [events],
+  );
+  /** Context for an AI call, read before this turn is logged so the AI doesn't see it twice. */
+  const context = useCallback(
+    (selection: string[]) => ({
+      selection,
+      history,
+      conversation: conversationContext(useBoardStore.getState().board?.chat),
+    }),
+    [history],
   );
 
   useEffect(() => {
@@ -162,6 +191,9 @@ export function CommandBar() {
     [undo, redo, fit, zoomIn, zoomOut],
   );
 
+  /** Clear the bar after a local command, unless the text came from the Chat panel. */
+  const clearIfSent = (utterance: string) => setText((t) => (t.trim() === utterance ? "" : t));
+
   const submit = useCallback(
     (raw: string) => {
       const utterance = raw.trim();
@@ -176,23 +208,29 @@ export function CommandBar() {
         const choice = matchOption(utterance, ai.state.options);
         if (choice) {
           setHint(null);
-          ai.choose(choice, { selection, history });
+          const ctx = context(selection);
+          addChat({ role: "user", text: utterance });
+          ai.choose(choice, ctx);
           return;
         }
       }
 
       const result = parseCommand(utterance, graph, { selection, recent: recentNodeIds(events) });
+      const ctx = context(selection);
+      addChat({ role: "user", text: utterance });
 
       if (!result) {
         // Tier 2: the AI, unless it's unavailable (docs/15 · Degraded mode).
         if (ai.degraded) {
           setBadge({ tier: "none" });
-          setHint("I need the AI for that one. Try a simpler command like “kill redis”.");
+          const message = "I need the AI for that one. Try a simpler command like “kill redis”.";
+          setHint(message);
+          addChat({ role: "assistant", text: message, kind: "error" });
           return;
         }
         setHint(null);
         submitted.current = utterance;
-        void ai.run(utterance, { selection, history });
+        void ai.run(utterance, ctx);
         return;
       }
 
@@ -203,8 +241,10 @@ export function CommandBar() {
         const ok = runAction(result.action);
         setBadge({ tier: "local", ms: performance.now() - started });
         setHint(null);
-        setText("");
-        setToast({ id: Date.now(), message: ok ? result.summary : `Nothing to ${result.action}`, undoable: false });
+        clearIfSent(utterance);
+        const message = ok ? result.summary : `Nothing to ${result.action}`;
+        setToast({ id: Date.now(), message, undoable: false });
+        addChat({ role: "assistant", text: message, kind: "local" });
         return;
       }
 
@@ -214,15 +254,34 @@ export function CommandBar() {
         // Should be impossible: parseCommand validated the ops against this graph.
         setBadge({ tier: "none" });
         setHint("That change isn’t valid for this board.");
+        addChat({ role: "assistant", text: "That change isn’t valid for this board.", kind: "error" });
         return;
       }
       setBadge({ tier: "local", ms });
       setHint(null);
-      setText("");
+      clearIfSent(utterance);
       setToast({ id: Date.now(), message: result.summary, undoable: true });
+      addChat({ role: "assistant", text: result.summary, kind: "local" });
     },
-    [graph, events, apply, getNodes, runAction, ai, history],
+    [graph, events, apply, getNodes, runAction, ai, context, addChat],
   );
+
+  /** A clarify chip, number key or typed answer: logged as the user's reply, then re-sent. */
+  const chooseOption = useCallback(
+    (option: string) => {
+      const ctx = context(getNodes().filter((n) => n.selected).map((n) => n.id));
+      addChat({ role: "user", text: option });
+      ai.choose(option, ctx);
+    },
+    [ai, addChat, context, getNodes],
+  );
+
+  // Text sent from the Chat panel runs through exactly the same pipeline as the bar.
+  useEffect(() => {
+    if (!chatSubmit) return;
+    consumeChatSubmit();
+    submit(chatSubmit.text);
+  }, [chatSubmit, consumeChatSubmit, submit]);
 
   // Browser speech fallback (FR-062): interim text streams into the bar; the final result submits.
   const speech = useSpeech({
@@ -271,12 +330,12 @@ export function CommandBar() {
         const choice = ai.state.options[Number(e.key) - 1];
         if (!choice) return;
         e.preventDefault();
-        ai.choose(choice, { selection: getNodes().filter((n) => n.selected).map((n) => n.id), history });
+        chooseOption(choice);
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [toggleHandsFree, ai, getNodes, history]);
+  }, [toggleHandsFree, ai, chooseOption]);
 
   function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -287,7 +346,7 @@ export function CommandBar() {
       const choice = ai.state.options[Number(e.key) - 1];
       if (!choice) return;
       e.preventDefault();
-      ai.choose(choice, { selection: getNodes().filter((n) => n.selected).map((n) => n.id), history });
+      chooseOption(choice);
     } else if (e.key === "Escape" && ai.state.phase !== "idle") {
       ai.cancel();
     } else if (e.key === "Escape") {
@@ -314,7 +373,7 @@ export function CommandBar() {
           <ClarifyChips
             message={ai.state.message}
             options={ai.state.options}
-            onChoose={(option) => ai.choose(option, { selection: getNodes().filter((n) => n.selected).map((n) => n.id), history })}
+            onChoose={chooseOption}
             onDismiss={ai.cancel}
           />
         )}
@@ -344,7 +403,7 @@ export function CommandBar() {
                   const retry = toast.retry!;
                   setToast(null);
                   submitted.current = retry;
-                  void ai.run(retry, { selection: getNodes().filter((n) => n.selected).map((n) => n.id), history });
+                  void ai.run(retry, context(getNodes().filter((n) => n.selected).map((n) => n.id)));
                 }}
               >
                 Retry

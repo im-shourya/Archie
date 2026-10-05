@@ -43,11 +43,15 @@ export type AiOutcome =
   | { type: "applied"; message: string; ms: number }
   | { type: "noop"; message: string }
   | { type: "stale" }
+  /** The AI replied without changing the board yet: an answer, a question, or a confirm prompt. */
+  | { type: "reply"; kind: "answer" | "clarify" | "confirm"; message: string; focus: string[]; options?: string[] }
   | { type: "error"; message: string; requestId: string | null; retry: string | null };
 
 export interface RunContext {
   selection: string[];
   history: string[];
+  /** Earlier chat turns, oldest first (docs/12 · Conversation memory). */
+  conversation?: { role: "user" | "assistant"; text: string }[];
 }
 
 /** The code lives in sessionStorage only: never the URL, gone when the tab closes (docs/18). */
@@ -160,6 +164,7 @@ export function useCommand(onOutcome: (outcome: AiOutcome) => void) {
             baseVersion: graph.version,
             selection: ctx.selection.slice(0, 50),
             history: ctx.history.slice(-5),
+            ...(ctx.conversation?.length ? { conversation: ctx.conversation.slice(-10) } : {}),
           }),
           signal: controller.signal,
         });
@@ -213,6 +218,7 @@ export function useCommand(onOutcome: (outcome: AiOutcome) => void) {
           case "clarify":
             setState({ phase: "clarify", utterance, message: data.message, options: data.options });
             setFocus(data.focusNodeIds);
+            outcome.current({ type: "reply", kind: "clarify", message: data.message, focus: data.focusNodeIds, options: data.options });
             break;
           case "confirm":
             setState({
@@ -225,10 +231,12 @@ export function useCommand(onOutcome: (outcome: AiOutcome) => void) {
               ms,
             });
             setFocus(data.focusNodeIds);
+            outcome.current({ type: "reply", kind: "confirm", message: data.message, focus: data.focusNodeIds });
             break;
           case "answer":
             setState({ phase: "answer", message: data.message, focus: data.focusNodeIds });
             setFocus([]);
+            outcome.current({ type: "reply", kind: "answer", message: data.message, focus: data.focusNodeIds });
             break;
           case "noop":
             settle({ phase: "idle" });
