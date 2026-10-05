@@ -32,6 +32,12 @@ export const TOKENS: { name: string; role: string; text?: boolean }[] = [
   { name: "--color-state-saturated", role: "ρ ≥ 1, failing, high severity, SPOF", text: true },
   { name: "--color-state-down", role: "Failed component", text: true },
   { name: "--color-edge", role: "Edges" },
+  { name: "--color-family-users", role: "Node glyph: clients (pill)" },
+  { name: "--color-family-edge", role: "Node glyph: CDN, load balancer, gateway (hexagon)" },
+  { name: "--color-family-compute", role: "Node glyph: services, workers (rounded rect)" },
+  { name: "--color-family-data", role: "Node glyph: databases, caches, search, storage (cylinder)" },
+  { name: "--color-family-async", role: "Node glyph: queues (pipe)" },
+  { name: "--color-family-outside", role: "Node glyph: external APIs (dotted outline)" },
   { name: "--glass-fill-strong", role: "Glass: menus, toasts" },
 ];
 

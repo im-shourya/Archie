@@ -4,9 +4,13 @@ import { memo, useState } from "react";
 import { Handle, NodeToolbar, Position, type Node, type NodeProps } from "@xyflow/react";
 import { ShieldWarning, X } from "@phosphor-icons/react/dist/ssr";
 import { CATALOG, type ArchNode, type NodeMetrics } from "@archie/simulator";
+import { BrandLogo } from "@/components/icons/BrandLogo";
+import { brandFor } from "@/components/icons/brands";
 import { KindIcon } from "@/components/icons/KindIcon";
 import { compact } from "@/lib/format";
 import { useBoardStore } from "../store/board.store";
+import { NODE_HEIGHT, NODE_WIDTH } from "./layout";
+import { FAMILY, SHAPE } from "./shapes";
 import styles from "./board.module.css";
 
 export type ArchFlowNode = Node<
@@ -46,6 +50,9 @@ function ArchNodeCardImpl({ data, selected }: NodeProps<ArchFlowNode>) {
   const focused = useBoardStore((s) => s.focus.includes(node.id));
   const status = node.status === "down" ? "down" : (metrics?.status ?? "idle");
   const showBar = metrics && node.kind !== "client" && status !== "down" && status !== "idle";
+  const family = FAMILY[node.kind];
+  const shape = SHAPE[family];
+  const brand = brandFor(node.label, node.kind);
   return (
     <>
       <NodeToolbar isVisible={bottleneck && callout && calloutOpen && !!metrics} position={Position.Top} offset={12}>
@@ -66,8 +73,13 @@ function ArchNodeCardImpl({ data, selected }: NodeProps<ArchFlowNode>) {
         data-status={node.status}
         data-sim={status}
         data-focus={focused || undefined}
+        data-family={family}
         aria-label={`${node.label}, ${subtitle(node)}, ${STATUS_LABEL[status]}${metrics && showBar ? `, utilization ${metrics.rho.toFixed(2)}` : ""}${spof ? ", single point of failure" : ""}`}
       >
+        <svg className={styles.shape} viewBox={`0 0 ${NODE_WIDTH} ${NODE_HEIGHT}`} aria-hidden>
+          <path className={styles.outline} d={shape.outline} />
+          {shape.detail && <path className={styles.detail} d={shape.detail} />}
+        </svg>
         <Handle type="target" position={vertical ? Position.Top : Position.Left} className={editable ? styles.handleEditable : styles.handle} isConnectable={editable} />
         {spof && (
           <span className={styles.spof} data-testid={`spof-${node.id}`} title="Single point of failure: losing one instance loses 5% or more of successful requests">
@@ -76,7 +88,7 @@ function ArchNodeCardImpl({ data, selected }: NodeProps<ArchFlowNode>) {
           </span>
         )}
         <span className={styles.glyph}>
-          <KindIcon kind={node.kind} />
+          {brand ? <BrandLogo brand={brand} fallback={<KindIcon kind={node.kind} />} /> : <KindIcon kind={node.kind} />}
         </span>
         <span className={styles.text}>
           <span className={styles.label} data-role="label">
