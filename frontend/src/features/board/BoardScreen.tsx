@@ -133,8 +133,8 @@ const TAB_LABEL: Record<PanelTab, string> = {
   inspector: "Inspector",
   history: "History",
 };
-const DESIGN_TABS: PanelTab[] = ["metrics", "chat", "inspector", "history"];
-const INTERVIEW_TABS: PanelTab[] = ["interview", "metrics", "chat", "inspector", "history"];
+const DESIGN_TABS: PanelTab[] = ["metrics", "inspector", "history", "chat"];
+const INTERVIEW_TABS: PanelTab[] = ["interview", "metrics", "inspector", "history", "chat"];
 
 function PanelTabs({
   tabs,
