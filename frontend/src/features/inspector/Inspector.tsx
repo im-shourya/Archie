@@ -169,7 +169,7 @@ export const Inspector = forwardRef<HTMLHeadingElement, Props>(function Inspecto
 
       <div className={styles.fields}>
         <TextField
-          key={`label-${node.id}-${node.label}`}
+          key={`label-${node.id}`}
           label="Label"
           value={node.label}
           error={errors.label}
@@ -192,7 +192,7 @@ export const Inspector = forwardRef<HTMLHeadingElement, Props>(function Inspecto
           const scale = spec.scale ?? 1;
           return (
             <NumberField
-              key={`${prop}-${node.id}-${value}`}
+              key={`${prop}-${node.id}`}
               label={spec.label}
               unit={spec.unit}
               value={display(value, scale)}
@@ -350,6 +350,12 @@ export const Inspector = forwardRef<HTMLHeadingElement, Props>(function Inspecto
 /** Commit on Enter or blur; Escape reverts. `onCommit` returns false to keep the draft (invalid). */
 function useDraft(value: string, onCommit: (value: string) => boolean) {
   const [draft, setDraft] = useState(value);
+  // Follow outside changes (a commit, undo, a voice command) without remounting, so focus stays.
+  const [prev, setPrev] = useState(value);
+  if (prev !== value) {
+    setPrev(value);
+    setDraft(value);
+  }
   return {
     value: draft,
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => setDraft(e.currentTarget.value),

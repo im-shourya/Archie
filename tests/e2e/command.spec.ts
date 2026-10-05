@@ -43,7 +43,7 @@ test("fast-path misses go to the AI instead of being guessed locally", async ({ 
   });
   await openThreeTier(page);
   await say(page, "kill redis and postgres");
-  await expect(page.getByRole("status").filter({ hasText: "Couldn't reach the AI." })).toBeVisible();
+  await expect(page.getByRole("alert").filter({ hasText: "Couldn't reach the AI." })).toBeVisible();
   expect(sent).toEqual(["kill redis and postgres"]);
   await expect(page.getByTestId("node-redis")).toHaveAttribute("data-status", "up");
   await expect(page.getByTestId("node-pg")).toHaveAttribute("data-status", "up");

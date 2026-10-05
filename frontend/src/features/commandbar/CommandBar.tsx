@@ -44,6 +44,8 @@ interface Toast {
   /** Utterance to re-send from the toast's Retry button (AI errors). */
   retry?: string | null;
   requestId?: string | null;
+  /** Errors are announced assertively (doc 06 · Accessibility); everything else politely. */
+  error?: boolean;
 }
 
 function formatMs(ms: number): string {
@@ -111,7 +113,7 @@ export function CommandBar() {
         return;
       case "error":
         setBadge({ tier: "none" });
-        setToast({ id, message: outcome.message, undoable: false, retry: outcome.retry, requestId: outcome.requestId });
+        setToast({ id, message: outcome.message, undoable: false, retry: outcome.retry, requestId: outcome.requestId, error: true });
     }
   }, []);
   const ai = useCommand(onOutcome);
@@ -234,7 +236,7 @@ export function CommandBar() {
       setText(final);
       submit(final);
     },
-    onError: (error) => setToast({ id: Date.now(), message: speechErrorMessage(error), undoable: false }),
+    onError: (error) => setToast({ id: Date.now(), message: speechErrorMessage(error), undoable: false, error: true }),
   });
 
   useEffect(() => {
@@ -322,7 +324,7 @@ export function CommandBar() {
           <AnswerCard message={ai.state.message} focus={ai.state.focus} onHighlight={ai.setFocus} onDismiss={ai.cancel} />
         )}
         {toast && (
-          <div className={styles.toast} key={toast.id} role="status">
+          <div className={styles.toast} key={toast.id} role={toast.error ? "alert" : "status"}>
             <span>{toast.message}</span>
             {toast.undoable && (
               <button
