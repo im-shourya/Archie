@@ -1,57 +1,82 @@
 /*
  * Archie design tokens (docs/06 · Design system). Semantic names only; components never use
- * raw colours. Light = a crisp, barely warm whiteboard + near-black ink; dark = true neutrals,
- * not inverted. One accent (the brand blue) for actions, focus and the active voice state.
- * Every text role meets WCAG AA (≥ 4.5:1) on background, surface and sunken in both themes.
+ * raw colours. The direction is Apple-like: SF Pro (the system font on Apple devices), a cool
+ * #f5f5f7 page with white surfaces and #1d1d1f ink, and one blue. Blue as text (links, numbers,
+ * focus) and blue as a solid fill (buttons) are separate tokens, as on apple.com: in dark mode
+ * text blue is brighter (#2997ff) while buttons keep #0071e3 with white text. Every text role
+ * meets WCAG AA (≥ 4.5:1) on background, surface, sunken and primary-subtle in both themes.
  */
 :root {
   color-scheme: light dark;
 
+  /* Type: SF Pro via the system stack (it can't be self-hosted; Apple's licence forbids it),
+     Inter (next/font) everywhere else. SF Mono for numbers, ids and rps. */
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", var(--font-inter),
+    "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono:
+    ui-monospace, "SF Mono", SFMono-Regular, var(--font-geist-mono), Menlo, Consolas, monospace;
+
   /* Surfaces */
-  --color-background: #fafaf9;
+  --color-background: #f5f5f7;
   --color-surface: #ffffff;
-  --color-surface-sunken: #f4f4f2;
+  --color-surface-sunken: #efeff2;
 
   /* Text */
-  --color-text-primary: #0a0a0a;
-  --color-text-secondary: #52525b;
-  --color-text-muted: #6b6b72;
+  --color-text-primary: #1d1d1f;
+  --color-text-secondary: #515154;
+  --color-text-muted: #636366;
 
   /* Borders */
-  --color-border-subtle: #ececea;
-  --color-border-default: #deded9;
-  --color-border-strong: #a3a39d;
+  --color-border-subtle: #e5e5ea;
+  --color-border-default: #d2d2d7;
+  --color-border-strong: #a1a1a6;
 
   /* Brand / interaction: reserved for actions, focus and the active voice state */
-  --color-primary: #2a44c8;
-  --color-primary-hover: #2238a8;
+  --color-primary: #0066cc;
+  --color-primary-fill: #0071e3;
+  --color-primary-hover: #0062c4;
   --color-primary-foreground: #ffffff;
-  --color-primary-subtle: #eef0fc;
-  --color-focus: #2a44c8;
+  --color-primary-subtle: #e8f2fd;
+  --color-focus: #0071e3;
 
   /* Simulation state (semantic; never decorative). Always paired with a label or bar. */
   --color-state-healthy: #1e7a58;
   --color-state-warm: #925b00;
   --color-state-hot: #ab4716;
   --color-state-saturated: #c0283a;
-  --color-state-down: #646a77;
-  --color-edge: #b4b4ae;
+  --color-state-down: #636366;
+  --color-edge: #b8b8bf;
 
-  /* Shape: small radii, borders before shadows; shadows are layered and quiet */
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --shadow-raised: 0 1px 1px rgb(10 10 10 / 0.03), 0 1px 3px rgb(10 10 10 / 0.05);
-  --shadow-overlay: 0 0 0 1px rgb(10 10 10 / 0.05), 0 12px 32px -8px rgb(10 10 10 / 0.18);
+  /* Materials: "liquid glass" for chrome that floats over content (nav, menus, toasts).
+     Translucent fill + blur + saturation, a specular top edge and a hairline rim. */
+  --glass-fill: rgb(255 255 255 / 0.72);
+  --glass-fill-strong: rgb(255 255 255 / 0.86);
+  --glass-rim: rgb(0 0 0 / 0.08);
+  --glass-highlight: rgb(255 255 255 / 0.9);
+  --glass-blur: saturate(180%) blur(20px);
 
-  /* Motion: fast and quiet; reduced motion turns it off (docs/06 · Motion) */
-  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --duration-fast: 120ms;
-  --duration-normal: 200ms;
+  /* Shape: buttons 12px, inputs and menus 10px, panels 18px (apple.com proportions) */
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-button: 12px;
+  --radius-lg: 18px;
+  --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.04), 0 2px 8px rgb(0 0 0 / 0.04);
+  --shadow-overlay: 0 0 0 0.5px rgb(0 0 0 / 0.06), 0 14px 40px -10px rgb(0 0 0 / 0.18);
+  --shadow-glass:
+    inset 0 1px 0 var(--glass-highlight), 0 0 0 0.5px var(--glass-rim),
+    0 10px 30px -12px rgb(0 0 0 / 0.18);
+
+  /* Motion: Apple's ease-out curves; reduced motion turns movement off (docs/06 · Motion) */
+  --ease-out: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 240ms;
+  --duration-slow: 600ms;
 
   /* React Flow */
   --xy-background-color-default: var(--color-background);
-  --xy-background-pattern-dots-color-default: #dcdcd8;
+  --xy-background-pattern-dots-color-default: #d2d2d7;
   --xy-controls-button-background-color-default: var(--color-surface);
   --xy-controls-button-border-color-default: var(--color-border-subtle);
   --xy-controls-button-color-default: var(--color-text-secondary);
@@ -60,35 +85,59 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-background: #0a0a0a;
-    --color-surface: #121212;
-    --color-surface-sunken: #1c1c1c;
+    --color-background: #000000;
+    --color-surface: #161617;
+    --color-surface-sunken: #232326;
 
-    --color-text-primary: #ededed;
-    --color-text-secondary: #a3a3a3;
-    --color-text-muted: #8e8e8e;
+    --color-text-primary: #f5f5f7;
+    --color-text-secondary: #a1a1a6;
+    --color-text-muted: #8e8e93;
 
-    --color-border-subtle: #2a2a2a;
-    --color-border-default: #363636;
-    --color-border-strong: #555555;
+    --color-border-subtle: #2a2a2d;
+    --color-border-default: #38383c;
+    --color-border-strong: #5a5a5f;
 
-    --color-primary: #93a5ff;
-    --color-primary-hover: #b0beff;
-    --color-primary-foreground: #0b1020;
-    --color-primary-subtle: #1a2040;
-    --color-focus: #93a5ff;
+    --color-primary: #2997ff;
+    --color-primary-fill: #0071e3;
+    --color-primary-hover: #0062c4;
+    --color-primary-foreground: #ffffff;
+    --color-primary-subtle: #0f2440;
+    --color-focus: #2997ff;
 
     --color-state-healthy: #41c493;
     --color-state-warm: #e5ac3e;
     --color-state-hot: #f28a4e;
     --color-state-saturated: #ff707b;
-    --color-state-down: #8e8e8e;
-    --color-edge: #3d3d3d;
+    --color-state-down: #8e8e93;
+    --color-edge: #3a3a3e;
+
+    --glass-fill: rgb(22 22 23 / 0.66);
+    --glass-fill-strong: rgb(29 29 31 / 0.82);
+    --glass-rim: rgb(255 255 255 / 0.1);
+    --glass-highlight: rgb(255 255 255 / 0.12);
 
     --shadow-raised: 0 0 0 1px rgb(255 255 255 / 0.04), 0 1px 3px rgb(0 0 0 / 0.5);
     --shadow-overlay: 0 0 0 1px rgb(255 255 255 / 0.06), 0 16px 40px -8px rgb(0 0 0 / 0.7);
+    --shadow-glass:
+      inset 0 1px 0 var(--glass-highlight), 0 0 0 0.5px var(--glass-rim),
+      0 16px 40px -12px rgb(0 0 0 / 0.7);
 
-    --xy-background-pattern-dots-color-default: #232323;
+    --xy-background-pattern-dots-color-default: #232326;
+  }
+}
+
+/* Without backdrop-filter, glass would be unreadable: fall back to an opaque material. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root {
+    --glass-fill: var(--color-surface);
+    --glass-fill-strong: var(--color-surface);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --glass-fill: var(--color-surface);
+    --glass-fill-strong: var(--color-surface);
   }
 }
 
@@ -107,17 +156,20 @@ body {
 body {
   background: var(--color-background);
   color: var(--color-text-primary);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-sans);
   font-size: 16px;
   line-height: 1.5;
+  /* SF Pro Text is tracked slightly tight at body sizes. */
+  letter-spacing: -0.011em;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
 
-/* Geist reads best slightly tightened at heading sizes. */
+/* SF Pro Display tracking: tighter as the size grows (Apple's optical tracking table). */
 h1,
 h2 {
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
 }
 
 :focus-visible {
@@ -140,6 +192,35 @@ h2 {
 /* Bottleneck callouts are informational: clicks pass through to the canvas (close button opts back in). */
 .react-flow__node-toolbar {
   pointer-events: none;
+}
+
+/* Screen-reader-only copy (e.g. the sentence behind a word-by-word reveal). */
+[data-sr-only] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Scroll reveal (features/home/Motion.tsx): fade, lift and un-blur once. Only hidden when scripting can show it again. */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(32px);
+    filter: blur(6px);
+    transition:
+      opacity 800ms var(--ease-emphasized) var(--delay, 0ms),
+      transform 800ms var(--ease-emphasized) var(--delay, 0ms),
+      filter 800ms var(--ease-emphasized) var(--delay, 0ms);
+  }
+
+  [data-reveal][data-shown] {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

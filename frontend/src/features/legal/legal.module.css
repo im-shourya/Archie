@@ -6,26 +6,16 @@
 }
 
 .header,
-.main,
-.footer {
+.main {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1024px;
   margin: 0 auto;
-  padding-inline: clamp(16px, 4vw, 40px);
+  padding-inline: clamp(16px, 4vw, 22px);
 }
 
+/* The legal sub-navigation, under the site bar. */
 .header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px 24px;
-  padding-block: 20px;
-}
-
-.brand {
-  color: var(--color-text-primary);
-  text-decoration: none;
+  padding-block: 16px 0;
 }
 
 .nav {
@@ -151,11 +141,13 @@
   white-space: nowrap;
 }
 
+/* Back to Archie, and where the text lives. */
 .footer {
   display: flex;
   flex-wrap: wrap;
   gap: 8px 24px;
-  padding-block: 28px 36px;
+  margin: 48px 0 0;
+  padding-top: 20px;
   border-top: 1px solid var(--color-border-subtle);
   color: var(--color-text-secondary);
   font-size: 14px;

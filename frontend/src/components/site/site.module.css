@@ -1,0 +1,179 @@
+/*
+ * Site chrome (docs/06): the glass navigation bar and the footer, shared by home, interview,
+ * evals and the legal pages. Proportions follow apple.com: a 52px bar with 13px links, and a
+ * 12px footer directory on the sunken surface.
+ */
+
+/* Navigation: glass, pinned, the page scrolls underneath. */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: 0 0.5px 0 var(--glass-rim);
+}
+
+.headerInner,
+.footerInner {
+  width: 100%;
+  max-width: 1024px;
+  margin: 0 auto;
+  padding-inline: clamp(16px, 4vw, 22px);
+}
+
+.headerInner {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  height: 52px;
+}
+
+.brand {
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.nav {
+  display: none;
+  flex: 1;
+  justify-content: center;
+  gap: 32px;
+  font-size: 13px;
+  letter-spacing: -0.01em;
+}
+
+.nav a {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.nav a:hover,
+.nav a[aria-current="page"] {
+  color: var(--color-text-primary);
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  margin-left: auto;
+  padding: 0 14px;
+  border-radius: var(--radius-button);
+  background: var(--color-primary-fill);
+  color: var(--color-primary-foreground);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.cta:hover {
+  background: var(--color-primary-hover);
+}
+
+@media (min-width: 720px) {
+  .nav {
+    display: flex;
+  }
+
+  .cta {
+    margin-left: 0;
+  }
+}
+
+/* Footer */
+.footer {
+  margin-top: auto;
+  background: var(--color-surface-sunken);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: -0.005em;
+}
+
+.footerInner {
+  padding-block: 20px 28px;
+}
+
+.footer a {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.fineprint {
+  margin: 0;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.fineprint a {
+  text-decoration: underline;
+}
+
+.directory {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  padding-block: 20px 24px;
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.columnTitle {
+  margin: 0 0 8px;
+  color: var(--color-text-primary);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+
+.column ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.legalBar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
+  padding-top: 16px;
+}
+
+.legalBar p {
+  margin: 0;
+}
+
+.legalBar a {
+  text-decoration: underline;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (min-width: 720px) {
+  .directory {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav a,
+  .cta {
+    transition: none;
+  }
+}

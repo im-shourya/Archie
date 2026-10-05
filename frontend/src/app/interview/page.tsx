@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PROBLEM_LIST } from "@archie/simulator";
-import { Wordmark } from "@/components/brand/LogoMark";
+import { SiteFooter } from "@/components/site/SiteFooter";
+import { SiteHeader } from "@/components/site/SiteHeader";
 import home from "@/features/home/home.module.css";
 import { compact } from "@/lib/format";
 import styles from "./interview.module.css";
@@ -20,14 +21,10 @@ const percent = (f: number) => `${String(Math.round(f * 100_000) / 1000)}%`;
 export default function InterviewPage() {
   return (
     <div className={home.page}>
-      <header className={home.header}>
-        <Link href="/" className={home.brandLink} aria-label="Archie home">
-          <Wordmark size={26} />
-        </Link>
-      </header>
-      <main className={home.main}>
-        <h1 className={home.title}>Practice a system-design interview</h1>
-        <p className={home.lede}>
+      <SiteHeader current="/interview" />
+      <main className={home.pageMain}>
+        <h1 className={home.pageTitle}>Practice a system-design interview</h1>
+        <p className={home.pageLede}>
           Pick a problem. The requirements set the load, the simulator checks your SLOs as you
           design by voice, and an interviewer asks one question at a time. Finish for a scorecard.
         </p>
@@ -60,6 +57,7 @@ export default function InterviewPage() {
           ))}
         </ul>
       </main>
+      <SiteFooter />
     </div>
   );
 }
