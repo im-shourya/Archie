@@ -33,6 +33,7 @@
     "eval": "tsx evals/src/run.ts"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.63.0",
     "@types/node": "^22.20.4",
