@@ -1,0 +1,205 @@
+/* Chat panel (docs/06 · Chat). Tokens only: see tests/contracts/design-tokens.test.ts. */
+.chat {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 12px;
+  min-height: 360px;
+  height: 100%;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.note {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.confirm {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.iconButton,
+.link,
+.danger {
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.iconButton {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+}
+
+.iconButton:hover {
+  background: var(--color-surface-sunken);
+  color: var(--color-text-primary);
+}
+
+.link {
+  color: var(--color-text-secondary);
+}
+
+.danger {
+  font-weight: 600;
+  color: var(--color-state-saturated);
+}
+
+.empty {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 4px;
+  padding: 24px 8px;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.empty p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.example {
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.turn {
+  display: grid;
+  gap: 3px;
+  max-width: 88%;
+  justify-items: start;
+}
+
+.turn[data-role="user"] {
+  align-self: flex-end;
+  justify-items: end;
+}
+
+.bubble {
+  padding: 8px 12px;
+  border-radius: 14px 14px 14px 4px;
+  background: var(--color-surface-sunken);
+  font-size: 14px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.turn[data-role="user"] .bubble {
+  border-radius: 14px 14px 4px 14px;
+  background: var(--color-primary-fill);
+  color: var(--color-primary-foreground);
+}
+
+.turn[data-kind="error"] .bubble {
+  border: 1px dashed var(--color-border-default);
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+
+.turn[tabindex] {
+  cursor: default;
+  border-radius: 14px;
+}
+
+.turn[tabindex]:hover .bubble,
+.turn[tabindex]:focus-visible .bubble {
+  box-shadow: 0 0 0 2px var(--color-focus);
+}
+
+.turn:focus-visible {
+  outline: none;
+}
+
+.meta {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.end {
+  height: 0;
+}
+
+.composer {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.composer:focus-within {
+  border-color: var(--color-primary);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  resize: none;
+  background: transparent;
+  color: var(--color-text-primary);
+  font: inherit;
+  font-size: 14px;
+}
+
+.send {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-primary-fill);
+  color: var(--color-primary-foreground);
+  cursor: pointer;
+}
+
+.send:disabled {
+  background: var(--color-surface-sunken);
+  color: var(--color-text-muted);
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .turn {
+    animation: rise var(--duration-fast) var(--ease-out);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}

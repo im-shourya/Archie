@@ -25,6 +25,7 @@ import { BottomSheet, type Snap } from "./BottomSheet";
 import { AddMenu } from "./AddMenu";
 import { OverflowMenu } from "./OverflowMenu";
 import { disconnect } from "./TrafficEdge";
+import { ChatPanel } from "../chat/ChatPanel";
 import { EventLog } from "./EventLog";
 import { useCompactLayout } from "./useCompactLayout";
 import { useFit } from "./useFit";
@@ -123,16 +124,17 @@ function EmptyBoard() {
   );
 }
 
-type PanelTab = "interview" | "metrics" | "inspector" | "history";
+type PanelTab = "interview" | "metrics" | "chat" | "inspector" | "history";
 
 const TAB_LABEL: Record<PanelTab, string> = {
   interview: "Interview",
   metrics: "Metrics",
+  chat: "Chat",
   inspector: "Inspector",
   history: "History",
 };
-const DESIGN_TABS: PanelTab[] = ["metrics", "inspector", "history"];
-const INTERVIEW_TABS: PanelTab[] = ["interview", "metrics", "inspector", "history"];
+const DESIGN_TABS: PanelTab[] = ["metrics", "chat", "inspector", "history"];
+const INTERVIEW_TABS: PanelTab[] = ["interview", "metrics", "chat", "inspector", "history"];
 
 function PanelTabs({
   tabs,
@@ -277,6 +279,7 @@ function SimulatedBoard({ graph, tab, onTab, problem, interview }: BoardProps) {
                   Select a component on the canvas to inspect and edit it.
                 </p>
               ))}
+            {tab === "chat" && <ChatPanel />}
             {tab === "history" && <EventLog events={events} />}
           </>
         )}
