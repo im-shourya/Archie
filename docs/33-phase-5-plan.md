@@ -21,8 +21,8 @@ Known bugs this phase closes (doc 31): wide graphs render tiny on phones; on pho
 
 ## Prerequisites (before 15:00)
 
-- [ ] `npm install -D @axe-core/playwright` (dev only)
-- [ ] No API key needed: every AI path in e2e is mocked with `page.route`, as in Phase 4. Free quota is untouched.
+- [x] `npm install -D @axe-core/playwright` (dev only)
+- [x] No API key needed: every AI path in e2e is mocked with `page.route`, as in Phase 4. Free quota is untouched.
 
 ## Decisions
 
@@ -113,14 +113,14 @@ Files: `tests/e2e/a11y.spec.ts`, fixes wherever axe or the keyboard pass finds i
 
 ## Acceptance criteria (Phase 5 is done when)
 
-- [ ] Selecting any node opens an Inspector that edits its props via validated ops; bad values show the op engine's error and change nothing; Undo reverts edits (FR-016)
-- [ ] At 360 px: the canvas fills the screen, the bottom sheet peeks with the bottleneck, toasts never overlap the sheet, and graph labels stay legible after fit (doc 06 · Responsive; both known bugs closed)
-- [ ] The mic fallback works in browsers with the Web Speech API and is hidden elsewhere (FR-062)
-- [ ] A 401 shows the access-code dialog, and the code lives only in sessionStorage (doc 18)
-- [ ] axe: **0 serious/critical** violations across the 8 states, light + dark, desktop + mobile; full keyboard journey passes (NFR-012)
-- [ ] Reduced motion verified by e2e (NFR-014); board route initial JS < 300 KB gzipped, enforced in CI (NFR-015)
-- [ ] No raw colour literals outside `globals.css`; no new icon families or fonts (ADR-015)
-- [ ] `npm test`, lint, typecheck, build and e2e green; CI green on the PR; nothing in the client bundle that shouldn't be
+- [x] Selecting any node opens an Inspector that edits its props via validated ops; bad values show the op engine's error and change nothing; Undo reverts edits (FR-016)
+- [x] At 360 px: the canvas fills the screen, the bottom sheet peeks with the bottleneck, toasts never overlap the sheet, and graph labels stay legible after fit (doc 06 · Responsive; both known bugs closed)
+- [x] The mic fallback works in browsers with the Web Speech API and is hidden elsewhere (FR-062)
+- [x] A 401 shows the access-code dialog, and the code lives only in sessionStorage (doc 18)
+- [x] axe: **0 serious/critical** violations across the 8 states, light + dark, desktop + mobile; full keyboard journey passes (NFR-012)
+- [ ] Reduced motion verified by e2e (NFR-014) ✅; board route initial JS < 300 KB gzipped, enforced in CI (NFR-015) ⚠️ **measured 318.7 KB**: zod's classic API is ≈ 90 KB of it; CI enforces a 320 KB no-regression ratchet until client validation moves to `zod/mini` (≈ 5 KB)
+- [x] No raw colour literals outside `globals.css`; no new icon families or fonts (ADR-015)
+- [x] `npm test`, lint, typecheck, build and e2e green; CI green on the PR; nothing in the client bundle that shouldn't be
 
 ## Risks
 
@@ -135,3 +135,11 @@ Files: `tests/e2e/a11y.spec.ts`, fixes wherever axe or the keyboard pass finds i
 ## Out of scope (later phases)
 
 Review / Share / Export top-bar actions and the interview panel (Phase 6), replay, `/evals` page and deployment (Phase 7). No AI changes: the eval numbers from Phase 4 stand.
+
+## Outcome (2026-10-03)
+
+Built on `feat/design-system`, one commit per step. Deviations from the plan:
+
+- **Bundle budget not met** (above). Lazy-loading the Inspector and dialogs was tried first and saved nothing measurable, so it was reverted; the real cost is zod. The measurement and a CI ratchet shipped (cut order: keep the measurement).
+- **⋯ menu cut** (cut order). Nothing needs it until Phase 6 adds Review, Share and Export.
+- **Found by the tests and QA, and fixed:** canvas nodes had no focus ring; Inspector fields lost focus after a commit; error toasts weren't assertive; 768 px portrait tablets also rendered wide graphs tiny (now laid out top to bottom); the canvas bottleneck callout covered nodes on phones (hidden there; the peek names the bottleneck).
