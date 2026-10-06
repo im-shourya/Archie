@@ -19,11 +19,12 @@ async function showMetrics(page: Page, isMobile: boolean) {
   if (isMobile) await page.getByRole("button", { name: "Expand panel" }).click();
 }
 
-test("three-tier: SPOF badges on exactly the LB, the API and Redis", async ({ page }) => {
+test("three-tier: one SPOF, Redis (2 LBs and 30 API servers survive losing one)", async ({
+  page,
+}) => {
   await openThreeTier(page);
-  await expect(badges(page)).toHaveCount(3);
-  for (const id of ["lb", "api", "redis"])
-    await expect(page.getByTestId(`spof-${id}`)).toBeVisible();
+  await expect(badges(page)).toHaveCount(1);
+  await expect(page.getByTestId("spof-redis")).toBeVisible();
   await expect(page.getByTestId("node-redis")).toHaveAttribute(
     "aria-label",
     /single point of failure/,
@@ -34,23 +35,20 @@ test("three-tier: SPOF badges on exactly the LB, the API and Redis", async ({ pa
   );
 });
 
-test("the metrics panel lists SPOFs with their what-if success, largest drop first", async ({
-  page,
-  isMobile,
-}) => {
+test("the metrics panel lists SPOFs with their what-if success", async ({ page, isMobile }) => {
   await openThreeTier(page);
   await showMetrics(page, isMobile);
   const section = page.getByRole("region", { name: "Single points of failure" });
-  await expect(section.getByRole("listitem")).toHaveCount(3);
-  await expect(section.getByRole("listitem").last()).toContainText("Redis");
-  await expect(section.getByRole("listitem").last()).toContainText("54.5%");
+  await expect(section.getByRole("listitem")).toHaveCount(1);
+  await expect(section.getByRole("listitem")).toContainText("Redis");
+  await expect(section.getByRole("listitem")).toContainText("54.5%");
 });
 
-test("the Inspector says what failing this component would do", async ({ page }) => {
+test("the Inspector says what losing one instance would do", async ({ page }) => {
   await openThreeTier(page);
   await page.getByTestId("node-redis").click();
   await expect(page.getByRole("region", { name: "Inspector" })).toContainText(
-    "If this fails: success 96.3% → 54.5%",
+    "If one instance fails: success 96.3% → 54.5%",
   );
 });
 
@@ -58,10 +56,10 @@ test("changes re-scan: sharding keeps the badges; failover off makes Postgres a 
   page,
 }) => {
   await openThreeTier(page);
-  await expect(badges(page)).toHaveCount(3);
+  await expect(badges(page)).toHaveCount(1);
   await say(page, "Shard Postgres into two.");
   await expect(page.getByTestId("node-pg")).toHaveAttribute("data-sim", "warm");
-  await expect(badges(page)).toHaveCount(3);
+  await expect(badges(page)).toHaveCount(1);
 
   await page.getByTestId("node-pg").click();
   await page.getByRole("region", { name: "Inspector" }).getByLabel("Automatic failover").uncheck();
