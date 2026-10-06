@@ -21,7 +21,8 @@ const DIMENSION_LABEL: Record<RubricItem["dimension"], string> = {
   communication: "Communication",
 };
 
-function Bar({ item }: { item: RubricItem }) {
+/** A 1–5 rubric meter (docs/design §5.6). Exported for the /design style guide. */
+export function RubricBar({ item }: { item: RubricItem }) {
   return (
     <span
       className={styles.bar}
@@ -133,7 +134,7 @@ export function Scorecard({
               <li key={item.dimension} data-testid={`rubric-${item.dimension}`}>
                 <div className={styles.rubricHead}>
                   <span>{DIMENSION_LABEL[item.dimension]}</span>
-                  <Bar item={item} />
+                  <RubricBar item={item} />
                   <span className={styles.rubricScore}>{item.score}</span>
                 </div>
                 {item.unsupported ? (

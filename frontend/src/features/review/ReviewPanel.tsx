@@ -32,7 +32,6 @@ export function ReviewPanel({ graph, problem }: { graph: Graph; problem: Problem
   const apply = useBoardStore((s) => s.apply);
   const undo = useBoardStore((s) => s.undo);
   const notify = useBoardStore((s) => s.notify);
-  const setFocus = useBoardStore((s) => s.setFocus);
   const close = useBoardStore((s) => s.setReviewOpen);
   // Findings for the board as it was when Review opened; applying fixes doesn't reshuffle the list.
   const [findings, setFindings] = useState<Finding[]>(() =>
@@ -147,55 +146,7 @@ export function ReviewPanel({ graph, problem }: { graph: Graph; problem: Problem
               </li>
             );
           }
-          const { icon: Icon, label: severity } = SEVERITY[f.severity];
-          return (
-            <li
-              key={f.id}
-              className={styles.card}
-              data-severity={f.severity}
-              data-testid={`finding-${f.id}`}
-            >
-              <div className={styles.cardHead}>
-                <span className={styles.severity}>
-                  <Icon size={14} strokeWidth={2.25} aria-hidden /> {severity}
-                </span>
-                {f.source === "ai" && (
-                  <span className={styles.ai}>
-                    <Sparkles size={12} strokeWidth={2} aria-hidden /> AI
-                  </span>
-                )}
-              </div>
-              <p className={styles.cardTitle}>{f.title}</p>
-              <p className={styles.detail}>{f.detail}</p>
-              <div className={styles.cardFoot}>
-                <div className={styles.chips}>
-                  {f.nodeIds.map((id) => (
-                    <button
-                      key={id}
-                      type="button"
-                      className={styles.chip}
-                      onMouseEnter={() => setFocus([id])}
-                      onMouseLeave={() => setFocus([])}
-                      onFocus={() => setFocus([id])}
-                      onBlur={() => setFocus([])}
-                    >
-                      {label(id)}
-                    </button>
-                  ))}
-                </div>
-                {f.fix && (
-                  <button
-                    type="button"
-                    className={styles.fix}
-                    onClick={() => applyFix(f)}
-                    title={f.fix.summary}
-                  >
-                    <Wrench size={14} aria-hidden /> Apply fix
-                  </button>
-                )}
-              </div>
-            </li>
-          );
+          return <FindingCard key={f.id} finding={f} labelOf={label} onApply={() => applyFix(f)} />;
         })}
       </ul>
 
@@ -204,5 +155,57 @@ export function ReviewPanel({ graph, problem }: { graph: Graph; problem: Problem
         <p className={styles.meta}>AI review unavailable: showing rule-based findings only.</p>
       )}
     </section>
+  );
+}
+
+/** One finding (docs/design §5.7). Exported for the /design style guide. */
+export function FindingCard({
+  finding: f,
+  labelOf,
+  onApply,
+}: {
+  finding: Finding;
+  labelOf(id: string): string;
+  onApply?(): void;
+}) {
+  const setFocus = useBoardStore((s) => s.setFocus);
+  const { icon: Icon, label: severity } = SEVERITY[f.severity];
+  return (
+    <li className={styles.card} data-severity={f.severity} data-testid={`finding-${f.id}`}>
+      <div className={styles.cardHead}>
+        <span className={styles.severity}>
+          <Icon size={14} strokeWidth={2.25} aria-hidden /> {severity}
+        </span>
+        {f.source === "ai" && (
+          <span className={styles.ai}>
+            <Sparkles size={12} strokeWidth={2} aria-hidden /> AI
+          </span>
+        )}
+      </div>
+      <p className={styles.cardTitle}>{f.title}</p>
+      <p className={styles.detail}>{f.detail}</p>
+      <div className={styles.cardFoot}>
+        <div className={styles.chips}>
+          {f.nodeIds.map((id) => (
+            <button
+              key={id}
+              type="button"
+              className={styles.chip}
+              onMouseEnter={() => setFocus([id])}
+              onMouseLeave={() => setFocus([])}
+              onFocus={() => setFocus([id])}
+              onBlur={() => setFocus([])}
+            >
+              {labelOf(id)}
+            </button>
+          ))}
+        </div>
+        {f.fix && onApply && (
+          <button type="button" className={styles.fix} onClick={onApply} title={f.fix.summary}>
+            <Wrench size={14} aria-hidden /> Apply fix
+          </button>
+        )}
+      </div>
+    </li>
   );
 }
