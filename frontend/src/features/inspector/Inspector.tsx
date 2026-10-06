@@ -4,11 +4,11 @@ import { forwardRef, useId, useState } from "react";
 import { Unplug } from "lucide-react";
 import {
   CATALOG,
-  PartialPropsSchema,
+  PROP_BOUNDS,
   effectiveProps,
   type ArchNode,
   type Graph,
-  type NodeProps,
+  type NumericProp,
   type Op,
   type SimResult,
 } from "@archie/simulator";
@@ -22,8 +22,6 @@ import styles from "./inspector.module.css";
  * connections. Every edit is one op batch through the store's `apply`, so the op engine is the
  * only rulebook: bounds come from its schema, errors are its messages, and undo works for free.
  */
-
-type NumericProp = Exclude<keyof NodeProps, "role" | "failover">;
 
 interface FieldSpec {
   label: string;
@@ -55,14 +53,10 @@ const NULLABLE = new Set<NumericProp>([
 
 const TRAFFIC_LABEL = { all: "all traffic", read: "reads", write: "writes" } as const;
 
-/** Bounds straight from the op schema, so the hint and the validator never disagree. */
+/** Bounds from the simulator's PROP_BOUNDS, the table its schemas are built from: one rulebook. */
 function bounds(prop: NumericProp): { min?: number; max?: number; int: boolean } {
-  let schema: unknown = PartialPropsSchema.shape[prop];
-  while (schema && typeof (schema as { unwrap?: unknown }).unwrap === "function") {
-    schema = (schema as { unwrap(): unknown }).unwrap();
-  }
-  const n = schema as { minValue?: number | null; maxValue?: number | null; isInt?: boolean };
-  return { min: n.minValue ?? undefined, max: n.maxValue ?? undefined, int: !!n.isInt };
+  const b = PROP_BOUNDS[prop];
+  return { min: b.min, max: b.max, int: b.int };
 }
 
 function rangeText(prop: NumericProp): string | null {

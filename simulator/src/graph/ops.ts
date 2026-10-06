@@ -1,8 +1,11 @@
-import { z } from "zod";
+import * as z from "zod/mini";
 import { CATALOG, disallowedProps } from "./catalog";
 import { edgeId, slugify, uniqueId } from "./ids";
 import {
   EdgeKindSchema,
+  LabelSchema,
+  boundedNumber,
+  propNumber,
   MAX_EDGES,
   MAX_NODES,
   MAX_RPS,
@@ -21,52 +24,51 @@ import {
 
 export const MAX_OPS_PER_BATCH = 25;
 
-const Label = z.string().min(1).max(60);
-const nullable = <T extends z.ZodType>(schema: T) => schema.nullable().optional();
+const nullable = <T extends z.core.SomeType>(schema: T) => z.optional(z.nullable(schema));
 
 /** Partial props for add/update. `null` resets a prop to its catalog default. */
 export const PartialPropsSchema = z.strictObject({
-  replicas: z.number().int().min(1).max(1000).optional(),
-  shards: z.number().int().min(1).max(256).optional(),
-  capacityRps: nullable(z.number().positive().max(MAX_RPS)),
-  readCapacity: nullable(z.number().positive().max(MAX_RPS)),
-  writeCapacity: nullable(z.number().positive().max(MAX_RPS)),
-  latencyMs: nullable(z.number().min(0).max(60_000)),
-  hitRate: nullable(z.number().min(0).max(1)),
-  role: SqlRoleSchema.optional(),
-  failover: z.boolean().optional(),
-  costPerReplica: nullable(z.number().min(0).max(1_000_000)),
+  replicas: z.optional(propNumber("replicas")),
+  shards: z.optional(propNumber("shards")),
+  capacityRps: nullable(propNumber("capacityRps")),
+  readCapacity: nullable(propNumber("readCapacity")),
+  writeCapacity: nullable(propNumber("writeCapacity")),
+  latencyMs: nullable(propNumber("latencyMs")),
+  hitRate: nullable(propNumber("hitRate")),
+  role: z.optional(SqlRoleSchema),
+  failover: z.optional(z.boolean()),
+  costPerReplica: nullable(propNumber("costPerReplica")),
 });
 
 export const AddNodeSpecSchema = z.strictObject({
-  id: NodeIdSchema.optional(),
+  id: z.optional(NodeIdSchema),
   kind: NodeKindSchema,
-  label: Label,
-  props: PartialPropsSchema.optional(),
+  label: LabelSchema,
+  props: z.optional(PartialPropsSchema),
 });
 
 export const OpSchema = z.discriminatedUnion("type", [
-  AddNodeSpecSchema.extend({ type: z.literal("addNode") }),
+  z.extend(AddNodeSpecSchema, { type: z.literal("addNode") }),
   z.strictObject({ type: z.literal("removeNode"), id: NodeIdSchema }),
   z.strictObject({
     type: z.literal("updateNode"),
     id: NodeIdSchema,
-    label: Label.optional(),
-    props: PartialPropsSchema.optional(),
+    label: z.optional(LabelSchema),
+    props: z.optional(PartialPropsSchema),
   }),
   z.strictObject({
     type: z.literal("connect"),
     from: NodeIdSchema,
     to: NodeIdSchema,
-    kind: EdgeKindSchema.optional(),
-    traffic: TrafficSchema.optional(),
-    weight: z.number().positive().max(1000).optional(),
+    kind: z.optional(EdgeKindSchema),
+    traffic: z.optional(TrafficSchema),
+    weight: z.optional(z.number().check(z.positive(), z.maximum(1000))),
   }),
   z.strictObject({ type: z.literal("disconnect"), from: NodeIdSchema, to: NodeIdSchema }),
   z.strictObject({
     type: z.literal("replicate"),
     id: NodeIdSchema,
-    replicas: z.number().int().min(1).max(1000),
+    replicas: propNumber("replicas"),
   }),
   z.strictObject({
     type: z.literal("insertBetween"),
@@ -76,9 +78,9 @@ export const OpSchema = z.discriminatedUnion("type", [
   }),
   z.strictObject({
     type: z.literal("setWorkload"),
-    rps: z.number().min(0).max(MAX_RPS).optional(),
-    readRatio: z.number().min(0).max(1).optional(),
-    peakMultiplier: z.number().min(1).max(100).optional(),
+    rps: z.optional(boundedNumber(0, MAX_RPS)),
+    readRatio: z.optional(boundedNumber(0, 1)),
+    peakMultiplier: z.optional(boundedNumber(1, 100)),
   }),
   z.strictObject({ type: z.literal("fail"), id: NodeIdSchema }),
   z.strictObject({ type: z.literal("recover"), id: NodeIdSchema }),
@@ -110,8 +112,7 @@ export interface OpError {
 }
 
 export type ApplyResult =
-  | { ok: true; graph: Graph; changedNodeIds: string[] }
-  | { ok: false; errors: OpError[] };
+  { ok: true; graph: Graph; changedNodeIds: string[] } | { ok: false; errors: OpError[] };
 
 class OpFailure extends Error {
   constructor(
@@ -138,7 +139,10 @@ interface Draft {
  */
 export function applyBatch(graph: Graph, ops: readonly unknown[]): ApplyResult {
   if (ops.length === 0) {
-    return { ok: false, errors: [{ opIndex: -1, code: "EMPTY_BATCH", message: "no ops to apply" }] };
+    return {
+      ok: false,
+      errors: [{ opIndex: -1, code: "EMPTY_BATCH", message: "no ops to apply" }],
+    };
   }
   if (ops.length > MAX_OPS_PER_BATCH) {
     return {
@@ -201,7 +205,7 @@ export function validateBatch(graph: Graph, ops: readonly unknown[]): OpError[] 
   return result.ok ? [] : result.errors;
 }
 
-function schemaError(raw: unknown, error: z.ZodError): Omit<OpError, "opIndex"> {
+function schemaError(raw: unknown, error: z.core.$ZodError): Omit<OpError, "opIndex"> {
   const type =
     typeof raw === "object" && raw !== null && "type" in raw ? String(raw.type) : "unknown";
   const issue = error.issues[0];
