@@ -318,3 +318,146 @@
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+.dialog {
+  width: min(420px, calc(100vw - 32px));
+  padding: 20px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-overlay);
+}
+
+.dialog::backdrop {
+  background: color-mix(in srgb, var(--color-text-primary) 30%, transparent);
+}
+
+.dialogTitle {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.dialog .answerActions {
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.scoreTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.overall {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.overallScore {
+  font:
+    600 34px/1 var(--font-mono),
+    monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.outOf {
+  font-size: 16px;
+  color: var(--color-text-secondary);
+}
+
+.rubric {
+  display: grid;
+  gap: 8px;
+}
+
+.rubric .heading {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rubricList {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rubricList li {
+  display: grid;
+  gap: 4px;
+}
+
+.rubricHead {
+  display: grid;
+  grid-template-columns: 1fr auto 16px;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.bar {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.segment {
+  width: 12px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--color-border-default);
+}
+
+.segment[data-filled] {
+  background: var(--color-text-primary);
+}
+
+.bar[data-unsupported] .segment {
+  outline: 1px dashed var(--color-border-strong);
+}
+
+.rubricScore {
+  font:
+    600 14px/1 var(--font-mono),
+    monospace;
+  text-align: right;
+}
+
+.evidence {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.error {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-state-saturated);
+}
+
+.linkButton {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-primary);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.linkButton:focus-visible,
+.scoreTitle:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+a.secondary {
+  text-decoration: none;
+}

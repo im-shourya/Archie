@@ -141,6 +141,37 @@ for (const scheme of ["light", "dark"] as const) {
       await audit(page);
     });
 
+    test("scorecard", async ({ page, isMobile }) => {
+      test.skip(isMobile, "Finish is in the ⋯ menu on phones");
+      await page.route("**/api/interview/score", (r) =>
+        r.fulfill({
+          json: {
+            checks: [],
+            overall: 3.4,
+            summary: "Solid.",
+            rubric: [
+              "scalability",
+              "availability",
+              "data-modelling",
+              "trade-offs",
+              "communication",
+            ].map((dimension, i) => ({
+              dimension,
+              score: 3 + (i % 2),
+              evidence: "Evidence sentence for this dimension.",
+              nodeIds: [],
+              unsupported: i === 2,
+            })),
+          },
+        }),
+      );
+      await page.goto("/b/new?problem=url-shortener");
+      await page.getByRole("button", { name: "Finish" }).first().click();
+      await page.getByRole("dialog").getByRole("button", { name: "Finish" }).click();
+      await expect(page.getByTestId("scorecard").getByRole("meter")).toHaveCount(5);
+      await audit(page);
+    });
+
     test("access-code dialog", async ({ page }) => {
       await page.route("**/api/command", (r) =>
         r.fulfill({ status: 401, json: { error: { code: "ACCESS_CODE_REQUIRED", message: "x" } } }),
