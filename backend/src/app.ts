@@ -8,6 +8,7 @@ import { command } from "./routes/command";
 import { health } from "./routes/health";
 import { interview } from "./routes/interview";
 import { problems } from "./routes/problems";
+import { review } from "./routes/review";
 
 const MAX_BODY_BYTES = 256 * 1024;
 
@@ -26,6 +27,7 @@ app.route("/health", health);
 app.route("/command", command);
 app.route("/problems", problems);
 app.route("/interview", interview);
+app.route("/review", review);
 
 app.notFound((c) => c.json(errorBody("NOT_FOUND", `No route for ${c.req.method} ${c.req.path}`), 404));
 
