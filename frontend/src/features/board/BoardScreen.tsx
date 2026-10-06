@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Flag, Redo2, Undo2 } from "lucide-react";
+import { ArrowLeft, Flag, PencilLine, Redo2, ScanSearch, Undo2 } from "lucide-react";
 import { LogoMark } from "@/components/brand/LogoMark";
 import { percent } from "@/lib/format";
 import { isTyping } from "@/lib/keyboard";
@@ -15,6 +15,7 @@ import { MetricsPanel } from "../metrics/MetricsPanel";
 import { useBoardStore } from "../store/board.store";
 import { Canvas } from "./Canvas";
 import { BottomSheet, type Snap } from "./BottomSheet";
+import { OverflowMenu } from "./OverflowMenu";
 import { EventLog } from "./EventLog";
 import { useCompactLayout } from "./useCompactLayout";
 import { useFit } from "./useFit";
@@ -23,6 +24,7 @@ import { useSpofScan } from "./useSpofScan";
 import { readInterview, type InterviewState } from "../interview/state";
 import { passing, useSloChecks } from "../interview/useSloChecks";
 
+const ReviewPanel = dynamic(() => import("../review/ReviewPanel").then((m) => m.ReviewPanel), { ssr: false });
 // Interview UI loads only on interview boards (NFR-015).
 const InterviewPanel = dynamic(() => import("../interview/InterviewPanel").then((m) => m.InterviewPanel), { ssr: false });
 import styles from "./board.module.css";
@@ -54,6 +56,11 @@ function BoardKeyboard() {
           ids.map((id) => ({ type: "removeNode", id })),
           { utterance: null, source: "inspector" },
         );
+      } else if (!mod && !e.altKey && e.key.toLowerCase() === "r") {
+        const { board, setReviewOpen } = useBoardStore.getState();
+        if (board?.mode !== "design" || board.graph.nodes.length === 0) return;
+        e.preventDefault();
+        setReviewOpen(true);
       } else if (!mod && e.key.toLowerCase() === "f") {
         void fit();
       }
@@ -149,6 +156,8 @@ function SimulatedBoard({ graph, tab, onTab, problem, interview }: BoardProps) {
   const { sim, baseline } = useSimulation(graph);
   const scan = useSpofScan(graph);
   const slo = useSloChecks(graph, problem);
+  const reviewOpen = useBoardStore((s) => s.reviewOpen);
+  const setReviewOpen = useBoardStore((s) => s.setReviewOpen);
   const selection = useBoardStore((s) => s.selection);
   const events = useBoardStore((s) => s.events);
   const selected = selection.length === 1 ? graph.nodes.find((n) => n.id === selection[0]) : undefined;
@@ -161,11 +170,19 @@ function SimulatedBoard({ graph, tab, onTab, problem, interview }: BoardProps) {
   const { compact } = useCompactLayout();
   const [snap, setSnap] = useState<Snap>("peek");
   useEffect(() => {
+    if (reviewOpen) setSnap((s) => (s === "peek" ? "half" : s));
+  }, [reviewOpen]);
+  const sheetRequest = useBoardStore((s) => s.sheetRequest);
+  useEffect(() => {
+    if (sheetRequest > 0) setSnap("full");
+  }, [sheetRequest]);
+  useEffect(() => {
     if (!selectedId) return;
+    setReviewOpen(false);
     onTab("inspector");
     setSnap((s) => (s === "peek" ? "half" : s));
     pendingFocus.current = keyboard.current;
-  }, [selectedId, onTab, keyboard]);
+  }, [selectedId, onTab, keyboard, setReviewOpen]);
   // Runs after the Inspector has mounted (the tab switch is a separate render).
   useEffect(() => {
     if (tab !== "inspector" || !pendingFocus.current || !heading.current) return;
@@ -176,7 +193,17 @@ function SimulatedBoard({ graph, tab, onTab, problem, interview }: BoardProps) {
   const label = (id: string) => graph.nodes.find((n) => n.id === id)?.label ?? id;
   const body = (
     <>
-      <PanelTabs tabs={problem ? INTERVIEW_TABS : DESIGN_TABS} tab={tab} onChange={onTab} />
+      <PanelTabs
+        tabs={problem ? INTERVIEW_TABS : DESIGN_TABS}
+        tab={tab}
+        onChange={(t) => {
+          setReviewOpen(false);
+          onTab(t);
+        }}
+      />
+      {reviewOpen ? (
+        <ReviewPanel graph={graph} problem={problem} />
+      ) : (
       <div id="side-panel-body" role="tabpanel" aria-labelledby={`tab-${tab}`}>
         {tab === "interview" && problem && interview && (
           <InterviewPanel graph={graph} problem={problem} interview={interview} checks={slo.checks} pending={slo.pending} />
@@ -199,6 +226,7 @@ function SimulatedBoard({ graph, tab, onTab, problem, interview }: BoardProps) {
           ))}
         {tab === "history" && <EventLog events={events} />}
       </div>
+      )}
     </>
   );
 
@@ -256,6 +284,14 @@ export function BoardScreen({ id }: { id: string }) {
   const [tab, setTab] = useState<PanelTab>("metrics");
   const { status, board, events, persistent, load, undo, redo, rename } = useBoardStore();
   const requestFinish = useBoardStore((s) => s.requestFinish);
+  const setReviewOpen = useBoardStore((s) => s.setReviewOpen);
+  const { compact } = useCompactLayout();
+  const nameInput = useRef<HTMLInputElement>(null);
+  const finish = () => {
+    setReviewOpen(false);
+    setTab("interview");
+    requestFinish();
+  };
   const canUndo = useBoardStore((s) => s.undoStack.length > 0);
   const canRedo = useBoardStore((s) => s.redoStack.length > 0);
 
@@ -304,6 +340,7 @@ export function BoardScreen({ id }: { id: string }) {
           </Link>
           {problem && <span className={styles.modeTag}>Interview ·</span>}
           <input
+            ref={nameInput}
             key={board.name}
             className={styles.name}
             defaultValue={board.name}
@@ -315,16 +352,14 @@ export function BoardScreen({ id }: { id: string }) {
             }}
           />
           <div className={styles.topActions}>
-            {problem && (
-              <button
-                type="button"
-                className={styles.textButton}
-                onClick={() => {
-                  setTab("interview");
-                  requestFinish();
-                }}
-              >
+            {!compact && problem && (
+              <button type="button" className={styles.textButton} onClick={finish}>
                 <Flag size={16} aria-hidden /> Finish
+              </button>
+            )}
+            {!compact && !problem && board.graph.nodes.length > 0 && (
+              <button type="button" className={styles.textButton} onClick={() => setReviewOpen(true)} title="Review the design (R)">
+                <ScanSearch size={16} aria-hidden /> Review
               </button>
             )}
             <button type="button" className={styles.iconButton} onClick={undo} disabled={!canUndo} aria-label="Undo" title="Undo (⌘Z)">
@@ -333,6 +368,25 @@ export function BoardScreen({ id }: { id: string }) {
             <button type="button" className={styles.iconButton} onClick={redo} disabled={!canRedo} aria-label="Redo" title="Redo (⇧⌘Z)">
               <Redo2 size={16} aria-hidden />
             </button>
+            {compact && (
+              <OverflowMenu
+                items={[
+                  ...(problem
+                    ? [{ label: "Finish interview", icon: <Flag size={16} aria-hidden />, onSelect: finish }]
+                    : board.graph.nodes.length > 0
+                      ? [{ label: "Review design", icon: <ScanSearch size={16} aria-hidden />, onSelect: () => setReviewOpen(true) }]
+                      : []),
+                  {
+                    label: "Rename board",
+                    icon: <PencilLine size={16} aria-hidden />,
+                    onSelect: () => {
+                      nameInput.current?.focus();
+                      nameInput.current?.select();
+                    },
+                  },
+                ]}
+              />
+            )}
           </div>
         </header>
         {!persistent && (

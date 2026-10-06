@@ -218,8 +218,19 @@ function mockScore(page: Page, status = 200) {
   return calls;
 }
 
+/** Finish: a top-bar button on desktop, an item in the ⋯ menu on phones. */
+async function pressFinish(page: Page) {
+  const more = page.getByRole("button", { name: "More actions" });
+  if (await more.isVisible()) {
+    await more.click();
+    await page.getByRole("menuitem", { name: "Finish interview" }).click();
+  } else {
+    await page.getByRole("button", { name: "Finish" }).first().click();
+  }
+}
+
 async function finish(page: Page) {
-  await page.getByRole("button", { name: "Finish" }).first().click();
+  await pressFinish(page);
   const dialog = page.getByRole("dialog", { name: "End the interview?" });
   await expect(dialog).toBeVisible();
   await dialog.getByRole("button", { name: "Finish" }).click();
@@ -229,7 +240,6 @@ test("Finish → scorecard: checks, five rubric rows, overall, saved across relo
   page,
   isMobile,
 }) => {
-  test.skip(isMobile, "Finish moves into the ⋯ menu on phones (Step 8)");
   const calls = mockScore(page);
   await start(page);
   await buildReference(page);
@@ -245,12 +255,12 @@ test("Finish → scorecard: checks, five rubric rows, overall, saved across relo
   await page.waitForTimeout(700);
   await page.reload();
   await expect(page.getByTestId("scorecard").getByTestId("overall")).toContainText("3.8");
+  if (isMobile) await page.getByRole("button", { name: "Expand panel" }).click();
   await page.getByRole("button", { name: "Resume editing" }).click();
   await expect(panel(page)).toBeVisible();
 });
 
-test("if scoring fails, the computed checks still show, with Retry", async ({ page, isMobile }) => {
-  test.skip(isMobile, "Finish moves into the ⋯ menu on phones (Step 8)");
+test("if scoring fails, the computed checks still show, with Retry", async ({ page }) => {
   mockScore(page, 502);
   await start(page);
   await finish(page);
@@ -260,11 +270,10 @@ test("if scoring fails, the computed checks still show, with Retry", async ({ pa
   await expect(card.getByRole("button", { name: "Retry" })).toBeVisible();
 });
 
-test("Keep going cancels without scoring", async ({ page, isMobile }) => {
-  test.skip(isMobile, "Finish moves into the ⋯ menu on phones (Step 8)");
+test("Keep going cancels without scoring", async ({ page }) => {
   const calls = mockScore(page);
   await start(page);
-  await page.getByRole("button", { name: "Finish" }).first().click();
+  await pressFinish(page);
   await page.getByRole("dialog").getByRole("button", { name: "Keep going" }).click();
   await expect(panel(page)).toBeVisible();
   expect(calls).toHaveLength(0);
@@ -274,10 +283,10 @@ test("Finish works from another tab (the panel mounts after the click)", async (
   page,
   isMobile,
 }) => {
-  test.skip(isMobile, "Finish moves into the ⋯ menu on phones (Step 8)");
   mockScore(page);
   await start(page);
+  if (isMobile) await page.getByRole("button", { name: "Expand panel" }).click();
   await page.getByRole("tab", { name: "Metrics" }).click();
-  await page.getByRole("button", { name: "Finish" }).first().click();
+  await pressFinish(page);
   await expect(page.getByRole("dialog", { name: "End the interview?" })).toBeVisible();
 });
