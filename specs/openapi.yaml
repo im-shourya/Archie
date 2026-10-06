@@ -181,22 +181,42 @@ components:
             details: { type: object }
     Requirements:
       type: object
-      required: [peakRps, readRatio, p99Ms, availability]
+      required: [dau, peakRps, readRatio, p99Ms, p99WriteMs, availability, monthlyBudget]
       properties:
         dau: { type: integer, minimum: 0 }
         peakRps: { type: number, minimum: 0 }
         readRatio: { type: number, minimum: 0, maximum: 1 }
-        p99Ms: { type: number, minimum: 1 }
+        p99Ms: { type: number, minimum: 1, description: "Read p99 target" }
+        p99WriteMs: { type: number, minimum: 1, description: "Write p99 target" }
         availability: { type: number, minimum: 0, maximum: 1 }
+        monthlyBudget: { type: number, minimum: 0, description: "USD per month" }
+    Hint:
+      type: object
+      required: [check, question]
+      properties:
+        check: { type: string, enum: [general, availability, p99-read, p99-write, headroom, spof, cost] }
+        question: { type: string }
     Problem:
       type: object
-      required: [id, title, difficulty, prompt, requirements]
+      required: [id, title, difficulty, brief, requirements, hints]
+      description: "Reference designs (the answer key) are never served."
       properties:
-        id: { type: string }
+        id: { type: string, enum: [url-shortener, rate-limiter, chat, news-feed, ride-dispatch, video-streaming] }
         title: { type: string }
         difficulty: { type: string, enum: [easy, medium, hard] }
-        prompt: { type: string }
+        brief: { type: string }
         requirements: { $ref: "#/components/schemas/Requirements" }
+        hints: { type: array, minItems: 6, items: { $ref: "#/components/schemas/Hint" } }
+    SloCheck:
+      type: object
+      required: [id, label, pass, actual, nodeIds]
+      description: "Computed by the simulator (sloChecks), never by the LLM. pass is null when not applicable."
+      properties:
+        id: { type: string, enum: [availability, p99-read, p99-write, headroom, spof, cost] }
+        label: { type: string }
+        pass: { type: [boolean, "null"] }
+        actual: { type: string }
+        nodeIds: { type: array, items: { type: string } }
     Finding:
       type: object
       required: [severity, nodeIds, title, detail]
