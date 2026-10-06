@@ -4,6 +4,15 @@ export { buildUserMessage, escapeText, graphDsl, simSummary, type ContextInput }
 export { COMMAND_SYSTEM_PROMPT } from "./prompts/command";
 export { runCommand, HarnessError, type HarnessErrorCode, type RunOptions } from "./harness";
 export {
+  fallbackQuestion,
+  InterviewTurnRequestSchema,
+  runInterviewTurn,
+  TranscriptTurnSchema,
+  type InterviewTurnRequest,
+  type InterviewTurnResponse,
+  type TranscriptTurn,
+} from "./interview";
+export {
   DEFAULT_MODELS,
   DEFAULT_QUOTAS,
   fallbackName,
