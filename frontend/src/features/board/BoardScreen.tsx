@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft, Redo2, Undo2 } from "lucide-react";
 import { LogoMark } from "@/components/brand/LogoMark";
 import { percent } from "@/lib/format";
+import { isTyping } from "@/lib/keyboard";
 import { useEffect, useRef, useState } from "react";
 import { ReactFlowProvider, useReactFlow } from "@xyflow/react";
 import { TEMPLATES, type Graph, type TemplateId } from "@archie/simulator";
@@ -17,11 +18,8 @@ import { EventLog } from "./EventLog";
 import { useCompactLayout } from "./useCompactLayout";
 import { useFit } from "./useFit";
 import { useSimulation } from "./useSimulation";
+import { useSpofScan } from "./useSpofScan";
 import styles from "./board.module.css";
-
-function isTyping(target: EventTarget | null): boolean {
-  return target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName));
-}
 
 /** Board shortcuts (docs/05 · Keyboard). Lives inside the provider to read the selection. */
 function BoardKeyboard() {
@@ -127,6 +125,7 @@ function useLastInputWasKeyboard() {
 /** Canvas + side panel for a non-empty board; the simulation runs on every change. */
 function SimulatedBoard({ graph, tab, onTab }: { graph: Graph; tab: PanelTab; onTab: (t: PanelTab) => void }) {
   const { sim, baseline } = useSimulation(graph);
+  const scan = useSpofScan(graph);
   const selection = useBoardStore((s) => s.selection);
   const events = useBoardStore((s) => s.events);
   const selected = selection.length === 1 ? graph.nodes.find((n) => n.id === selection[0]) : undefined;
@@ -156,7 +155,7 @@ function SimulatedBoard({ graph, tab, onTab }: { graph: Graph; tab: PanelTab; on
     <>
       <PanelTabs tab={tab} onChange={onTab} />
       <div id="side-panel-body" role="tabpanel" aria-labelledby={`tab-${tab}`}>
-        {tab === "metrics" && <MetricsPanel graph={graph} sim={sim} baseline={baseline} />}
+        {tab === "metrics" && <MetricsPanel graph={graph} sim={sim} baseline={baseline} scan={scan} />}
         {tab === "inspector" &&
           (selected ? (
             <Inspector
@@ -164,6 +163,7 @@ function SimulatedBoard({ graph, tab, onTab }: { graph: Graph; tab: PanelTab; on
               graph={graph}
               sim={sim}
               node={selected}
+              scan={scan}
               onEscape={() =>
                 document.querySelector<HTMLElement>(`.react-flow__node[data-id="${CSS.escape(selected.id)}"]`)?.focus()
               }
@@ -179,7 +179,7 @@ function SimulatedBoard({ graph, tab, onTab }: { graph: Graph; tab: PanelTab; on
   return (
     <>
       <section className={styles.canvas} aria-label="Board">
-        <Canvas graph={graph} sim={sim} />
+        <Canvas graph={graph} sim={sim} spofs={scan.spofs} />
       </section>
       {compact ? (
         <BottomSheet

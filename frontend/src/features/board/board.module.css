@@ -401,6 +401,23 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* SPOF badge (docs/design §5.8): straddles the top border, never covers the label. */
+.spof {
+  position: absolute;
+  top: -9px;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border: 1px solid var(--color-state-saturated);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-state-saturated);
+  font: 600 11px/1.3 var(--font-sans), sans-serif;
+  letter-spacing: 0.04em;
+}
+
 .downMark {
   position: absolute;
   top: 4px;

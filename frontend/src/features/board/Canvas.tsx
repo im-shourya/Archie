@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { Background, Controls, MarkerType, ReactFlow, useNodesState } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import type { Graph, SimResult } from "@archie/simulator";
+import type { Graph, SimResult, Spof } from "@archie/simulator";
 import { useBoardStore } from "../store/board.store";
 import { ArchNodeCard, type ArchFlowNode } from "./ArchNodeCard";
 import { TrafficEdge, type TrafficFlowEdge } from "./TrafficEdge";
@@ -27,7 +27,7 @@ function toEdges(graph: Graph, sim: SimResult): TrafficFlowEdge[] {
   }));
 }
 
-export function Canvas({ graph, sim }: { graph: Graph; sim: SimResult }) {
+export function Canvas({ graph, sim, spofs }: { graph: Graph; sim: SimResult; spofs: readonly Spof[] }) {
   const { compact, vertical } = useCompactLayout();
   const positions = useLayout(graph, vertical ? "DOWN" : "RIGHT");
   const changed = useBoardStore((s) => s.changed);
@@ -39,22 +39,28 @@ export function Canvas({ graph, sim }: { graph: Graph; sim: SimResult }) {
   const wrapper = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const spofIds = new Set(spofs.map((s) => s.id));
     const pulsing = Date.now() - changed.at < PULSE_MS ? new Set(changed.ids) : new Set<string>();
     setNodes((prev) => {
-      const selected = new Set(prev.filter((n) => n.selected).map((n) => n.id));
+      const previous = new Map(prev.map((n) => [n.id, n]));
       return graph.nodes.map((node) => {
         const position = positions?.[node.id];
+        const old = previous.get(node.id);
         return {
+          // Keep React Flow's measured size: a node without it is hidden (visibility) until it is
+          // measured again, which blinks the node and makes it unfocusable for a frame.
+          ...(old?.measured ? { measured: old.measured } : {}),
           id: node.id,
           type: "arch",
           position: position ?? { x: 0, y: 0 },
           hidden: !position,
-          selected: selected.has(node.id),
+          selected: old?.selected ?? false,
           data: {
             node,
             pulseKey: pulsing.has(node.id) ? changed.at : null,
             metrics: sim.nodes[node.id] ?? null,
             bottleneck: sim.bottleneck?.id === node.id,
+            spof: spofIds.has(node.id),
             vertical,
             // On phones the sheet's peek names the bottleneck; a callout would cover the graph.
             callout: !compact,
@@ -62,7 +68,7 @@ export function Canvas({ graph, sim }: { graph: Graph; sim: SimResult }) {
         };
       });
     });
-  }, [graph, sim, positions, changed, setNodes, vertical, compact]);
+  }, [graph, sim, spofs, positions, changed, setNodes, vertical, compact]);
 
   // Re-fit when the topology layout changes so new components are in view.
   const layoutKey = positions ? `${vertical}|${Object.keys(positions).sort().join(",")}` : "";

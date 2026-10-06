@@ -11,9 +11,10 @@ import {
   type NumericProp,
   type Op,
   type SimResult,
+  type SpofScan,
 } from "@archie/simulator";
 import { KindIcon } from "@/components/icons/KindIcon";
-import { compact, ms } from "@/lib/format";
+import { compact, ms, percent } from "@/lib/format";
 import { useBoardStore } from "../store/board.store";
 import styles from "./inspector.module.css";
 
@@ -86,10 +87,12 @@ interface Props {
   node: ArchNode;
   /** Escape outside a pending edit: hand focus back to the canvas. */
   onEscape(): void;
+  /** SPOF scan of the board, for the "If this fails" line. */
+  scan?: SpofScan;
 }
 
 export const Inspector = forwardRef<HTMLHeadingElement, Props>(function Inspector(
-  { graph, sim, node, onEscape },
+  { graph, sim, node, onEscape, scan },
   headingRef,
 ) {
   const apply = useBoardStore((s) => s.apply);
@@ -289,6 +292,7 @@ export const Inspector = forwardRef<HTMLHeadingElement, Props>(function Inspecto
             </div>
           </dl>
           <p className={styles.explain}>{metrics.explanation}</p>
+          {scan && node.kind !== "client" && node.status === "up" && <FailureLine scan={scan} id={node.id} />}
         </div>
       )}
 
@@ -340,6 +344,23 @@ export const Inspector = forwardRef<HTMLHeadingElement, Props>(function Inspecto
     </section>
   );
 });
+
+/** "If this fails: success 96.3% → 54.5%" (docs/design §5.8). Only SPOFs are listed by the scan. */
+function FailureLine({ scan, id }: { scan: SpofScan; id: string }) {
+  const spof = scan.spofs.find((s) => s.id === id);
+  return (
+    <p className={styles.failure} data-spof={spof ? true : undefined}>
+      If this fails:{" "}
+      {spof ? (
+        <>
+          success {percent(scan.baseline)} → {percent(spof.successRate)}
+        </>
+      ) : (
+        <>success stays within 5 points of {percent(scan.baseline)}</>
+      )}
+    </p>
+  );
+}
 
 /** Commit on Enter or blur; Escape reverts. `onCommit` returns false to keep the draft (invalid). */
 function useDraft(value: string, onCommit: (value: string) => boolean) {
