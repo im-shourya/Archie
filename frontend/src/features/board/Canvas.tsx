@@ -27,7 +27,18 @@ function toEdges(graph: Graph, sim: SimResult): TrafficFlowEdge[] {
   }));
 }
 
-export function Canvas({ graph, sim, spofs }: { graph: Graph; sim: SimResult; spofs: readonly Spof[] }) {
+/** `readOnly` (shared links): no dragging, no selection, nothing written to the board store. */
+export function Canvas({
+  graph,
+  sim,
+  spofs,
+  readOnly = false,
+}: {
+  graph: Graph;
+  sim: SimResult;
+  spofs: readonly Spof[];
+  readOnly?: boolean;
+}) {
   const { compact, vertical } = useCompactLayout();
   const positions = useLayout(graph, vertical ? "DOWN" : "RIGHT");
   const changed = useBoardStore((s) => s.changed);
@@ -102,8 +113,12 @@ export function Canvas({ graph, sim, spofs }: { graph: Graph; sim: SimResult; sp
       nodeTypes={nodeTypes}
       edgeTypes={edgeTypes}
       onNodesChange={onNodesChange}
-      onSelectionChange={({ nodes: selected }) => setSelection(selected.map((n) => n.id))}
-      onNodeDragStop={(_e, node) => setPinned(node.id, node.position)}
+      onSelectionChange={
+        readOnly ? undefined : ({ nodes: selected }) => setSelection(selected.map((n) => n.id))
+      }
+      onNodeDragStop={readOnly ? undefined : (_e, node) => setPinned(node.id, node.position)}
+      nodesDraggable={!readOnly}
+      elementsSelectable={!readOnly}
       deleteKeyCode={null}
       nodesConnectable={false}
       colorMode="system"
