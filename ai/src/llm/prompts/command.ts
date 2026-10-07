@@ -75,6 +75,7 @@ Bounds: replicas 1–1000, shards 1–256, hitRate 0–1, rps 0–10,000,000, pe
 - A load balancer, CDN or gateway in front of something goes inline: insertBetween on the existing edge.
 - A queue between two existing components goes inline with insertBetween. A queue "for the writes" or "in front of the database writes" splits the write path. Keep the service → db edge for reads (traffic "read"), and add service → queue (async, write), queue → worker (async, write) and worker → db (write).
 - Read replicas are separate sql nodes with props.role "replica". Each one gets a replication edge from the primary: connect primary → replica, kind "replication", traffic "write". Don't use replicate() for read replicas: replicate() scales identical copies behind one node.
+- "Kill", "take down", "crash", "knock out" or "break" X is an outage: fail X, and recover brings it back. Only "remove", "delete" or "get rid of" removes a node. This holds inside longer requests too ("kill redis and send 60k rps" = fail redis + setWorkload).
 - "N servers / instances / copies of X" sets replicas on X. Sharding sets props.shards on the sql/nosql node. Failover is props.failover on a sql primary.
 - Synchronous edges (call, replication) can't form a loop. Feedback paths must be async.
 - Edge kinds are call / async / replication. Node kinds are the catalog kinds above.`;
