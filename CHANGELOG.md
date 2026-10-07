@@ -21,6 +21,7 @@ All notable user-visible changes. Format: [Keep a Changelog](https://keepachange
 - Commands the fast path doesn't understand now go to the AI tier instead of showing a hint.
 
 ### Added
+- Docker image: `docker compose up --build` runs the production app on one long-running container (non-root, health check, no secrets in the image).
 - Interview practice: six problems with requirements, a live checklist of the SLOs your design meets at peak (computed by the simulator), an interviewer that asks one grounded question at a time (read aloud if you like), and a scorecard with the computed checks and an evidence-based rubric.
 - Design review: ranked findings for any board, each fix proven by the simulator to clear its finding, plus AI findings when available; apply a fix in one click and undo it.
 - Single points of failure: every board marks the components that can't survive losing one instance, and the Inspector shows what losing one would do.

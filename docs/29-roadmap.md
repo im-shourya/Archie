@@ -85,7 +85,7 @@ Where the project is going. Live status is in [31-project-state.md](31-project-s
 - [ ] ≥ 92 cases, dev/test split, run, fix the top failing categories, final test-split run
 - [ ] All benches; `results/latest.json` committed; `/evals` page
 - [ ] Share links, exports, replay (if not cut)
-- [ ] Deploy (doc 25 checklist); README via **readme-maintenance**; CHANGELOG `v1.0.0`
+- [ ] Deploy the Docker image (ADR-018, doc 25 · Docker) as a single instance on a container host; README via **readme-maintenance**; CHANGELOG `v1.0.0`
 
 ## Phase 8 · Record + submit
 - [ ] Follow [99-challenge.md](99-challenge.md): video script + submission checklist
