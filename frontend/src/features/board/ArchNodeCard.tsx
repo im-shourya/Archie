@@ -2,7 +2,7 @@
 
 import { memo, useState } from "react";
 import { Handle, NodeToolbar, Position, type Node, type NodeProps } from "@xyflow/react";
-import { X } from "lucide-react";
+import { ShieldAlert, X } from "lucide-react";
 import { CATALOG, type ArchNode, type NodeMetrics } from "@archie/simulator";
 import { KindIcon } from "@/components/icons/KindIcon";
 import { compact } from "@/lib/format";
@@ -10,7 +10,7 @@ import { useBoardStore } from "../store/board.store";
 import styles from "./board.module.css";
 
 export type ArchFlowNode = Node<
-  { node: ArchNode; pulseKey: number | null; metrics: NodeMetrics | null; bottleneck: boolean; vertical: boolean; callout: boolean },
+  { node: ArchNode; pulseKey: number | null; metrics: NodeMetrics | null; bottleneck: boolean; vertical: boolean; callout: boolean; spof: boolean },
   "arch"
 >;
 
@@ -41,7 +41,7 @@ function load(node: ArchNode, m: NodeMetrics | null): string {
 }
 
 function ArchNodeCardImpl({ data, selected }: NodeProps<ArchFlowNode>) {
-  const { node, pulseKey, metrics, bottleneck, vertical, callout } = data;
+  const { node, pulseKey, metrics, bottleneck, vertical, callout, spof } = data;
   const [calloutOpen, setCalloutOpen] = useState(true);
   const focused = useBoardStore((s) => s.focus.includes(node.id));
   const status = node.status === "down" ? "down" : (metrics?.status ?? "idle");
@@ -66,9 +66,15 @@ function ArchNodeCardImpl({ data, selected }: NodeProps<ArchFlowNode>) {
         data-status={node.status}
         data-sim={status}
         data-focus={focused || undefined}
-        aria-label={`${node.label}, ${subtitle(node)}, ${STATUS_LABEL[status]}${metrics && showBar ? `, utilization ${metrics.rho.toFixed(2)}` : ""}`}
+        aria-label={`${node.label}, ${subtitle(node)}, ${STATUS_LABEL[status]}${metrics && showBar ? `, utilization ${metrics.rho.toFixed(2)}` : ""}${spof ? ", single point of failure" : ""}`}
       >
         <Handle type="target" position={vertical ? Position.Top : Position.Left} className={styles.handle} />
+        {spof && (
+          <span className={styles.spof} data-testid={`spof-${node.id}`} title="Single point of failure: losing one instance loses 5% or more of successful requests">
+            <ShieldAlert size={11} strokeWidth={2.25} aria-hidden />
+            SPOF
+          </span>
+        )}
         <span className={styles.glyph}>
           <KindIcon kind={node.kind} />
         </span>

@@ -1,5 +1,7 @@
 # 06 · UI / UX
 
+Screen-level layouts, states and wireframes (including Phase 6 interview, scorecard, review and `/design`) are in [design/frontend-design.md](design/frontend-design.md). This doc stays the source for principles, tokens, type, icons and the accessibility baseline.
+
 ## Design principles
 
 1. **The board is the product.** Chrome stays quiet. The canvas and its live state carry the attention.
@@ -106,8 +108,10 @@ Guarded by `tests/contracts/design-tokens.test.ts`: no raw colour literals in an
 | **Access-code dialog** | native `<dialog>` on 401 `ACCESS_CODE_REQUIRED`; code kept in sessionStorage only after it works; wrong code → inline error; 429 → countdown |
 | **Answer card** | slides above the command bar; node chips highlight on hover |
 | **Toast** | message + optional `Undo` (10 s) |
-| **Interview panel** | problem card · SLO checklist (live) · question bubble + 🔊 · answer transcript · Finish |
-| **Scorecard** | checks table with actuals · rubric bars · summary |
+| **Interview panel** | problem card · SLO checklist (computed, live) · interviewer question with provenance (AI / from the problem / offline) and node chips · read-aloud toggle · answer box · Next question · transcript. Spec: [design §5.2–5.5](design/frontend-design.md) |
+| **Scorecard** | overall (mean, computed in code) · computed checks · rubric meters with evidence (unsupported → "not enough evidence") · summary · Copy as Markdown. Spec: [design §5.6](design/frontend-design.md) |
+| **Review panel** | rule findings at once, AI findings when available (marked) · severity label + icon + left border · Apply fix (validated, undoable, "review fix") → Resolved + Undo. Spec: [design §5.7](design/frontend-design.md) |
+| **SPOF badge** | top-left pill "SPOF" in the saturated token, never over the label; aria-label "single point of failure" |
 
 ## Motion
 

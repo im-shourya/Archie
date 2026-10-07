@@ -44,12 +44,17 @@ Blast radius · Redis down
 ## SPOF scan (FR-027, P1)
 
 ```
+baseline = successRate(graph)                     # exact (ADR-013), no Monte Carlo
 for each node n (status up, kind ≠ client):
-    sim' = simulate(graph with n down)
-    if sim'.e2e.successRate < 0.99 → n is a SPOF (record the drop)
+    n' = n with replicas − 1   if n.replicas ≥ 2  # losing one instance
+         n down                otherwise          # SQL failover still applies
+    after = successRate(graph with n')
+    if (baseline − after) / baseline ≥ 5% → n is a SPOF (record after)
 ```
 
-≤ 200 sims × < 5 ms = < 1 s worst case; run in a Web Worker, debounced 1 s after the last change. Results: a SPOF badge on nodes, a list in the metrics panel, and an input to the review/interview prompts. The interview SLO "survives any single-node failure" = the SPOF list is empty.
+**Why this rule (measured in Phase 6, doc 34):** the first draft ("fail the whole node; SPOF if success < 99%") failed twice against the simulator. On an overloaded board every failure lands below 99% (three-tier sits at 96.3%, so Postgres with failover counted for losing 1 point), and compute nodes call every dependency (doc 10), so failing a whole 3-broker Kafka always breaks the path. No design could pass. Losing *one instance* matches what an interviewer means by "survives any single failure"; the proportional threshold keeps a hopeless one-box design (1% success) from passing.
+
+Results on the templates: three-tier → only Redis (the 2 LBs and 30 API servers survive a loss); URL shortener → the single CDN, LB and datastore; chat → the single gateway, Kafka and message store, plus the chat service, whose 8 replicas can't absorb losing one (N+1). Cost: P95 21 ms at 100 components (`bench:sim`), so it runs in a deferred render, not a worker. Results: a SPOF badge on nodes, a Metrics section, the Inspector line "If one instance fails: success 96.3% → 54.5%", the review rules, and the interview check "Survives any single failure".
 
 ## Not modelled
 

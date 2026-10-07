@@ -1,7 +1,6 @@
 import { ApiError, GoogleGenAI, ThinkingLevel, type GenerateContentConfig, type GenerateContentResponse } from "@google/genai";
-import { z } from "zod";
 import { msUntilMidnight } from "../quota";
-import { WireResultSchema } from "../schemas";
+import { COMMAND_OUTPUT, jsonSchemaFor } from "./output";
 import { ProviderError, type Completion, type CompletionRequest, type LlmProvider } from "./types";
 
 /**
@@ -25,10 +24,7 @@ export const GEMINI_MAX_TOKENS = 8_000;
 export type ModelsClient = Pick<GoogleGenAI, "models">;
 
 /** WireResult as JSON Schema. Gemini rejects `$schema`; everything else is in its supported subset. */
-export const WIRE_JSON_SCHEMA: Record<string, unknown> = (() => {
-  const { $schema: _drop, ...schema } = z.toJSONSchema(WireResultSchema, { target: "draft-2020-12" }) as Record<string, unknown>;
-  return schema;
-})();
+export const WIRE_JSON_SCHEMA: Record<string, unknown> = jsonSchemaFor(COMMAND_OUTPUT);
 
 /** Finish reasons that mean the model declined (safety / policy filters). */
 const REFUSALS = new Set(["SAFETY", "PROHIBITED_CONTENT", "BLOCKLIST", "SPII", "RECITATION", "IMAGE_SAFETY"]);
@@ -98,7 +94,7 @@ export function createGeminiProvider(options: { client?: ModelsClient; model?: s
             // Byte-stable prefix: Gemini's implicit caching reuses it across calls.
             systemInstruction: req.system,
             responseMimeType: "application/json",
-            responseJsonSchema: WIRE_JSON_SCHEMA,
+            responseJsonSchema: jsonSchemaFor(req.output),
             maxOutputTokens: GEMINI_MAX_TOKENS * req.tokenScale,
             ...(thinkingFor(model) ? { thinkingConfig: thinkingFor(model) } : {}),
             abortSignal: req.signal,
