@@ -1,5 +1,25 @@
 # 25 · Deployment
 
+> **Decision (ADR-018, 2026-10-04):** production runs as **one long-running Docker container**, because the AI quota guards, rate limits and daily cap live in memory and serverless instances would each keep their own. The Vercel notes below remain valid for previews.
+
+## Docker (production)
+
+```
+docker build --build-arg GIT_SHA=$(git rev-parse HEAD) -t archie .
+docker run -d -p 3000:3000 --env-file .env.local --name archie archie
+# or: docker compose up --build
+```
+
+| Piece | Detail |
+|-------|--------|
+| Build | multi-stage: `npm ci` from manifests (cached) → `npm run build` with `ARCHIE_STANDALONE=1` → runtime copies `frontend/.next/standalone`, `.next/static`, `public` |
+| Runtime | `node:22-alpine`, user `archie` (non-root), `node frontend/server.js`, `PORT=3000`, `HOSTNAME=0.0.0.0` |
+| Secrets | runtime env only (`--env-file`); `.dockerignore` keeps `.env*`, `.claude/` and the work log out of the build context; the smoke test asserts no `.env` file is in the image |
+| Health | `HEALTHCHECK` fetches `/api/health`; `version` in the response is the image's git SHA |
+| CI | the **Docker image** job builds the image and runs `scripts/docker-smoke.sh`: pages, `/api/problems`, a static chunk, security headers, a graceful 503 from the AI tier without a key, non-root, no `.env`, `healthy` |
+| Scale | one instance (quota state is per process); more instances need a shared counter store first |
+| Hosts | any container host with a persistent instance (e.g. Fly.io, Render, Railway, Cloud Run with min instances 1) |
+
 ## Environments
 
 | Env | URL | Trigger | AI key | Notes |
