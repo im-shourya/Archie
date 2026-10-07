@@ -73,6 +73,29 @@ jobs:
         if: steps.pkg.outputs.present == 'true'
         run: npx playwright install --with-deps chromium && npm run test:e2e
 
+  docker:
+    name: Docker image (build + smoke)
+    needs: guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build the image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: archie:ci
+          build-args: GIT_SHA=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: "Run and smoke-test (no AI key, so the AI tier must degrade, not crash)"
+        run: |
+          docker run -d --name archie -p 3000:3000 archie:ci
+          EXPECT_VERSION=1 scripts/docker-smoke.sh archie http://localhost:3000
+      - name: Image size
+        run: docker image ls archie:ci --format '{{.Repository}}:{{.Tag}} {{.Size}}'
+
   evals:
     name: Evals (real AI, manual)
     needs: build-test
