@@ -24,11 +24,11 @@ export function fallbackQuestion(
 ): { question: string; focusNodeIds: string[] } {
   const asked = new Set(transcript.filter((t) => t.role === "interviewer").map((t) => t.text));
   const failing = PROBE_ORDER.filter((id) => checks.find((c) => c.id === id)?.pass === false);
-  const order: (CheckId | "general")[] = [
-    ...failing,
-    "general",
-    ...PROBE_ORDER.filter((id) => !failing.includes(id)),
-  ];
+  // Nothing drawn yet: "which component is dropping requests?" makes no sense, so ask general questions first.
+  const started = checks.some((c) => c.actual !== "no clients yet");
+  const order: (CheckId | "general")[] = !started
+    ? ["general", ...PROBE_ORDER]
+    : [...failing, "general", ...PROBE_ORDER.filter((id) => !failing.includes(id))];
   for (const check of order) {
     const hint = problem.hints.find((h) => h.check === check && !asked.has(h.question));
     if (hint) {
