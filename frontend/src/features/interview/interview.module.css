@@ -357,6 +357,8 @@
 }
 
 .overallScore {
+  flex: none;
+  white-space: nowrap;
   font:
     600 34px/1 var(--font-mono),
     monospace;
