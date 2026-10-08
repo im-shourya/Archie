@@ -79,6 +79,17 @@ test("Open file rejects a file that isn't a board, without echoing it", async ({
   await expect(page).toHaveURL(/\/$/);
 });
 
+test("Escape closes the menu even before focus has moved into it", async ({ page, isMobile }) => {
+  test.skip(isMobile, "Export is in the ⋯ menu on phones");
+  await openThreeTier(page);
+  const button = page.getByRole("button", { name: "Export" });
+  await button.focus();
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("menu")).toHaveCount(0);
+  await expect(button).toBeFocused();
+});
+
 test("the Export menu works by keyboard", async ({ page, isMobile }) => {
   test.skip(isMobile, "Export is in the ⋯ menu on phones (covered above)");
   await openThreeTier(page);
@@ -92,6 +103,7 @@ test("the Export menu works by keyboard", async ({ page, isMobile }) => {
   expect((await download).suggestedFilename()).toMatch(/\.mmd$/);
   await page.getByRole("button", { name: "Export" }).focus();
   await page.keyboard.press("Enter");
+  await expect(page.getByRole("menuitem", { name: LABEL.json })).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("menu")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Export" })).toBeFocused();

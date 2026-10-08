@@ -71,6 +71,10 @@ export function OverflowMenu({
           if (e.key === "ArrowDown") {
             e.preventDefault();
             setOpen(true);
+          } else if (e.key === "Escape" && open) {
+            // Focus moves into the menu a frame after it opens; Escape before that still closes it.
+            e.preventDefault();
+            setOpen(false);
           }
         }}
       >
