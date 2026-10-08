@@ -101,10 +101,24 @@ export interface Miss {
   reason: string;
 }
 
+/** Cases that got no answer at all (every provider timed out or failed) vs answered ones. */
+export interface Availability {
+  cases: number;
+  noAnswer: number;
+  answered: number;
+  correct: number;
+}
+
+function availability(r: RunResult): Availability {
+  const noAnswer = r.cases.filter((c) => c.failedAssertions?.[0]?.startsWith("error:")).length;
+  return { cases: r.cases.length, noAnswer, answered: r.cases.length - noAnswer, correct: r.cases.filter((c) => c.pass).length };
+}
+
 export interface Report {
   headline: { taskAccuracy: number; kindAccuracy: number; falseActionRate: number; overClarifyRate: number; cases: number };
   dev?: RunResult["metrics"] & { cases: number };
   fastPath: { precision: number; coverage: number; cases: number } | null;
+  availability: { test: Availability; dev?: Availability };
   categories: CategoryRow[];
   latency: LatencyRow[];
   misses: Miss[];
@@ -137,7 +151,11 @@ function misses(r: RunResult | undefined, split: "dev" | "test"): Miss[] {
       split,
       expected: c.expectedKind,
       actual: c.actualKind,
-      reason: c.actualKind !== c.expectedKind ? `answered with ${c.actualKind}` : (c.failedAssertions?.[0] ?? "assertion failed"),
+      reason: c.failedAssertions?.[0]?.startsWith("error:")
+        ? `no answer from any provider (${c.failedAssertions[0].slice(7)})`
+        : c.actualKind !== c.expectedKind
+          ? `answered with ${c.actualKind}`
+          : (c.failedAssertions?.[0] ?? "assertion failed"),
     }));
 }
 
@@ -169,6 +187,7 @@ export function buildReport(input: ReportInput): Report {
   return {
     headline: { ...test.metrics, cases: test.cases.length },
     ...(dev ? { dev: { ...dev.metrics, cases: dev.cases.length } } : {}),
+    availability: { test: availability(test), ...(dev ? { dev: availability(dev) } : {}) },
     fastPath: b0 ? { precision: b0.metrics.fastPathPrecision, coverage: b0.metrics.fastPathCoverage, cases: b0.cases.length } : null,
     categories: [...categories].sort().map((category) => ({
       category,

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import type { Stats } from "@archie/evals/report";
+import type { Availability, Stats } from "@archie/evals/report";
 import { Wordmark } from "@/components/brand/LogoMark";
 import { report, RESULTS_URL } from "@/features/evals/data";
 import styles from "@/features/evals/evals.module.css";
@@ -28,8 +28,12 @@ function Ratio({ n, pass }: { n: number; pass: number }) {
 const STAT_COLUMNS: (keyof Stats)[] = ["p50", "p70", "p95", "p99", "p100"];
 
 export default function EvalsPage() {
-  const { headline, dev, fastPath, categories, latency, misses, runs } = report;
+  const { headline, dev, fastPath, availability, categories, latency, misses, runs } = report;
   const warm = latency.find((l) => l.tier === "AI command (warm)");
+  const splits: [string, Availability][] = [
+    ["Test", availability.test],
+    ...(availability.dev ? [["Dev", availability.dev] as [string, Availability]] : []),
+  ];
   const tiles = [
     { label: "Task accuracy, held-out test", value: percent(headline.taskAccuracy), detail: `${headline.cases} cases · target ≥ 90%` },
     { label: "False actions", value: percent(headline.falseActionRate), detail: "acted when it should have asked · target ≤ 2%" },
@@ -97,6 +101,16 @@ export default function EvalsPage() {
                 </dd>
               </>
             )}
+            {splits.map(([split, a]) => (
+              <div key={split} className={styles.factRow}>
+                <dt>{split}: answered vs. no answer</dt>
+                <dd>
+                  {a.answered} of {a.cases} got an answer; {a.answered ? percent(a.correct / a.answered) : "–"} of
+                  those were right.
+                  {a.noAnswer > 0 && ` ${a.noAnswer} timed out or hit a provider outage on the free tier.`}
+                </dd>
+              </div>
+            ))}
             <dt>Over-clarify (asked when it should have acted)</dt>
             <dd>{percent(headline.overClarifyRate)} on test</dd>
             {fastPath && (
