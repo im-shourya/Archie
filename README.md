@@ -17,7 +17,7 @@ Archie is a system-design board you talk to. You describe changes out loud ("fiv
 
 ![The three-tier template at 50,000 requests per second: Postgres is saturated at ρ 1.40 and the bottleneck note explains why](docs/assets/board-bottleneck.png)
 
-> Built by voice with [Wispr Flow](https://ref.wisprflow.ai/hhg) for Hacker House Goa 2026. **Status:** in development. Phases 0–6 of the 9 (0–8) are done ([roadmap](docs/29-roadmap.md), [project state](docs/31-project-state.md)).
+> Built by voice with [Wispr Flow](https://ref.wisprflow.ai/hhg) for Hacker House Goa 2026. **Status:** in development. Phases 0–6 are done and Phase 7 (evals, share and export, deployment) is in progress ([roadmap](docs/29-roadmap.md), [project state](docs/31-project-state.md)).
 
 ## What works today
 
@@ -31,7 +31,9 @@ Archie is a system-design board you talk to. You describe changes out loud ("fiv
 - **Interview practice.** Pick one of six problems (URL shortener to video streaming). The requirements set the load, and a live checklist shows which SLOs your design meets at peak: success rate, read and write p99, headroom, surviving any single failure, and cost. Every pass or fail is computed by the simulator. An interviewer asks one question at a time, aimed at your weakest point and grounded in your board (read aloud if you like). **Finish** gives a scorecard: the computed checks plus a five-part rubric where every score cites evidence.
 - **Design review and single points of failure.** Every board shows which components can't survive losing one instance. **Review** lists ranked findings, each with a fix the simulator has proven clears it, plus AI findings when the model is available. Apply a fix in one click, then undo it if you change your mind.
 - **Works on phones, by keyboard and without Wispr Flow.** Under 768 px the panel becomes a bottom sheet that peeks with the bottleneck, and graphs lay out top to bottom so labels stay legible. Every action is keyboard-reachable, with visible focus. Browsers with the Web Speech API get a mic button as a fallback for Wispr Flow.
-- **Boards in your browser.** Templates (three-tier, URL shortener, chat), undo/redo, change history, automatic layout, light and dark themes. Boards are saved in IndexedDB and never leave your browser.
+- **Share, export and replay.** **Share** copies a link that opens a read-only copy with the live simulation; the design travels in the link's `#` fragment, which browsers never send to the server, and **Duplicate** saves an editable copy. **Export** downloads JSON (re-importable with **Open file** on the home page), a Mermaid diagram, a Markdown design doc with the simulator's numbers and the review findings, or an SVG/PNG image. **Replay** steps through a session's changes, undo included.
+- **Boards in your browser.** Templates (three-tier, URL shortener, chat), undo/redo, change history, automatic layout, light and dark themes. Boards are saved in IndexedDB and never leave your browser unless you share or export them.
+- **A public eval report.** [`/evals`](docs/22-evaluation.md) renders the committed results: accuracy per category on the held-out test split, false actions, cases with no answer from any free-tier provider, and latency percentiles for every tier.
 
 ![After "Kill Redis": the blast radius panel shows success falling from 96.3% to 54.5% and both replicas saturating](docs/assets/board-blast-radius.png)
 
@@ -55,7 +57,7 @@ Archie is a system-design board you talk to. You describe changes out loud ("fiv
 | 4 | AI tier: full descriptions ("users hit two load balancers…"), clarifying questions, confirmations, grounded answers ([plan](docs/32-phase-4-plan.md)) | ✅ Done (#7) |
 | 5 | Design pass: Inspector, phone layout, mic fallback, access-code dialog, accessibility gate ([plan](docs/33-phase-5-plan.md)) | ✅ Done |
 | 6 | Interview mode with simulator-checked SLOs and a scorecard, design review, SPOF scan, `/design` style guide ([plan](docs/34-phase-6-plan.md)) | ✅ Done |
-| 7 | Eval report from 92 cases, share links, exports, deployment on Render ([plan](docs/35-phase-7-plan.md)) | 📋 Planned |
+| 7 | 92 eval cases, `/evals`, share links, exports and Open file, replay ✅ · final test-split run and deployment on Render 🚧 ([plan](docs/35-phase-7-plan.md)) | 🚧 In progress |
 
 ## Results
 
@@ -69,10 +71,12 @@ Measured with the scripts in this repository (`npm run bench:fast`, `npm run ben
 | Interview question / scorecard / review, live (free-tier Gemini) | 1.8–2.9 s / 3.6 s / 8.5 s (review included a provider failover) | — |
 | AI command understanding, held-out test split (12 cases, free-tier Gemini → Groq) | task accuracy 91.7% · kind accuracy 100% · **0 false actions** · warm P50 1.8 s | ≥ 90% · false actions ≤ 2% · P50 < 3 s |
 | AI command understanding, all 31 cases | 29/31 = 93.5% · 0 false actions | ≥ 85% (Phase 4) |
-| Unit, property and contract tests | 514 passing | — |
-| End-to-end tests (desktop + mobile Chromium) | 191 passing (AI responses mocked) | — |
+| AI command understanding, dev split of the 92-case dataset (58 cases, 2026-10-04) | 48/48 answered cases correct · **0 false actions** · 10 got no answer: every free-tier model timed out, before the [fallback fix](docs/35-phase-7-plan.md) | Phase 7: test split ≥ 90%, run once at the end |
+| Fast path alone on all 92 cases (no AI) | handles 8, all correct (precision 100%); abstains on the rest | precision 100% |
+| Unit, property and contract tests | 577 passing | — |
+| End-to-end tests (desktop + mobile Chromium) | 240 passing (AI responses mocked) | — |
 | Accessibility: axe, WCAG 2.2 A/AA, 15 states × light/dark × desktop/phone, plus `/design` | **0 serious or critical** violations; keyboard-only journey passes | 0 |
-| Board route initial JS, gzipped (`npm run bundle:size`) | 260.6 KB (Home 170.9 KB), with interview and review loaded on demand | < 300 KB, enforced in CI |
+| Board route initial JS, gzipped (`npm run bundle:size`) | 263.8 KB, with interview, review and export code loaded on demand | < 300 KB, enforced in CI |
 
 The simulator's headline numbers are golden-tested against hand calculations in [docs/10](docs/10-traffic-model.md). It is a teaching model (M/M/1 per replica, steady state), not a vendor benchmark; assumptions are listed in [docs/09](docs/09-simulation-engine.md).
 
@@ -138,7 +142,7 @@ npm run dev
 
 Open <http://localhost:3000>, pick **Open the 50k rps demo**, and try saying *"Shard Postgres into two."*
 
-Local commands and the simulator need no environment variables. AI commands (anything the fast path doesn't understand) need a free `GEMINI_API_KEY` from [Google AI Studio](https://aistudio.google.com/apikey) in `.env.local`, plus an optional free `GROQ_API_KEY` from [Groq](https://console.groq.com/keys) as the fallback. Keys are server-only and never sent to the browser. Per-provider quota guards keep usage under the free tiers: when both are full, the API answers 429 rather than failing upstream. To use Claude instead, set `ANTHROPIC_API_KEY` and `ARCHIE_PROVIDER=anthropic`. Note that Google may use prompts sent on its free tier to improve its products. [`.env.example`](.env.example) lists the optional ones: `ARCHIE_PROVIDER`, `ARCHIE_FALLBACK`, `ARCHIE_MODEL`, the quota overrides (`GEMINI_RPM`, `GROQ_TPM`, …), `ARCHIE_DAILY_CAP`, `ARCHIE_ACCESS_CODE`, `ARCHIE_IP_SALT` and `NEXT_PUBLIC_SITE_URL`.
+Local commands and the simulator need no environment variables. AI commands (anything the fast path doesn't understand) need a free `GEMINI_API_KEY` from [Google AI Studio](https://aistudio.google.com/apikey) in `.env.local`, plus an optional free `GROQ_API_KEY` from [Groq](https://console.groq.com/keys) as the fallback. Keys are server-only and never sent to the browser. Per-provider quota guards keep usage under the free tiers: when both are full, the API answers 429 rather than failing upstream. To use Claude instead, set `ANTHROPIC_API_KEY` and `ARCHIE_PROVIDER=anthropic`. Note that Google may use prompts sent on its free tier to improve its products. [`.env.example`](.env.example) lists the optional ones: `ARCHIE_PROVIDER`, `ARCHIE_FALLBACK`, `ARCHIE_MODEL`, the quota overrides (`GEMINI_RPM`, `GROQ_TPM`, …), `ARCHIE_DAILY_CAP`, `ARCHIE_ACCESS_CODE`, `ARCHIE_IP_SALT`, `NEXT_PUBLIC_SITE_URL` and, behind a host's proxy, `ARCHIE_CLIENT_IP_HEADER`.
 
 ### Run with Docker
 
@@ -146,7 +150,7 @@ Local commands and the simulator need no environment variables. AI commands (any
 docker compose up --build        # http://localhost:3000, keys read from .env.local at runtime
 ```
 
-One container is the production setup ([ADR-018](docs/30-architecture-decisions.md)): the AI quota guards and rate limits live in memory, so a single long-running process keeps them exact. The image is non-root, has no secrets baked in, and is built and smoke-tested in CI on every PR.
+One container is the production setup ([ADR-018](docs/30-architecture-decisions.md)): the AI quota guards and rate limits live in memory, so a single long-running process keeps them exact. The image is non-root, has no secrets baked in, and is built and smoke-tested in CI on every PR. [`render.yaml`](render.yaml) deploys it to Render's free tier; the steps are in [docs/25](docs/25-deployment.md#render-production-host).
 
 ### Commands
 
@@ -161,8 +165,9 @@ One container is the production setup ([ADR-018](docs/30-architecture-decisions.
 | `npm run bundle:size` | Gzipped initial JS of the board route, after `npm run build` (CI fails above 320 KB) |
 | `docker compose up --build` | Production image on <http://localhost:3000> (see [deployment](docs/25-deployment.md)) |
 | `npx tsx scripts/screenshots.ts --base <url> [--readme]` | Visual QA screenshots at 360/768/1280/1440 px in light and dark; `--readme` refreshes `docs/assets` |
-| `npm run eval` | Command-understanding eval against the real model (needs `GEMINI_API_KEY`; `GROQ_API_KEY` adds the fallback; paces itself to the free quotas); `-- --fastpath-only` for the no-AI baseline, `-- --split test` for the held-out split |
+| `npm run eval` | Command-understanding eval against the real model (needs `GEMINI_API_KEY`; `GROQ_API_KEY` adds the fallback; paces itself to the free quotas); `-- --fastpath-only` for the no-AI baseline, `-- --split test` for the held-out split, `-- --show` to print failing results |
 | `npm run dev:backend` | The API alone on <http://localhost:8787/api> |
+| `scripts/deploy-smoke.sh <url> [--ai]` | Smoke-test a deployment: pages, API, security headers, `og:url`, the deployed commit; `--ai` sends one real command |
 
 ## Built with Wispr Flow
 

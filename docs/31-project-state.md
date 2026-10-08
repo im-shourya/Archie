@@ -4,7 +4,7 @@ Where the project is **right now**. Update at the end of every phase (and whenev
 
 ## Current phase
 
-**Phase 7 planned** ([35-phase-7-plan.md](35-phase-7-plan.md)): grow the evals to 92 cases and publish one final test-split run, `/evals`, share links, exports, replay (cuttable), and the Docker image deployed on Render. Starts on `chore/evals-deploy` once the keys are rotated.
+**Phase 7 in progress** (`chore/evals-deploy`, [35-phase-7-plan.md](35-phase-7-plan.md)). Done: the dataset is at 92 cases (58 dev / 34 test, frozen per line), B0 and benches refreshed, dev-driven fixes (an outage rule in the prompt, a deadline-aware provider chain, two runner fixes), `/evals`, share links with Duplicate, exports (JSON, Mermaid, design doc, SVG, PNG) with Open file, replay, and the deploy code (`render.yaml`, the client-IP header, `deploy-smoke.sh`, keep-warm). **Open:** the final held-out test-split run (Mon 5 Oct after the 12:30 IST quota reset) and the Render service, which needs the owner's account and rotated keys.
 
 **Phase 6 done** (`feat/interview`) ([34-phase-6-plan.md](34-phase-6-plan.md)): SPOF scan, six interview problems with simulator-computed SLO checks and golden-tested reference designs, `/api/interview/turn`, `/api/interview/score` and `/api/review` on a shared structured-output session, interview mode with a live checklist, grounded questions and a scorecard, design review with simulator-proven fixes, the phone ⋯ menu and the `/design` style guide. `zod/mini` on the client closed the bundle gap (318.7 → 260.6 KB). Every acceptance criterion met.
 
@@ -68,16 +68,16 @@ _None._ (NFR-015 closed in Phase 6: 260.6 KB with `zod/mini` on the client.)
 
 | Metric | Value |
 |--------|-------|
-| Eval cases | 31 / 92 (19 dev, 12 test) |
-| Task accuracy (dev / test) | 94.7% / 91.7% (all 31: 93.5%) |
+| Eval cases | 92 (58 dev, 34 test); last test-split run is still the 12-case one from Phase 4 |
+| Task accuracy (dev / test) | dev 58 cases: 82.8% (48/48 answered correct, 10 free-tier timeouts before the fallback fix) · test: 91.7% on the Phase 4 split, final 34-case run pending |
 | False-action rate (dev / test) | 0% / 0% |
 | Fast-path P50 / P100 | 0.006 ms / 0.138 ms |
 | Simulator P95 @ 100 nodes | 2.327 ms |
-| Fast path on eval cases (B0) | 2/31 handled, precision 100% |
+| Fast path on eval cases (B0) | 8/92 handled, precision 100% |
 | AI warm P50 / P95 (test) | 1.8 s / 11.9 s (P95 = a fallback hop on the free tier) |
-| Tests | 514 unit/property/contract · 191 e2e (desktop + Pixel 7) |
+| Tests | 577 unit/property/contract · 240 e2e (desktop + Pixel 7) |
 | Accessibility (axe, WCAG 2.2 A/AA) | 0 serious/critical over 36 audits |
-| Board route initial JS (gzip) | 260.6 KB (target < 300) · Home 170.9 KB |
+| Board route initial JS (gzip) | 263.8 KB (target < 300) |
 | SPOF scan P95 @ 100 nodes | 21.3 ms |
 | Interview turn / score / review (live, free tier) | 1.8–2.9 s / 3.6 s / 8.5 s |
 
