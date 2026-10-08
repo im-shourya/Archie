@@ -5,3 +5,4 @@ export * from "./ops";
 export * from "./events";
 export * from "./templates";
 export * from "./diff";
+export * from "./replay";
