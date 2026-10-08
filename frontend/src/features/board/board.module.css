@@ -659,3 +659,25 @@
     outline: 2px solid var(--color-focus);
   }
 }
+
+.replayLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  margin-bottom: 8px;
+  color: var(--color-primary);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.replayLink:hover {
+  text-decoration: underline;
+}
+
+.replayLink:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
