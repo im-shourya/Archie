@@ -1,6 +1,6 @@
 /**
  * Visual QA sweep (docs/33 Step 8, docs/34 Step 10). Captures Home, the board, the Inspector,
- * the AI panels, interview mode, the scorecard and review at 360, 768, 1280 and 1440 px in light
+ * the AI panels, interview mode, the scorecard, review, share, export and replay at 360, 768, 1280 and 1440 px in light
  * and dark, and refreshes the README images in docs/assets. AI routes are mocked: no quota used. Run against a running app (production build recommended):
  *
  *   npm run build && npm start -- -p 3200
@@ -9,6 +9,8 @@
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { chromium, type Page } from "@playwright/test";
+import LZString from "lz-string";
+import { buildTemplate } from "@archie/simulator";
 
 const args = process.argv.slice(2);
 const arg = (name: string, fallback: string) => {
@@ -272,6 +274,40 @@ async function main() {
     await rp.waitForTimeout(400);
     await rp.screenshot({ path: join(ASSETS, "board-review.png") });
     await rv.close();
+
+    // Phase 7: a shared read-only board, the Export menu, and replay mid-session.
+    const sv = await browser.newContext({ viewport: { width: 1440, height: 860 }, deviceScaleFactor: 2 });
+    const sp = await sv.newPage();
+    // The share link format (docs/17): v1: + lz-string of { name, graph }. lz-string is CommonJS,
+    // so it's built here rather than through @archie/database's named import.
+    const link = `v1:${LZString.compressToEncodedURIComponent(JSON.stringify({ name: "Checkout at 50k rps", graph: buildTemplate("three-tier") }))}`;
+    await sp.goto(`${base}/s#${link}`);
+    await sp.locator(".react-flow__node").nth(6).waitFor();
+    await sp.waitForTimeout(700);
+    await sp.screenshot({ path: join(ASSETS, "board-shared.png") });
+
+    await openThreeTier(sp);
+    await sp.getByRole("button", { name: "Export" }).click();
+    await sp.getByRole("menu", { name: "Export" }).waitFor();
+    await sp.waitForTimeout(200);
+    await sp.screenshot({ path: join(ASSETS, "board-export.png") });
+    await sp.keyboard.press("Escape");
+
+    const say = async (text: string) => {
+      const bar = sp.getByRole("textbox", { name: "Command" });
+      await bar.fill(text);
+      await bar.press("Enter");
+      await sp.waitForTimeout(300);
+    };
+    await say("Kill Redis.");
+    await say("Shard Postgres into two.");
+    await say("Bring Redis back.");
+    await sp.getByRole("tab", { name: "History" }).click();
+    await sp.getByRole("link", { name: "Replay this session" }).click();
+    await sp.getByRole("slider", { name: "Replay step" }).fill("2");
+    await sp.waitForTimeout(700);
+    await sp.screenshot({ path: join(ASSETS, "board-replay.png") });
+    await sv.close();
 
     const phone = await browser.newContext({
       viewport: { width: 390, height: 844 },

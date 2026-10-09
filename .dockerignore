@@ -13,12 +13,11 @@ node_modules/
 coverage/
 dist/
 
-# Not needed to build or run.
+# Not needed to build or run. (evals/results/ stays: /evals is built from it.)
 .git/
 .github/
 test-results/
 playwright-report/
-evals/results/
 docs/assets/
 *.log
 .DS_Store

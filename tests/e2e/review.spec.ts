@@ -117,6 +117,8 @@ test("phones: the ⋯ menu works by keyboard", async ({ page, isMobile }) => {
   await page.keyboard.press("ArrowDown");
   await expect(page.getByRole("menuitem", { name: "Review design" })).toBeFocused();
   await page.keyboard.press("ArrowDown");
+  await expect(page.getByRole("menuitem", { name: "Share link" })).toBeFocused();
+  await page.keyboard.press("End");
   await expect(page.getByRole("menuitem", { name: "Rename board" })).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("menu")).toHaveCount(0);

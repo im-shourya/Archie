@@ -1,0 +1,106 @@
+{
+  "nodes": [
+    {
+      "id": "client",
+      "kind": "client",
+      "label": "Users",
+      "props": {
+        "replicas": 1
+      },
+      "status": "up"
+    },
+    {
+      "id": "lb",
+      "kind": "lb",
+      "label": "Load balancer",
+      "props": {
+        "replicas": 2
+      },
+      "status": "up"
+    },
+    {
+      "id": "feed",
+      "kind": "service",
+      "label": "Feed service",
+      "props": {
+        "replicas": 8
+      },
+      "status": "up"
+    },
+    {
+      "id": "timeline-cache",
+      "kind": "cache",
+      "label": "Timeline cache",
+      "props": {
+        "replicas": 1,
+        "hitRate": 0.8
+      },
+      "status": "up"
+    },
+    {
+      "id": "posts-db",
+      "kind": "nosql",
+      "label": "Posts (Cassandra)",
+      "props": {
+        "replicas": 1,
+        "shards": 4
+      },
+      "status": "up"
+    },
+    {
+      "id": "users-db",
+      "kind": "sql",
+      "label": "Users DB",
+      "props": {
+        "replicas": 1,
+        "shards": 1,
+        "role": "primary",
+        "failover": false
+      },
+      "status": "up"
+    }
+  ],
+  "edges": [
+    {
+      "id": "client->lb",
+      "from": "client",
+      "to": "lb",
+      "kind": "call",
+      "traffic": "all"
+    },
+    {
+      "id": "lb->feed",
+      "from": "lb",
+      "to": "feed",
+      "kind": "call",
+      "traffic": "all"
+    },
+    {
+      "id": "feed->timeline-cache",
+      "from": "feed",
+      "to": "timeline-cache",
+      "kind": "call",
+      "traffic": "read"
+    },
+    {
+      "id": "feed->posts-db",
+      "from": "feed",
+      "to": "posts-db",
+      "kind": "call",
+      "traffic": "all"
+    },
+    {
+      "id": "feed->users-db",
+      "from": "feed",
+      "to": "users-db",
+      "kind": "call",
+      "traffic": "read"
+    }
+  ],
+  "workload": {
+    "rps": 120000,
+    "readRatio": 0.98,
+    "peakMultiplier": 1
+  },
+  "version": 0
+}

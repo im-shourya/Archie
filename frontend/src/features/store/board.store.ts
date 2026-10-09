@@ -80,20 +80,48 @@ interface BoardState {
 }
 
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
+/** The board waiting for its debounced save, and event writes still in flight. */
+let pendingBoard: Board | null = null;
+const inFlight = new Set<Promise<void>>();
 
-function scheduleSave(board: Board): void {
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    void getRepository()
-      .then((repo) => repo.saveBoard(board))
-      .catch((err) => console.error("[archie] failed to save board", err));
-  }, SAVE_DEBOUNCE_MS);
+function track(write: Promise<void>): void {
+  inFlight.add(write);
+  void write.finally(() => inFlight.delete(write));
 }
 
+function scheduleSave(board: Board): void {
+  pendingBoard = board;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => void flushWrites(), SAVE_DEBOUNCE_MS);
+}
+
+/**
+ * Write the pending board now and wait for every event write. Called before another screen reads
+ * the repository (replay, opening a board) and on pagehide, so a change made just before leaving
+ * the board isn't lost or read stale.
+ */
+export async function flushWrites(): Promise<void> {
+  clearTimeout(saveTimer);
+  const board = pendingBoard;
+  pendingBoard = null;
+  if (board) {
+    track(
+      getRepository()
+        .then((repo) => repo.saveBoard(board))
+        .catch((err) => console.error("[archie] failed to save board", err)),
+    );
+  }
+  await Promise.all([...inFlight]);
+}
+
+if (typeof window !== "undefined") window.addEventListener("pagehide", () => void flushWrites());
+
 function logEvent(boardId: string, event: BoardEvent): void {
-  void getRepository()
-    .then((repo) => repo.appendEvent(boardId, event))
-    .catch((err) => console.error("[archie] failed to log event", err));
+  track(
+    getRepository()
+      .then((repo) => repo.appendEvent(boardId, event))
+      .catch((err) => console.error("[archie] failed to log event", err)),
+  );
 }
 
 export const useBoardStore = create<BoardState>()((set, get) => {
@@ -154,6 +182,7 @@ export const useBoardStore = create<BoardState>()((set, get) => {
 
     async load(id) {
       set({ status: "loading", board: null, events: [], undoStack: [], redoStack: [], selection: [], focus: [], reviewOpen: false });
+      await flushWrites();
       const repo = await getRepository();
       const [board, events] = await Promise.all([repo.getBoard(id), repo.listEvents(id)]);
       if (get().status !== "loading") return;

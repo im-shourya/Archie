@@ -17,9 +17,9 @@ What we're building, feature by feature, and in what order. Priority: **P0** mus
 | F-09 | Local boards + templates | P0 | 1 | FR-040, 041 | Done |
 | F-10 | Interview mode | P1 | 6 | FR-050–053 | Done |
 | F-11 | Design review | P1 | 6 | FR-054 | Done |
-| F-12 | Share + export | P1 | 7 | FR-042, 043 | Planned |
-| F-13 | Session replay | P1 | 7 | FR-044 | Planned |
-| F-14 | Eval report page | P1 | 7 | FR-060, 061 | Planned |
+| F-12 | Share + export | P1 | 7 | FR-042, 043 | Done |
+| F-13 | Session replay | P1 | 7 | FR-044 | Done |
+| F-14 | Eval report page | P1 | 7 | FR-060, 061 | Done |
 | F-15 | Cost estimate | P1 | 6 | FR-028 | Done |
 | F-16 | Multiplayer board | P2 | — | — | Backlog |
 | F-17 | `docker-compose.yml` export | P2 | — | — | Backlog |

@@ -1,0 +1,32 @@
+# Render Blueprint (docs/25 · Render, ADR-018): Archie as one long-running Docker container.
+# Dashboard → Blueprints → New Blueprint Instance → this repo. Secrets (sync: false) are entered
+# in the dashboard and never committed.
+services:
+  - type: web
+    name: archie
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: main
+    autoDeploy: true
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    envVars:
+      # Free-tier keys. Use freshly rotated ones.
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      # Canonical URL (a Docker build arg too: Next inlines it), e.g. https://archie.onrender.com
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
+      # The header Render's proxy sets for the client address (docs/25 · Client IP).
+      - key: ARCHIE_CLIENT_IP_HEADER
+        sync: false
+      - key: ARCHIE_DAILY_CAP
+        value: "300"
+      - key: ARCHIE_IP_SALT
+        generateValue: true
+      - key: ARCHIE_LOG_LEVEL
+        value: info
