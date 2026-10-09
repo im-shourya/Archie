@@ -22,6 +22,8 @@ docker run -d -p 3000:3000 --env-file .env.local --name archie archie
 
 ## Render (production host)
 
+**Live:** <https://archie-rb2x.onrender.com> (since 2026-10-04). Verified with `deploy-smoke.sh --ai`; requests reach Render through Cloudflare (`server: cloudflare`, `cf-ray`), so `ARCHIE_CLIENT_IP_HEADER=cf-connecting-ip`, a header Cloudflare always overwrites. A forged `X-Forwarded-For` was checked to get no fresh rate-limit bucket (429).
+
 The image runs on Render's free web service plan (docs/35 · Decisions → Host), described in [`render.yaml`](../render.yaml): Docker runtime, region Singapore, one instance, health check `/api/health`, auto-deploy on every push to `main`.
 
 1. Render dashboard → **Blueprints → New Blueprint Instance** → this repository. Render reads `render.yaml`.
