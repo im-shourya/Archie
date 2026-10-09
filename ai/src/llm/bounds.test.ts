@@ -29,5 +29,8 @@ describe("findOutOfBounds", () => {
   it("recognises a clarify answer", () => {
     expect(isClarifyAnswer("send fifty million rps (answer: Use 10,000,000)")).toBe(true);
     expect(isClarifyAnswer("send fifty million rps")).toBe(false);
+    // Option labels can contain parentheses.
+    expect(isClarifyAnswer("connect the workers to the database (answer: Postgres (primary))")).toBe(true);
+    expect(isClarifyAnswer("kill the catalog (MongoDB) node")).toBe(false);
   });
 });
