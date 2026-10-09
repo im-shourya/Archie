@@ -1,4 +1,5 @@
 import { applyBatch, type ArchNode, type Graph, type OpError } from "@archie/simulator";
+import { guessedRef } from "./ambiguity";
 import { findOutOfBounds, isClarifyAnswer } from "./bounds";
 import { MAX_FOCUS, MAX_MESSAGE, MAX_OPTION_CHARS, MAX_OPTIONS, type CommandResult } from "./schemas";
 
@@ -40,6 +41,7 @@ const DEFAULT_MESSAGE: Record<CommandResult["kind"], string> = {
 /**
  * Apply the guardrails to a result whose ops already passed validateBatch.
  * - G-05 a number beyond the op language's bounds → `clarify` stating the limit (never clamp)
+ * - G-13 "the database" matching 2+ components, and the edit picked one → `clarify` with the candidates
  * - G-12 `ops`/`confirm` with no ops → `noop`
  * - G-03 destructive `ops` → `confirm`
  * - G-08 focus ids limited to nodes that exist (before or after the edit)
@@ -61,6 +63,19 @@ export function applyGuardrails(result: CommandResult, graph: Graph, utterance =
       message: clip(`${fmtNum(b.value)} ${b.noun} is more than the simulator supports (the limit is ${fmtNum(b.max)}). Should I use ${fmtNum(b.max)}?`, MAX_MESSAGE),
       options: [clip(`Use ${fmtNum(b.max)}`, MAX_OPTION_CHARS), "Cancel"],
       focusNodeIds: [],
+    };
+  }
+
+  // G-13: a definite generic reference matched several components and the model chose one. Ask.
+  const guess = (kind === "ops" || kind === "confirm") && !isClarifyAnswer(utterance) ? guessedRef(utterance, graph, ops) : null;
+  if (guess) {
+    const shown = guess.candidates.slice(0, MAX_OPTIONS);
+    return {
+      kind: "clarify",
+      ops: [],
+      message: clip(`Which ${guess.phrase} do you mean: ${shown.map((n) => n.label).join(" or ")}?`, MAX_MESSAGE),
+      options: shown.map((n) => clip(n.label, MAX_OPTION_CHARS)),
+      focusNodeIds: shown.map((n) => n.id),
     };
   }
 
