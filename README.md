@@ -50,6 +50,11 @@ Archie is a system-design board you talk to. You describe changes out loud ("fiv
   <img src="docs/assets/board-review.png" width="49%" alt="Design review on the three-tier board: Redis is a single point of failure and Postgres is saturated, each with an Apply fix button">
 </p>
 
+<p align="center">
+  <img src="docs/assets/board-shared.png" width="49%" alt="A shared link opened in another browser: the board read-only with its live simulation, the bottleneck note and a Duplicate button">
+  <img src="docs/assets/board-replay.png" width="49%" alt="Replay at step 2 of 4, Kill Redis: Redis is down, Postgres saturates at ρ 2.75, and the list of changes on the right">
+</p>
+
 ### Planned
 
 | Phase | Feature | Status |
