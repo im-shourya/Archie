@@ -70,6 +70,14 @@ describe("buildReport", () => {
     expect(r.runs.at(-1)?.label).toBe("Deployed");
   });
 
+  it("lists an earlier test run next to the latest, with its own accuracy", () => {
+    const r = buildReport({ ...committed(), earlierTest: file("b1-test-run1.json") });
+    const earlier = r.runs.find((x) => x.label === "Test split, earlier run");
+    expect(earlier?.cases).toBe(34);
+    expect(earlier?.falseActionRate).toBeCloseTo(0.1111, 4);
+    expect(r.runs[0]!.label).toBe("Test split (held out)");
+  });
+
   it("works without the optional runs", () => {
     const { test, benchFast, benchSim } = committed();
     const r = buildReport({ test, benchFast, benchSim });
