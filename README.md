@@ -13,6 +13,8 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-2a44c8" alt="MIT license"></a>
 </p>
 
+**Watch the build: [demo video (6 min)](docs/assets/ARCHIE_3PIXLE.mp4)**, Archie being built by voice with Wispr Flow.
+
 **Try it live: <https://archie-rb2x.onrender.com>** (free hosting: if nobody has used it for a while, the first load can take about a minute).
 
 Archie is a system-design board you talk to. You describe changes out loud ("five replicas of the API", "kill Redis"), the diagram updates, and a simulator shows where the system saturates, which requests fail, and why, with the numbers behind every red component. It's built for engineers sketching a design and for students practising system-design interviews.
@@ -191,6 +193,8 @@ One container is the production setup ([ADR-018](docs/30-architecture-decisions.
 ## Built with Wispr Flow
 
 Archie is being built for the Wispr Flow challenge: the coding agent receives its instructions by dictation, the docs in [`docs/`](docs/) are detailed so spoken prompts can stay short (*"Do Phase 3 from doc 29"*), and the product itself is designed for dictation, with one command bar and a hands-free mode. Challenge rules and the submission checklist are in [docs/99](docs/99-challenge.md).
+
+The [demo video](docs/assets/ARCHIE_3PIXLE.mp4) (6 min) shows Archie being built by voice with Wispr Flow.
 
 ## Documentation
 
