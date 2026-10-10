@@ -1,17 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from "react";
 import { SITE, siteUrl } from "@/lib/site";
 import "./globals.css";
 
-// One engineering superfamily: Plex Sans for UI, Plex Mono for numbers and ids (docs/06).
-const sans = IBM_Plex_Sans({
+// Geist for UI and Geist Mono for numbers, ids and rps (docs/06): an engineering pair that keeps
+// dense simulator numbers legible. Self-hosted by next/font, no request to Google at runtime.
+const sans = Geist({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   variable: "--font-sans",
   display: "swap",
 });
-const mono = IBM_Plex_Mono({
+const mono = Geist_Mono({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   variable: "--font-mono",
