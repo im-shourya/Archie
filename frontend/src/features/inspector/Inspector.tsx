@@ -333,8 +333,15 @@ export const Inspector = forwardRef<HTMLHeadingElement, Props>(function Inspecto
           ))}
         </ul>
         {incoming.length + outgoing.length === 0 && (
-          <p className={styles.hint}>Not connected. Say “connect the API to {node.label}”.</p>
+          <p className={styles.hint}>Not connected yet. Connect it below, or say “connect the API to {node.label}”.</p>
         )}
+        <ConnectForm
+          node={node}
+          graph={graph}
+          onConnect={(from, to, traffic) =>
+            edit("edges", [{ type: "connect", from, to, traffic }], `Connected ${label(from)} → ${label(to)}`)
+          }
+        />
         {errors.edges && (
           <p className={styles.error} role="alert">
             {errors.edges}
@@ -454,5 +461,95 @@ function NumberField(props: {
         </span>
       )}
     </label>
+  );
+}
+
+type Traffic = "all" | "read" | "write";
+
+/** Kinds that sit at the front of a system and pass traffic on. */
+const ENTRY_KINDS = new Set<ArchNode["kind"]>(["client", "cdn", "lb", "gateway"]);
+/** Likely targets first: what a component usually sends to, and what usually sends to it. */
+const DOWNSTREAM_ORDER: ArchNode["kind"][] = ["cache", "sql", "nosql", "queue", "service", "worker", "search", "objectstore", "external", "lb", "gateway", "cdn", "client"];
+const UPSTREAM_ORDER: ArchNode["kind"][] = ["service", "worker", "gateway", "lb", "cdn", "client", "queue", "cache", "sql", "nosql", "search", "objectstore", "external"];
+
+/**
+ * Connect by hand (no AI): pick a direction, the other component and the traffic it carries.
+ * The edit goes through `edit`, so invalid edges (a loop of synchronous calls) show inline and
+ * every connection can be undone.
+ */
+export function ConnectForm({
+  node,
+  graph,
+  onConnect,
+}: {
+  node: ArchNode;
+  graph: Graph;
+  onConnect(from: string, to: string, traffic: Traffic): boolean;
+}) {
+  const id = useId();
+  // Entry points send traffic on; anything else that nothing calls yet most likely receives it.
+  const entry = ENTRY_KINDS.has(node.kind) || graph.edges.some((e) => e.to === node.id);
+  const [direction, setDirection] = useState<"to" | "from">(entry ? "to" : "from");
+  const [traffic, setTraffic] = useState<Traffic>("all");
+  const linked = new Set(
+    graph.edges.flatMap((e) => (direction === "to" ? (e.from === node.id ? [e.to] : []) : e.to === node.id ? [e.from] : [])),
+  );
+  const order = direction === "to" ? DOWNSTREAM_ORDER : UPSTREAM_ORDER;
+  const options = graph.nodes
+    .filter((n) => n.id !== node.id && !linked.has(n.id) && !(direction === "to" && n.kind === "client"))
+    .sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind));
+  const [target, setTarget] = useState("");
+  const chosen = options.some((n) => n.id === target) ? target : (options[0]?.id ?? "");
+  if (graph.nodes.length < 2) return null;
+
+  return (
+    <form
+      className={styles.connect}
+      aria-label={`Connect ${node.label}`}
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!chosen) return;
+        const [from, to] = direction === "to" ? [node.id, chosen] : [chosen, node.id];
+        if (onConnect(from, to, traffic)) setTarget("");
+      }}
+    >
+      <label className={styles.field}>
+        <span className={styles.fieldLabel}>Direction</span>
+        <select className={styles.input} value={direction} onChange={(e) => setDirection(e.currentTarget.value as "to" | "from")}>
+          <option value="to">{node.label} sends to</option>
+          <option value="from">{node.label} receives from</option>
+        </select>
+      </label>
+      <label className={styles.field}>
+        <span className={styles.fieldLabel} id={`${id}-target`}>
+          Component
+        </span>
+        <select
+          className={styles.input}
+          value={chosen}
+          onChange={(e) => setTarget(e.currentTarget.value)}
+          disabled={options.length === 0}
+          aria-labelledby={`${id}-target`}
+        >
+          {options.length === 0 && <option value="">Already connected to everything</option>}
+          {options.map((n) => (
+            <option key={n.id} value={n.id}>
+              {n.label}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className={styles.field}>
+        <span className={styles.fieldLabel}>Traffic</span>
+        <select className={styles.input} value={traffic} onChange={(e) => setTraffic(e.currentTarget.value as Traffic)}>
+          <option value="all">All requests</option>
+          <option value="read">Reads only</option>
+          <option value="write">Writes only</option>
+        </select>
+      </label>
+      <button type="submit" className={styles.button} disabled={!chosen}>
+        Connect
+      </button>
+    </form>
   );
 }

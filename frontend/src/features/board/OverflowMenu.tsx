@@ -20,6 +20,7 @@ export function OverflowMenu({
   items,
   label = "More actions",
   trigger,
+  iconOnly = false,
   buttonClassName,
 }: {
   items: MenuItem[];
@@ -27,6 +28,8 @@ export function OverflowMenu({
   label?: string;
   /** Visible button content (defaults to the ⋯ icon). */
   trigger?: ReactNode;
+  /** The trigger is an icon only, so the button needs `label` as its accessible name. */
+  iconOnly?: boolean;
   buttonClassName?: string;
 }) {
   const [open, setOpen] = useState(false);
@@ -62,7 +65,7 @@ export function OverflowMenu({
         ref={button}
         type="button"
         className={buttonClassName ?? styles.iconButton}
-        aria-label={trigger ? undefined : label}
+        aria-label={trigger && !iconOnly ? undefined : label}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? id : undefined}
