@@ -132,3 +132,49 @@ describe("resolveRef", () => {
     if (r.kind === "ambiguous") expect(r.candidates.map((n) => n.id).sort()).toEqual(["orders-db", "pg"]);
   });
 });
+
+describe("parseCommand: adding a component locally (no AI)", () => {
+  const added = (utterance: string, graph: Graph = threeTier) => {
+    const result = parseCommand(utterance, graph);
+    if (!result || result.kind !== "ops") throw new Error(`expected ops for "${utterance}", got ${JSON.stringify(result)}`);
+    expect(result.ops).toHaveLength(1);
+    const op = result.ops[0]!;
+    if (op.type !== "addNode") throw new Error(`expected addNode, got ${op.type}`);
+    return { kind: op.kind, label: op.label, summary: result.summary };
+  };
+
+  it.each<[string, string, string]>([
+    ["add a cache", "cache", "Cache"],
+    ["add a redis cache", "cache", "Redis cache"],
+    ["Add another Redis.", "cache", "Redis 2"],
+    ["add a load balancer", "lb", "Load balancer 2"],
+    ["add kafka", "queue", "Kafka"],
+    ["add a postgres database", "sql", "Postgres database"],
+    ["add an orders service", "service", "Orders service"],
+    ["add a mongo db", "nosql", "MongoDB"], // the dictation fix-ups turn "mongo db" into "mongodb"
+    ["add an s3 bucket", "objectstore", "S3 bucket"],
+    ["spin up an elasticsearch", "search", "Elasticsearch"],
+    ["add a queue called order events", "queue", "Order events"],
+  ])("%s", (utterance, kind, label) => {
+    const r = added(utterance);
+    expect(r.kind).toBe(kind);
+    expect(r.label).toBe(label);
+    expect(r.summary).toContain("not connected yet");
+  });
+
+  it("keeps labels unique on the board", () => {
+    expect(added("add a load balancer").label).toBe("Load balancer 2");
+    expect(added("add a load balancer", emptyGraph()).label).toBe("Load balancer");
+  });
+
+  it.each([
+    "add a database", // SQL or NoSQL? the AI picks a default and says so
+    "add a cache in front of postgres", // placement: cache-aside wiring is the AI's job
+    "add a queue for the writes",
+    "add two caches",
+    "add something",
+    "add a cache and a queue",
+  ])("abstains on %s", (utterance) => {
+    expect(parseCommand(utterance, threeTier)).toBeNull();
+  });
+});
