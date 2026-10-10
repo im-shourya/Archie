@@ -329,8 +329,10 @@ Opened by **Review** (`ScanSearch` 16 + label) in design mode.
 
 ### 5.9 Top bar and ⋯ menu
 
-- **Desktop actions, right to left:** Redo, Undo, then the mode action (Review or Finish). Later phases add Share and Export ▾ to the left of the mode action. Buttons 32 px high; text buttons have icon + label.
-- **Phones (< 768 px):** the mode action, Rename and (later) Share/Export move into **⋯** (`Ellipsis` 16, `aria-label="More actions"`, `aria-haspopup="menu"`, `aria-expanded`). The menu follows the WAI-ARIA menu-button pattern: Enter/Space/↓ opens and focuses the first item, ↑/↓ move, Home/End jump, Escape closes and returns focus, Tab closes. Items are 44 px high. The menu has a `--shadow-overlay` surface at z 20 and closes on outside pointerdown.
+- **Desktop actions, left to right:** **Add ▾** (`Plus` 16 + label + `ChevronDown` 14; component types with their `KindIcon`, in the order a design usually needs them), Share, Export ▾, the mode action (Review or Finish), Undo, Redo. Buttons 32 px high; text buttons have icon + label.
+- **Add ▾** uses the same menu-button pattern as ⋯. Picking a type applies the same validated `addNode` op as voice ("add a cache"), with a label kept unique ("Cache 2"), selects the new component through the canvas (so React Flow and the Inspector agree) and shows a toast with Undo. Shown in design and interview mode, on empty boards too.
+- **Inspector → Connect:** under Connections, a form of three selects (Direction: sends to / receives from; Component; Traffic: all / reads / writes) and a Connect button. Defaults follow the system's shape: entry points (users, CDN, LB, gateway) send; anything nothing calls yet receives; likely targets are listed first and users are never a "sends to" target. Errors (a loop of synchronous calls) show inline; every connection can be undone.
+- **Phones (< 768 px):** **Add** is a 44 px `Plus` icon button (`aria-label="Add component"`) opening the same menu; the mode action, Rename, Share and Export move into **⋯** (`Ellipsis` 16, `aria-label="More actions"`, `aria-haspopup="menu"`, `aria-expanded`). The menu follows the WAI-ARIA menu-button pattern: Enter/Space/↓ opens and focuses the first item, ↑/↓ move, Home/End jump, Escape closes and returns focus, Tab closes. Items are 44 px high. The menu has a `--shadow-overlay` surface at z 20 and closes on outside pointerdown.
 - **Rename on phones** (from the menu): turns the title into the existing inline input, focused and selected.
 
 ---
