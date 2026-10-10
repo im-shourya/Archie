@@ -48,7 +48,8 @@ _None open._ Fixed in Phase 5: wide graphs rendered tiny on phones and portrait 
 
 ## Open items
 
-- **False action on ambiguous references** (ambiguity-08, final test split): "connect the workers to the database" with two databases was applied to one instead of asking. Planned fix: a deterministic guard that turns a model edit into a clarify when a generic reference resolves to 2+ components, checked offline against all 92 cases, then a test-split re-run with both runs reported. Deferred by the owner (2026-10-04).
+- ~~False action on ambiguous references~~ fixed by G-13 (2026-10-04); test re-run: 97.1%, 0 false actions, both runs published.
+- **Answer groundedness 66.7%** in test run 2 (one of three answers cited a number not in the context). Not tuned on test; a dev-split look is the next step.
 
 ## Open questions
 
@@ -71,12 +72,12 @@ Phase 8 from [doc 36](36-phase-8-plan.md):
 | Metric | Value |
 |--------|-------|
 | Eval cases | 92 (58 dev, 34 test) |
-| Task accuracy (dev / test) | dev 82.8% (48/48 answered correct, 10 free-tier timeouts before the fallback fix) / **test 91.2%** (31/34, final, held out) |
-| False-action rate (dev / test) | 0% / **11.1%** (1 of 9: ambiguity-08) |
+| Task accuracy (dev / test) | dev 82.8% (48/48 answered correct, 10 free-tier timeouts before the fallback fix) / **test 97.1%** (run 2, with G-13; run 1: 91.2%) |
+| False-action rate (dev / test) | 0% / **0%** (run 2; run 1: 11.1%, ambiguity-08) |
 | Fast-path P50 / P100 | 0.006 ms / 0.138 ms |
 | Simulator P95 @ 100 nodes | 2.327 ms |
 | Fast path on eval cases (B0) | 8/92 handled, precision 100% |
-| AI warm P50 / P95 (test) | 2.3 s / 6.7 s |
+| AI warm P50 / P95 (test) | 2.4 s / 5.4 s (run 2) |
 | Tests | 577 unit/property/contract · 240 e2e (desktop + Pixel 7) |
 | Accessibility (axe, WCAG 2.2 A/AA) | 0 serious/critical over 36 audits |
 | Board route initial JS (gzip) | 263.8 KB (target < 300) |

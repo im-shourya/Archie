@@ -77,7 +77,8 @@ Measured with the scripts in this repository (`npm run bench:fast`, `npm run ben
 | SPOF scan (one what-if per component), 100 components | P95 21.3 ms | P95 < 600 ms |
 | Interview question / scorecard / review, live (free-tier Gemini) | 1.8–2.9 s / 3.6 s / 8.5 s (review included a provider failover) | — |
 | AI command, **deployed** (6 held-out cases sent to the live site from India, network included) | 6/6 correct · 0 false actions · warm P50 2.4 s, P95 3.9 s · first call 6.7 s | P50 < 3 s |
-| **AI command understanding, held-out test split** (34 cases, run once on the final build, free-tier Gemini, 2026-10-04) | **task accuracy 91.2%** (31/34) · kind accuracy 94.1% · over-clarify 0% · warm P50 2.3 s, P95 6.7 s · **1 false action** (11.1% of 9 hold-back cases): "connect the workers to the database" picked one of two databases instead of asking ([notes](evals/notes.md)) | ≥ 90% ✅ · false actions ≤ 2% ❌ · P50 < 3 s ✅ · P95 < 6 s ❌ |
+| **AI command understanding, held-out test split, run 2** (34 cases, free-tier models, 2026-10-04) | **task accuracy 97.1%** (33/34) · **0 false actions** · over-clarify 0% · warm P50 2.4 s, P95 5.4 s · answers citing only simulator numbers: 2 of 3 | ≥ 90% ✅ · false actions ≤ 2% ✅ · P50 < 3 s ✅ · P95 < 6 s ✅ · groundedness ≥ 95% ❌ |
+| Held-out test split, run 1 (before the fix) | 91.2% (31/34) · 1 false action: "connect the workers to the database" picked one of two databases. That led to a guard in code that asks instead (G-13); part of run 2's gain is run-to-run variance ([notes](evals/notes.md)) | — |
 | AI command understanding, dev split of the 92-case dataset (58 cases, 2026-10-04) | 48/48 answered cases correct · **0 false actions** · 10 got no answer: every free-tier model timed out, before the [fallback fix](docs/35-phase-7-plan.md) | Phase 7: test split ≥ 90%, run once at the end |
 | Fast path alone on all 92 cases (no AI) | handles 8, all correct (precision 100%); abstains on the rest | precision 100% |
 | Unit, property and contract tests | 577 passing | — |
@@ -85,7 +86,7 @@ Measured with the scripts in this repository (`npm run bench:fast`, `npm run ben
 | Accessibility: axe, WCAG 2.2 A/AA, 15 states × light/dark × desktop/phone, plus `/design` | **0 serious or critical** violations; keyboard-only journey passes | 0 |
 | Board route initial JS, gzipped (`npm run bundle:size`) | 263.8 KB, with interview, review and export code loaded on demand | < 300 KB, enforced in CI |
 
-![The /evals page: 91.2% task accuracy on the 34 held-out cases, 11.1% false actions (one case), 94.1% right kind of response, warm AI P50 2.27 s, and passes per category for dev and test](docs/assets/evals.png)
+![The /evals page: 97.1% task accuracy on the 34 held-out cases, 0% false actions, warm AI P50 2.39 s, and passes per category for dev and test](docs/assets/evals.png)
 
 The simulator's headline numbers are golden-tested against hand calculations in [docs/10](docs/10-traffic-model.md). It is a teaching model (M/M/1 per replica, steady state), not a vendor benchmark; assumptions are listed in [docs/09](docs/09-simulation-engine.md).
 

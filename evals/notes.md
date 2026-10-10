@@ -1,5 +1,17 @@
 # Eval notes (docs/22 · Human review)
 
+## Test split, run 2 · 2026-10-04 · commit `61ad8e5` · prompt `8259bf6e5201` + G-13
+
+Re-run once after the G-13 guard (a generic "the database" matching two components becomes a question). 33/34 = 97.1%, kind accuracy 97.1%, **0 false actions**, over-clarify 0%, warm P50 2.39 s, P95 5.38 s, P99 15.1 s (a case retried while every provider was briefly busy, then Groq). Models: gemini-3.5-flash-lite (19), gemini-3.5-flash (9), Groq gpt-oss-120b (3).
+
+| Case | Expected | Got | Why |
+|------|----------|-----|-----|
+| modify-06 · "each api server can handle two thousand requests a second" | ops: capacityRps 2000 | noop | As in run 1: 2,000 rps is the default, so the model said there was nothing to change |
+
+- ambiguity-08 passed (clarify). The guard or the model may have asked; the result is the same for the user.
+- dictation-noise-02 passed with no change aimed at it: run-to-run variance on free-tier models. Treat the gap between 91.2% and 97.1% as fix + variance, not fix alone.
+- **Answer groundedness 66.7%:** one of three answers cited a number that isn't in the simulator context (a new miss; run 1 was 100%).
+
 ## Final held-out test split · 2026-10-04 · commit `84949a6` · prompt `8259bf6e5201`
 
 34 cases, run once on the final build. Task accuracy 91.2% (31/34), kind accuracy 94.1%, over-clarify 0%, fast-path precision 100%, answer groundedness 100%. **False-action rate 11.1%: one of the nine hold-back cases.** Warm AI P50 2.27 s, P95 6.74 s (N = 30). Models: gemini-2.5-flash (11), gemini-3.5-flash-lite (16), gemini-3.5-flash (4).

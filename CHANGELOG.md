@@ -5,6 +5,8 @@ All notable user-visible changes. Format: [Keep a Changelog](https://keepachange
 ## [Unreleased]
 
 ### Fixed
+- When "the database" (or "the service", "the cache") could mean two components, the app now asks which one instead of guessing.
+- Answering a question with an option like "Postgres (primary)" no longer makes the app ask again.
 - When an AI model hangs, the request now leaves time for the fallback provider instead of timing out.
 - "Kill Redis and send sixty thousand requests a second" fails Redis instead of deleting it.
 - Rate limits can't be bypassed by sending a fake `X-Forwarded-For` header behind a proxy (set `ARCHIE_CLIENT_IP_HEADER`).
