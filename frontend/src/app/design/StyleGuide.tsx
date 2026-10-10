@@ -138,6 +138,8 @@ function card(
       vertical: false,
       callout: false,
       spof: false,
+      // Style-guide samples are static: no connection handles.
+      editable: false,
       ...extra,
     },
   };
