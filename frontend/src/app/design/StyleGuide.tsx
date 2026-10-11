@@ -4,24 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ReactFlow } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import {
-  BookOpen,
-  CircleCheck,
-  CircleX,
-  Ellipsis,
-  Flag,
-  GraduationCap,
-  Info,
-  Mic,
-  OctagonAlert,
-  ScanSearch,
-  ShieldAlert,
-  SkipForward,
-  Sparkles,
-  TriangleAlert,
-  Volume2,
-  Wrench,
-} from "lucide-react";
+import { BookOpen, CheckCircle, Cloud, DotsThree, Flag, GraduationCap, Info, ListMagnifyingGlass, Microphone, ShieldWarning, SkipForward, SpeakerHigh, Warning, WarningOctagon, Wrench, XCircle } from "@phosphor-icons/react/dist/ssr";
 import { NODE_KINDS, type ArchNode, type NodeMetrics } from "@archie/simulator";
 import { LogoMark, Wordmark } from "@/components/brand/LogoMark";
 import { KindIcon } from "@/components/icons/KindIcon";
@@ -188,20 +171,20 @@ const nodeTypes = { arch: ArchNodeCard };
 const UI_ICONS = {
   GraduationCap,
   Flag,
-  ScanSearch,
-  ShieldAlert,
-  CircleCheck,
-  CircleX,
-  Volume2,
+  ListMagnifyingGlass,
+  ShieldWarning,
+  CheckCircle,
+  XCircle,
+  SpeakerHigh,
   SkipForward,
   BookOpen,
   Wrench,
-  OctagonAlert,
-  TriangleAlert,
+  WarningOctagon,
+  Warning,
   Info,
-  Ellipsis,
-  Sparkles,
-  Mic,
+  DotsThree,
+  Cloud,
+  Microphone,
 };
 const SECTIONS = [
   "Brand",
@@ -301,7 +284,7 @@ export function StyleGuide() {
             <h2 id="h-type">Type</h2>
             {TYPE_SCALE.map((t) => (
               <div key={t.size} className={styles.typeRow}>
-                <span style={{ fontSize: t.size }}>IBM Plex Sans {t.size}</span>
+                <span style={{ fontSize: t.size }}>Geist {t.size}</span>
                 <span className={styles.mono} style={{ fontSize: Math.min(t.size, 20) }}>
                   ρ 0.83 · 612 ms
                 </span>

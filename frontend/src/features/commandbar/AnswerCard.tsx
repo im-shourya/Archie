@@ -1,6 +1,6 @@
 "use client";
 
-import { MessageSquareText, X } from "lucide-react";
+import { ChatText, X } from "@phosphor-icons/react/dist/ssr";
 import styles from "./commandbar.module.css";
 
 /** An AI answer about the board. Hover or focus highlights the nodes it refers to. */
@@ -29,7 +29,7 @@ export function AnswerCard({
       onBlur={off}
     >
       <div className={styles.panelHead}>
-        <MessageSquareText className={styles.panelIcon} size={16} aria-hidden />
+        <ChatText className={styles.panelIcon} size={16} aria-hidden />
         <p className={styles.panelText}>{message}</p>
         <button type="button" className={styles.iconButton} onClick={onDismiss} aria-label="Dismiss answer">
           <X size={16} aria-hidden />

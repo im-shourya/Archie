@@ -1,7 +1,7 @@
 "use client";
 
 import { forwardRef, useId, useState } from "react";
-import { Unplug } from "lucide-react";
+import { LinkBreak } from "@phosphor-icons/react/dist/ssr";
 import {
   CATALOG,
   PROP_BOUNDS,
@@ -322,7 +322,7 @@ export const Inspector = forwardRef<HTMLHeadingElement, Props>(function Inspecto
                   )
                 }
               >
-                <Unplug size={14} aria-hidden />
+                <LinkBreak size={14} aria-hidden />
               </button>
             </li>
           ))}
