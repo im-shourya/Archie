@@ -20,8 +20,9 @@ export const TOKENS: { name: string; role: string; text?: boolean }[] = [
   { name: "--color-border-subtle", role: "Dividers" },
   { name: "--color-border-default", role: "Inputs, chips" },
   { name: "--color-border-strong", role: "Sheet grip, dashed outlines" },
-  { name: "--color-primary", role: "Actions, focus, the mic", text: true },
-  { name: "--color-primary-hover", role: "Primary hover" },
+  { name: "--color-primary", role: "Links, numbers, focus, the mic", text: true },
+  { name: "--color-primary-fill", role: "Solid buttons" },
+  { name: "--color-primary-hover", role: "Solid button hover" },
   { name: "--color-primary-foreground", role: "Text on primary" },
   { name: "--color-primary-subtle", role: "Primary tint" },
   { name: "--color-focus", role: "Focus ring" },
@@ -31,6 +32,7 @@ export const TOKENS: { name: string; role: string; text?: boolean }[] = [
   { name: "--color-state-saturated", role: "ρ ≥ 1, failing, high severity, SPOF", text: true },
   { name: "--color-state-down", role: "Failed component", text: true },
   { name: "--color-edge", role: "Edges" },
+  { name: "--glass-fill-strong", role: "Glass: menus, toasts" },
 ];
 
 export const TYPE_SCALE = [

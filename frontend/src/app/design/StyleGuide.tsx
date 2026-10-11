@@ -284,7 +284,7 @@ export function StyleGuide() {
             <h2 id="h-type">Type</h2>
             {TYPE_SCALE.map((t) => (
               <div key={t.size} className={styles.typeRow}>
-                <span style={{ fontSize: t.size }}>Geist {t.size}</span>
+                <span style={{ fontSize: t.size }}>SF Pro {t.size}</span>
                 <span className={styles.mono} style={{ fontSize: Math.min(t.size, 20) }}>
                   ρ 0.83 · 612 ms
                 </span>
