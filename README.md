@@ -192,4 +192,6 @@ Start with the [overview](docs/00-overview.md). Product: [idea](docs/01-idea.md)
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md). Changes are tracked in [CHANGELOG.md](CHANGELOG.md).
 
+Privacy, terms, third-party services and accessibility: [docs/legal](docs/legal/README.md), also on the site at `/legal`. In short: no accounts, cookies or tracking; boards stay in your browser; AI features send your command and board to the AI provider.
+
 Licensed under the [MIT License](LICENSE). IBM Plex fonts are used under the SIL Open Font License ([frontend/assets/fonts/OFL-IBM-Plex.txt](frontend/assets/fonts/OFL-IBM-Plex.txt)).
