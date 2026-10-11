@@ -1,6 +1,6 @@
 "use client";
 
-import { X } from "lucide-react";
+import { X } from "@phosphor-icons/react/dist/ssr";
 import styles from "./commandbar.module.css";
 
 /** Clarifying question with tappable answers (docs/13 §6). Keys 1–4 pick an option. */

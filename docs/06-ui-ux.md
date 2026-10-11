@@ -20,42 +20,42 @@ Decided on 2026-10-01 with the **design-system-decision** skill. Tokens live in 
 |----------|-------------------|
 | Who | Engineers and interview-prep students at a laptop, often screen-recorded → high contrast, legible numbers at 1080p |
 | What matters most | The *state* of the system and its numbers → colour is reserved for state; numbers in mono with tabular figures |
-| Mood | A precise instrument, like a drafting table → warm paper neutrals, graphite ink, restrained radii, no gradients or glow |
+| Mood | A precise instrument with the restraint of a good developer tool → a crisp, barely warm whiteboard, near-black ink, one accent, hairlines before shadows, no gradients or glow (redesign, 2026-10-04) |
 | What should be memorable | The graph is the product → the logo is an "A" drawn as a three-node graph; the health ramp is the colour story |
 
 ### Brand
 
 - **Mark:** the letter A as a tiny architecture graph: an apex node and two base nodes joined by edges, with the crossbar as a third edge. The apex is the primary colour (the component that's "listening"); the rest is ink. Source: `frontend/src/components/brand/LogoMark.tsx`, `frontend/src/app/icon.svg` (adapts to dark mode), `frontend/public/brand/logo-mark-{light,dark}.svg`.
-- **Wordmark:** "Archie" in Plex Sans 600 next to the mark.
+- **Wordmark:** "Archie" in Geist 600 next to the mark.
 - **Social card / icons:** `opengraph-image.tsx` (1200×630, a real simulator readout), `apple-icon.tsx` (180×180), `manifest.ts`.
 
 ### Colour roles
 
 | Token | Light | Dark | Use |
 |-------|-------|------|-----|
-| `--color-background` | `#f6f5f1` | `#111317` | page and canvas (dominant, ~60%) |
-| `--color-surface` / `-sunken` | `#ffffff` / `#eeece6` | `#181b20` / `#21252b` | cards, panels, icon wells |
-| `--color-text-primary` / `-secondary` / `-muted` | `#16181d` / `#525866` / `#686e7b` | `#ecedef` / `#aab0ba` / `#8c929d` | text hierarchy |
-| `--color-border-subtle` / `-default` / `-strong` | `#e2e0d8` / `#cfccc2` / `#9c9890` | `#2a2f36` / `#3a4049` / `#5a606b` | structure |
+| `--color-background` | `#fafaf9` | `#0a0a0a` | page and canvas (dominant, ~60%) |
+| `--color-surface` / `-sunken` | `#ffffff` / `#f4f4f2` | `#121212` / `#1c1c1c` | cards, panels, icon wells |
+| `--color-text-primary` / `-secondary` / `-muted` | `#0a0a0a` / `#52525b` / `#6b6b72` | `#ededed` / `#a3a3a3` / `#8e8e8e` | text hierarchy |
+| `--color-border-subtle` / `-default` / `-strong` | `#ececea` / `#deded9` / `#a3a39d` | `#2a2a2a` / `#363636` / `#555555` | structure |
 | `--color-primary` (+ hover, foreground, subtle) | `#2a44c8` | `#93a5ff` | actions, focus, the mic. **Never** used for state |
 | `--color-state-healthy` | `#1e7a58` | `#41c493` | ρ < 0.7 |
-| `--color-state-warm` | `#9a6200` | `#e5ac3e` | 0.7 ≤ ρ < 0.9 |
-| `--color-state-hot` | `#b8501a` | `#f28a4e` | 0.9 ≤ ρ < 1 |
+| `--color-state-warm` | `#925b00` | `#e5ac3e` | 0.7 ≤ ρ < 0.9 |
+| `--color-state-hot` | `#ab4716` | `#f28a4e` | 0.9 ≤ ρ < 1 |
 | `--color-state-saturated` | `#c0283a` | `#ff707b` | ρ ≥ 1, failing traffic |
-| `--color-state-down` | `#646a77` | `#8c929d` | failed component |
+| `--color-state-down` | `#646a77` | `#8e8e8e` | failed component |
 
-Every text-bearing role (including all state colours, which colour ρ values and "fail" labels) is **≥ 4.5:1** on both background and surface in both themes (computed with the WCAG formula; lowest is light `hot` on the page background at 4.58:1). State is never shown by colour alone: each node also has a text status (`ρ 1.40`, `down`, `idle`), a utilization bar and an aria-label.
+Every text-bearing role (including all state colours, which colour ρ values and "fail" labels) is **≥ 4.5:1** on background, surface and sunken in both themes (computed with the WCAG formula; lowest is light `muted`/`healthy` on sunken at 4.79:1). Warm and hot were darkened slightly in the redesign to clear the light sunken and accent-subtle surfaces. State is never shown by colour alone: each node also has a text status (`ρ 1.40`, `down`, `idle`), a utilization bar and an aria-label.
 
 ### Typography
 
-- **IBM Plex Sans** (400/500/600) for UI and **IBM Plex Mono** (400/500/600) for numbers, ids, utterances and latency. One engineering superfamily: technical without being a monospace UI. Loaded with `next/font` (self-hosted, no layout shift); SIL OFL 1.1.
-- Scale in use: 11 (node load) · 12 (labels, captions) · 13 (panel headings, uppercase, tracked) · 14 (body small) · 16 (body, inputs) · 17–19 (lede, `clamp`) · 34–56 (display, `clamp`).
+- **Geist** (400/500/600) for UI and **Geist Mono** (400/500/600) for numbers, ids, utterances and latency: a precise engineering pair that keeps dense simulator numbers legible. Loaded with `next/font` (self-hosted, no layout shift); SIL OFL 1.1. Headings are tightened (−0.02em; display −0.035em). The OG image still renders in Plex: its renderer can't read Geist's woff2 files.
+- Scale in use: 11 (node load) · 12 (captions) · 13 (panel headings: sentence case, semibold, primary ink; no forced uppercase) · 14 (body small) · 16 (body, inputs) · 17–19 (lede, `clamp`) · 22–28 (section titles) · 40–76 (display, `clamp`).
 - Tabular numerals for every metric.
 
 ### Icons
 
-- **Lucide**, stroke 1.75–2.25, sizes 12 (inline badge) · 14 · 16 (buttons) · 18 (node kinds, mic).
-- One icon per component kind (`frontend/src/components/icons/KindIcon.tsx`): client `Users`, CDN `Globe`, LB `Split`, gateway `Router`, service `Server`, worker `Cog`, cache `MemoryStick`, SQL `Database`, NoSQL `Boxes`, queue `ListOrdered`, object storage `Archive`, search `Search`, external `Plug`.
+- **Phosphor** (regular; bold for 12 px badges), from `@phosphor-icons/react/dist/ssr` so server and client components share one set. Sizes 12 (inline badge) · 14 · 16 (buttons) · 18 (node kinds, mic). The AI badge is `Cloud` (where the command ran), paired with `Lightning` for local; no sparkles.
+- One icon per component kind (`frontend/src/components/icons/KindIcon.tsx`): client `Users`, CDN `Globe`, LB `ArrowsSplit`, gateway `Door`, service `HardDrives`, worker `Gear`, cache `Memory`, SQL `Database`, NoSQL `Stack`, queue `Queue`, object storage `Archive`, search `MagnifyingGlass`, external `Plug`.
 - No emoji anywhere in the UI. Decorative icons are `aria-hidden`; icon-only buttons have `aria-label`.
 
 ### Shape and spacing

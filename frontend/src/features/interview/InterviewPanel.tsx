@@ -1,18 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import {
-  BookOpen,
-  ChevronDown,
-  ChevronRight,
-  CircleCheck,
-  CircleMinus,
-  CircleX,
-  SkipForward,
-  Sparkles,
-  Volume2,
-  VolumeX,
-} from "lucide-react";
+import { BookOpen, CaretDown, CaretRight, CheckCircle, Cloud, MinusCircle, SkipForward, SpeakerHigh, SpeakerSlash, XCircle } from "@phosphor-icons/react/dist/ssr";
 import type { Graph, Problem, SloCheck } from "@archie/simulator";
 import { compact } from "@/lib/format";
 import { isTyping } from "@/lib/keyboard";
@@ -55,7 +44,7 @@ function ProblemCard({
   return (
     <section className={styles.problem} aria-label="Problem">
       <button type="button" className={styles.disclosure} aria-expanded={open} onClick={onToggle}>
-        {open ? <ChevronDown size={16} aria-hidden /> : <ChevronRight size={16} aria-hidden />}
+        {open ? <CaretDown size={16} aria-hidden /> : <CaretRight size={16} aria-hidden />}
         <span className={styles.problemTitle}>{problem.title}</span>
       </button>
       {open && (
@@ -97,7 +86,7 @@ function ProblemCard({
   );
 }
 
-const ICON = { pass: CircleCheck, fail: CircleX, na: CircleMinus };
+const ICON = { pass: CheckCircle, fail: XCircle, na: MinusCircle };
 
 export function SloChecklist({
   checks,
@@ -131,7 +120,7 @@ export function SloChecklist({
               onMouseEnter={() => c.nodeIds.length && setFocus(c.nodeIds)}
               onMouseLeave={() => setFocus([])}
             >
-              <Icon size={16} strokeWidth={2} aria-hidden className={styles.checkIcon} />
+              <Icon size={16} weight="bold" aria-hidden className={styles.checkIcon} />
               <span className={styles.checkLabel}>{c.label}</span>
               <span className={styles.checkActual} title={c.actual}>
                 {c.actual}
@@ -195,14 +184,14 @@ function Provenance({ turn }: { turn: Turn }) {
   if (turn.source === "ai") {
     return (
       <span className={styles.provenance}>
-        <Sparkles size={12} strokeWidth={2} aria-hidden className={styles.aiIcon} /> AI ·
+        <Cloud size={12} weight="bold" aria-hidden className={styles.aiIcon} /> AI ·
         Interviewer
       </span>
     );
   }
   return (
     <span className={styles.provenance}>
-      <BookOpen size={12} strokeWidth={2} aria-hidden /> Interviewer · from the problem
+      <BookOpen size={12} weight="bold" aria-hidden /> Interviewer · from the problem
       {turn.source === "offline" && <span className={styles.offline}> · offline question</span>}
     </span>
   );
@@ -384,9 +373,9 @@ function InterviewBody({ graph, problem, interview, checks, pending }: Props) {
                 onClick={tts.toggle}
               >
                 {tts.enabled ? (
-                  <Volume2 size={16} aria-hidden />
+                  <SpeakerHigh size={16} aria-hidden />
                 ) : (
-                  <VolumeX size={16} aria-hidden />
+                  <SpeakerSlash size={16} aria-hidden />
                 )}
               </button>
             )}
@@ -460,9 +449,9 @@ function InterviewBody({ graph, problem, interview, checks, pending }: Props) {
           onClick={() => setTranscriptOpen((o) => !o)}
         >
           {transcriptOpen ? (
-            <ChevronDown size={16} aria-hidden />
+            <CaretDown size={16} aria-hidden />
           ) : (
-            <ChevronRight size={16} aria-hidden />
+            <CaretRight size={16} aria-hidden />
           )}
           Transcript ({interview.transcript.length})
         </button>

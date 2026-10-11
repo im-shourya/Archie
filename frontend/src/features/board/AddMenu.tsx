@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Plus } from "lucide-react";
+import { CaretDown, Plus } from "@phosphor-icons/react/dist/ssr";
 import { CATALOG, uniqueLabel, type NodeKind } from "@archie/simulator";
 import { KindIcon } from "@/components/icons/KindIcon";
 import { useBoardStore } from "../store/board.store";
@@ -40,7 +40,7 @@ export function AddMenu({ compact }: { compact: boolean }) {
           <Plus size={16} aria-hidden />
         ) : (
           <>
-            <Plus size={16} aria-hidden /> Add <ChevronDown size={14} aria-hidden />
+            <Plus size={16} aria-hidden /> Add <CaretDown size={14} aria-hidden />
           </>
         )
       }

@@ -122,7 +122,7 @@ flowchart LR
 | State and storage | Zustand, IndexedDB (`idb`) |
 | API | Hono, mounted at `/api` inside Next.js |
 | Validation and contracts | Zod, JSON Schema + OpenAPI in [`specs/`](specs/) |
-| Design | IBM Plex Sans and Mono, Lucide icons, CSS custom properties |
+| Design | Geist and Geist Mono, Phosphor icons, CSS custom properties (tokens in `globals.css`) |
 | Testing | Vitest, fast-check, Playwright |
 | Voice | Wispr Flow (system-wide dictation) |
 
