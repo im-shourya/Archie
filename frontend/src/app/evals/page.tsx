@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import type { Availability, Stats } from "@archie/evals/report";
-import { Wordmark } from "@/components/brand/LogoMark";
+import { SiteFooter } from "@/components/site/SiteFooter";
+import { SiteHeader } from "@/components/site/SiteHeader";
 import { report, RESULTS_URL } from "@/features/evals/data";
 import styles from "@/features/evals/evals.module.css";
 import { ms, percent } from "@/lib/format";
@@ -43,11 +43,7 @@ export default function EvalsPage() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <Link href="/" className={styles.home} aria-label="Archie home">
-          <Wordmark />
-        </Link>
-      </header>
+      <SiteHeader current="/evals" />
 
       <main className={styles.main}>
         <h1 className={styles.title}>Evals</h1>
@@ -223,6 +219,7 @@ export default function EvalsPage() {
           </p>
         </section>
       </main>
+      <SiteFooter />
     </div>
   );
 }
