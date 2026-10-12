@@ -61,6 +61,23 @@ Every text-bearing role (including all state colours, which colour ρ values and
 - One icon per component kind (`frontend/src/components/icons/KindIcon.tsx`): client `Users`, CDN `Globe`, LB `ArrowsSplit`, gateway `Door`, service `HardDrives`, worker `Gear`, cache `Memory`, SQL `Database`, NoSQL `Stack`, queue `Queue`, object storage `Archive`, search `MagnifyingGlass`, external `Plug`.
 - No emoji anywhere in the UI. Decorative icons are `aria-hidden`; icon-only buttons have `aria-label`.
 
+### Node shapes and logos
+
+Nodes are not all boxes: each kind belongs to a family, and each family has the outline people already draw on architecture diagrams (`frontend/src/features/board/shapes.ts`). Every shape fills the same 184×72 box, so layout, handles and edges don't change.
+
+| Family | Kinds | Shape | Glyph tint |
+|--------|-------|-------|------------|
+| users | client | pill | `--color-family-users` |
+| edge | cdn, lb, gateway | chamfered hexagon | `--color-family-edge` |
+| compute | service, worker | rounded rect | `--color-family-compute` |
+| data | sql, nosql, cache, search, objectstore | cylinder | `--color-family-data` |
+| async | queue | pipe | `--color-family-async` |
+| outside | external | dotted rounded rect | `--color-family-outside` |
+
+- The outline is an SVG path. Simulation state only sets CSS variables (`--node-stroke`, `--node-fill`), so warm/hot/saturated/down/selected/focused look the same on every shape. Down is a dashed outline on the sunken fill. The change pulse traces the outline; with reduced motion it's a static outline flash.
+- Family tints colour the glyph only, never the outline: the outline belongs to simulation state.
+- **Brand logos.** A node shows a monochrome brand mark only when its **label names the product** and its kind can be that product (`frontend/src/components/icons/brands.ts`): "Redis" on a cache, "Kafka" on a queue, "Stripe" on an external API. The board never claims a technology the user didn't name, and the simulator still models the generic kind. Marks come from [simple-icons](https://simpleicons.org) (CC0); trademarks belong to their owners and are used only to identify the product. AWS marks aren't in simple-icons, so AWS products keep the kind glyph. The paths are a lazy chunk (outside the NFR-015 budget); the kind glyph shows until they load.
+
 ### Shape and spacing
 
 4 px spacing base · radius `--radius-sm` 8 / `--radius-md` 10 (inputs, menus) / `--radius-button` 12 (buttons, as on apple.com) / `--radius-lg` 18 (panels) · elevation `--shadow-raised` (cards) and `--shadow-overlay` (toasts, callouts) · touch targets ≥ 44 px on Home actions.
@@ -98,7 +115,7 @@ Guarded by `tests/contracts/design-tokens.test.ts`: no raw colour literals in an
 
 | Component | States / notes |
 |-----------|----------------|
-| **Node card** | icon · label · `×N` badge · ρ bar · status colour · ✕ when down · pulse (900 ms) when changed · selected ring |
+| **Node card** | family shape (see Node shapes and logos) · kind glyph or brand logo · label · `×N` badge · ρ bar · status colour on the outline · ✕ when down · pulse (900 ms) when changed · selected ring |
 | **Traffic edge** | particle density ∝ log(rps); error particles in `--state-saturated`; dashed for `async`; dotted for `replication` |
 | **Command bar** | idle · dictating (text changing) · hands-free countdown ring · thinking (shimmer) · result badge |
 | **Clarify chips** | appear above the command bar; number keys `1`–`4` select |
@@ -110,6 +127,7 @@ Guarded by `tests/contracts/design-tokens.test.ts`: no raw colour literals in an
 | **Mic button** (FR-062) | shown only where the Web Speech API exists; `aria-pressed`; interim text streams into the bar, the final result submits; stops on Escape, Enter, submit or tab hide; errors name Wispr Flow as the main path |
 | **Access-code dialog** | native `<dialog>` on 401 `ACCESS_CODE_REQUIRED`; code kept in sessionStorage only after it works; wrong code → inline error; 429 → countdown |
 | **Answer card** | slides above the command bar; node chips highlight on hover |
+| **Chat panel** | last side-panel tab. Every message (typed, spoken, chat box or clarify choice) and Archie's reply, saved with the board; each reply says how it was handled (local, AI change, answer, question, confirm, no change, not done). Replies that point at components highlight them on hover or focus. The composer sticks to the bottom and runs the same fast path → AI pipeline as the command bar. Clear asks first. Docs: [12 · Conversation memory](12-ai-architecture.md), [17 · Chat](17-database.md) |
 | **Toast** | message + optional `Undo` (10 s) |
 | **Interview panel** | problem card · SLO checklist (computed, live) · interviewer question with provenance (AI / from the problem / offline) and node chips · read-aloud toggle · answer box · Next question · transcript. Spec: [design §5.2–5.5](design/frontend-design.md) |
 | **Scorecard** | overall (mean, computed in code) · computed checks · rubric meters with evidence (unsupported → "not enough evidence") · summary · Copy as Markdown. Spec: [design §5.6](design/frontend-design.md) |
