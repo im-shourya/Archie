@@ -11,6 +11,9 @@ export const MAX_MESSAGE = 600;
 export const MAX_OPTIONS = 4;
 export const MAX_OPTION_CHARS = 40;
 export const MAX_FOCUS = 20;
+/** Chat turns sent back as context (docs/12 · Conversation memory). */
+export const MAX_CONVERSATION = 10;
+export const MAX_TURN_CHARS = 600;
 
 export const CommandKindSchema = z.enum(["ops", "clarify", "confirm", "answer", "noop"]);
 export type CommandKind = z.infer<typeof CommandKindSchema>;
@@ -21,6 +24,10 @@ export const CommandRequestSchema = z.strictObject({
   baseVersion: z.number().int().min(0),
   selection: z.array(NodeIdSchema).max(50).optional(),
   history: z.array(z.string().max(MAX_UTTERANCE)).max(5).optional(),
+  conversation: z
+    .array(z.strictObject({ role: z.enum(["user", "assistant"]), text: z.string().max(MAX_TURN_CHARS) }))
+    .max(MAX_CONVERSATION)
+    .optional(),
   mode: z.enum(["design", "interview"]).optional(),
 });
 export type CommandRequest = z.infer<typeof CommandRequestSchema>;

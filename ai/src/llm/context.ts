@@ -12,6 +12,8 @@ export interface ContextInput {
   graph: Graph;
   sim?: SimResult | null;
   history?: readonly string[];
+  /** Earlier chat turns, oldest first: what the user asked and what Archie answered. */
+  conversation?: readonly { role: "user" | "assistant"; text: string }[];
   selection?: readonly string[];
   utterance: string;
 }
@@ -114,10 +116,14 @@ export function simSummary(sim: SimResult): string {
 }
 
 /** The full user message for /api/command (docs/32 Step 1). Deterministic for a given input. */
-export function buildUserMessage({ graph, sim, history, selection, utterance }: ContextInput): string {
+export function buildUserMessage({ graph, sim, history, conversation, selection, utterance }: ContextInput): string {
   const sections = [`<graph>\n${graphDsl(graph, sim)}\n</graph>`];
   if (sim && graph.nodes.length > 0) sections.push(`<sim>${simSummary(sim)}</sim>`);
   if (history?.length) sections.push(`<history>${history.slice(-5).map(escapeText).join(" | ")}</history>`);
+  if (conversation?.length) {
+    const lines = conversation.slice(-10).map((t) => `${t.role === "user" ? "user" : "archie"}: ${escapeText(t.text)}`);
+    sections.push(`<conversation>\n${lines.join("\n")}\n</conversation>`);
+  }
   if (selection?.length) sections.push(`<selection>${selection.join(" ")}</selection>`);
   sections.push(`<utterance>${escapeText(utterance)}</utterance>`);
   return sections.join("\n");
