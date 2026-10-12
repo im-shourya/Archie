@@ -78,6 +78,7 @@ export async function runCommand(
     graph: req.graph,
     sim,
     history: req.history,
+    conversation: req.conversation,
     selection: req.selection,
     utterance: req.utterance,
   });

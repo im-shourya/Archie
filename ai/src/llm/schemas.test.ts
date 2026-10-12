@@ -112,4 +112,14 @@ describe("schemas", () => {
     expect(CommandRequestSchema.safeParse({ ...ok, history: ["a", "b", "c", "d", "e", "f"] }).success).toBe(false);
     expect(CommandRequestSchema.safeParse({ ...ok, extra: 1 }).success).toBe(false);
   });
+
+  it("CommandRequestSchema bounds the conversation", () => {
+    const graph = buildTemplate("three-tier");
+    const ok = { utterance: "and search?", graph, baseVersion: 0 };
+    const turn = { role: "assistant", text: "Redis is at ρ 0.42." };
+    expect(CommandRequestSchema.safeParse({ ...ok, conversation: [turn] }).success).toBe(true);
+    expect(CommandRequestSchema.safeParse({ ...ok, conversation: Array(11).fill(turn) }).success).toBe(false);
+    expect(CommandRequestSchema.safeParse({ ...ok, conversation: [{ ...turn, text: "x".repeat(601) }] }).success).toBe(false);
+    expect(CommandRequestSchema.safeParse({ ...ok, conversation: [{ ...turn, role: "system" }] }).success).toBe(false);
+  });
 });

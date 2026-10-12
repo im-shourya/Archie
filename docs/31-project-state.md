@@ -4,6 +4,8 @@ Where the project is **right now**. Update at the end of every phase (and whenev
 
 ## Current phase
 
+**1.2.0 (2026-10-05):** a Chat tab with a saved message log and conversation memory for the AI (last 10 turns, [ADR-019](30-architecture-decisions.md)), and node shapes by component family with label-matched brand logos ([ADR-020](30-architecture-decisions.md)). Board route 291.6 KB of 300. Not re-run: the AI evals (the dataset is single-turn and sends no conversation). Open: the SVG/PNG export still draws rectangles; a multi-turn eval category.
+
 **Phase 7 done** (merged in #12, deployed at <https://archie-rb2x.onrender.com>; [35-phase-7-plan.md](35-phase-7-plan.md)). Final held-out test split 91.2% with one false action; deployed eval 6/6, warm P50 2.4 s. Next: Phase 8, record and submit ([36-phase-8-plan.md](36-phase-8-plan.md)). Done: the dataset is at 92 cases (58 dev / 34 test, frozen per line), B0 and benches refreshed, dev-driven fixes (an outage rule in the prompt, a deadline-aware provider chain, two runner fixes), `/evals`, share links with Duplicate, exports (JSON, Mermaid, design doc, SVG, PNG) with Open file, replay, and the deploy code (`render.yaml`, the client-IP header, `deploy-smoke.sh`, keep-warm). **Open:** the final held-out test-split run (Mon 5 Oct after the 12:30 IST quota reset) and the Render service, which needs the owner's account and rotated keys.
 
 **Phase 6 done** (`feat/interview`) ([34-phase-6-plan.md](34-phase-6-plan.md)): SPOF scan, six interview problems with simulator-computed SLO checks and golden-tested reference designs, `/api/interview/turn`, `/api/interview/score` and `/api/review` on a shared structured-output session, interview mode with a live checklist, grounded questions and a scorecard, design review with simulator-proven fixes, the phone ⋯ menu and the `/design` style guide. `zod/mini` on the client closed the bundle gap (318.7 → 260.6 KB). Every acceptance criterion met.
@@ -86,4 +88,4 @@ Phase 8 from [doc 36](36-phase-8-plan.md):
 
 ## Last updated
 
-2026-10-04
+2026-10-05
