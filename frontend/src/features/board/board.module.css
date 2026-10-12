@@ -131,10 +131,11 @@
   min-width: 200px;
   margin: 0;
   padding: 4px;
-  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-md);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-overlay);
+  background: var(--glass-fill-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--shadow-glass);
   list-style: none;
 }
 
@@ -573,7 +574,7 @@
   width: 10px;
   height: 10px;
   border: 2px solid var(--color-surface);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   opacity: 0;
   transition: opacity 120ms ease-out, transform 120ms ease-out;
 }

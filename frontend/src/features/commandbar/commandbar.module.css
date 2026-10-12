@@ -27,10 +27,12 @@
   max-width: min(640px, 100%);
   margin: 0;
   padding: 8px 12px;
-  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-md);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-overlay);
+  /* Glass: the canvas stays visible behind transient messages. */
+  background: var(--glass-fill-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--shadow-glass);
   font-size: 14px;
 }
 
@@ -90,7 +92,7 @@
 }
 
 .micButton[aria-pressed="true"] {
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-primary-foreground);
   animation: listening 1.6s ease-in-out infinite;
 }
@@ -379,8 +381,8 @@
 }
 
 .primaryButton {
-  border: 1px solid var(--color-primary);
-  background: var(--color-primary);
+  border: 1px solid var(--color-primary-fill);
+  background: var(--color-primary-fill);
   color: var(--color-primary-foreground);
 }
 
@@ -458,7 +460,7 @@
 
   .ring {
     animation: none;
-    background: var(--color-primary);
+    background: var(--color-primary-fill);
   }
 
   .micButton[aria-pressed="true"] {

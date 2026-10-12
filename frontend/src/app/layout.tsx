@@ -1,22 +1,25 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Inter } from "next/font/google";
 import type { ReactNode } from "react";
 import { SITE, siteUrl } from "@/lib/site";
 import "./globals.css";
 
-// Geist for UI and Geist Mono for numbers, ids and rps (docs/06): an engineering pair that keeps
-// dense simulator numbers legible. Self-hosted by next/font, no request to Google at runtime.
-const sans = Geist({
+// SF Pro is the type (docs/06): on Apple devices it comes from the system stack in globals.css,
+// so nothing is downloaded. Apple's licence doesn't allow serving it, so other platforms get
+// Inter, the closest open grotesque, then Geist Mono for numbers when SF Mono isn't there.
+// Not preloaded: Apple devices never request them. Self-hosted by next/font, no Google request.
+const inter = Inter({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-sans",
+  variable: "--font-inter",
   display: "swap",
+  preload: false,
 });
 const mono = Geist_Mono({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
-  variable: "--font-mono",
+  variable: "--font-geist-mono",
   display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -52,7 +55,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${sans.variable} ${mono.variable}`}>
+    <html lang="en" className={`${inter.variable} ${mono.variable}`}>
       <body>{children}</body>
     </html>
   );
