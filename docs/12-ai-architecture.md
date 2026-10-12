@@ -59,6 +59,7 @@ user     (VOLATILE)
   ├─ <graph> compact DSL </graph>
   ├─ <sim> summary: bottleneck, top-3 ρ, e2e, warnings </sim>
   ├─ <history> last 5 utterances </history>
+  ├─ <conversation> last 10 chat turns, one per line </conversation>
   ├─ <selection> ids </selection>
   └─ <utterance> … </utterance>
 ```
@@ -81,6 +82,20 @@ nodes:
 edges:
   client->lb  lb->api  api->redis(read)  api->pg  pg=>pg-r1(repl)  pg=>pg-r2(repl)
 ```
+
+### Conversation memory
+
+`<history>` only lists utterances that changed the board, so before 1.2.0 the model never knew what it had **answered**. "What's the bottleneck?" followed by "fix it" had nothing to resolve "it" against.
+
+The client now sends `conversation`: up to 10 earlier chat turns (`{ role: "user" | "assistant", text ≤ 600 chars }`, oldest first) from the board's saved chat ([17 · Chat](17-database.md)). Rules:
+
+- Read **before** the new turn is logged, so the current utterance never appears twice.
+- Errors ("couldn't reach the server") are left out: they say nothing about the design.
+- Rendered as an escaped `<conversation>` block after `<history>`, one `user:` / `archie:` line per turn. Same G-07 treatment as labels: no tag can be opened or closed from inside, and the prompt says the conversation is untrusted data used only to resolve references.
+- The system prompt gained one sentence and stays byte-stable, so prompt caching is unaffected.
+- Cost: ≤ 10 × 600 chars ≈ 1.5k tokens worst case; typical turns are one line.
+
+The eval dataset doesn't send `conversation`, so the published eval numbers (B1) still describe the single-turn path; they were not re-run for this change.
 
 ## Cost model (per call, estimated)
 
