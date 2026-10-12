@@ -1,7 +1,11 @@
 /*
- * Home (docs/06): an editorial page for one product. A split hero with the real board, the
- * three spoken steps as a list rather than cards, real numbers from the evals, and quiet lists
- * for templates and recent boards. Hairlines over boxes; one accent for the main action.
+ * Home (docs/06): an Apple-style product page for one product. A centred headline, then the
+ * real board rising and flattening as you scroll (scroll-scrubbed, never scroll-jacked), the
+ * three spoken steps lighting up word by word, real numbers from the evals, and templates as an
+ * inset grouped list. One blue for actions; glass only on chrome that floats (the nav).
+ *
+ * Motion reads --p (0 → 1) written by Motion.tsx. Without scripting, or with reduced motion,
+ * everything renders in its final state.
  */
 .page {
   display: flex;
@@ -9,108 +13,107 @@
   min-height: 100dvh;
 }
 
-.header,
-.main,
-.footer {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding-inline: clamp(16px, 4vw, 40px);
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-block: 20px;
-}
-
-.brandLink {
-  color: var(--color-text-primary);
-  text-decoration: none;
-}
-
-.nav {
-  display: flex;
-  gap: 24px;
-  font-size: 14px;
-}
-
-.nav a {
-  color: var(--color-text-secondary);
-  text-decoration: none;
-  transition: color var(--duration-fast) var(--ease-out);
-}
-
-.nav a:hover {
-  color: var(--color-text-primary);
-}
-
 .main {
   flex: 1;
-  padding-block: clamp(32px, 6vw, 72px) 96px;
+  width: 100%;
+  overflow-x: clip;
+  padding-bottom: clamp(64px, 10vw, 120px);
 }
 
-/* Hero */
+.section,
+.hero,
+.closing,
+.pageMain {
+  width: 100%;
+  max-width: 1024px;
+  margin-inline: auto;
+  padding-inline: clamp(16px, 4vw, 22px);
+}
+
+/* Hero: centred, SF Pro Display proportions, a blur-in entrance on load. */
 .hero {
-  display: grid;
-  gap: 48px;
-  align-items: center;
+  padding-top: clamp(56px, 10vw, 112px);
+  text-align: center;
 }
 
 .title {
-  max-width: 20ch;
   margin: 0;
-  font-size: clamp(40px, 6vw, 76px);
+  font-size: clamp(44px, 7vw, 80px);
   font-weight: 600;
-  line-height: 1.02;
-  letter-spacing: -0.035em;
+  line-height: 1.04;
+  letter-spacing: -0.045em;
+}
+
+.titleFirst,
+.titleRest {
+  display: block;
+  animation: rise var(--duration-slow) var(--ease-emphasized) both;
 }
 
 .titleRest {
-  display: block;
   color: var(--color-text-secondary);
+  animation-delay: 120ms;
 }
 
 .lede {
-  max-width: 46ch;
-  margin: 24px 0 32px;
-  font-size: clamp(17px, 1.6vw, 19px);
-  line-height: 1.55;
+  max-width: 40ch;
+  margin: 24px auto 32px;
+  font-size: clamp(19px, 2vw, 24px);
+  line-height: 1.4;
+  letter-spacing: -0.015em;
   color: var(--color-text-secondary);
+  animation: rise var(--duration-slow) var(--ease-emphasized) 220ms both;
 }
 
 .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  justify-content: center;
+  gap: 12px;
 }
 
+.hero .actions,
+.alsoLinks {
+  animation: rise var(--duration-slow) var(--ease-emphasized) 320ms both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+/* Buttons: 12px corners (apple.com), 44px targets. */
 .primary,
 .secondary {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   min-height: 44px;
-  padding: 0 18px;
-  border-radius: var(--radius-md);
+  padding: 0 20px;
+  border-radius: var(--radius-button);
+  font-size: 17px;
   font-weight: 500;
-  font-size: 15px;
+  letter-spacing: -0.015em;
   text-decoration: none;
   transition:
     background-color var(--duration-fast) var(--ease-out),
-    border-color var(--duration-fast) var(--ease-out),
     transform var(--duration-fast) var(--ease-out);
 }
 
 .primary {
-  border: 1px solid var(--color-primary);
-  background: var(--color-primary);
+  background: var(--color-primary-fill);
   color: var(--color-primary-foreground);
 }
 
 .primary:hover {
-  border-color: var(--color-primary-hover);
   background: var(--color-primary-hover);
 }
 
@@ -119,27 +122,30 @@
 }
 
 .primary:hover svg {
-  transform: translateX(2px);
+  transform: translateX(3px);
 }
 
+/* Secondary: a tinted glass button, the Apple "plain" style. */
 .secondary {
-  border: 1px solid var(--color-border-default);
-  background: var(--color-surface);
-  color: var(--color-text-primary);
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--shadow-glass);
+  color: var(--color-primary);
 }
 
 .secondary:hover {
-  border-color: var(--color-border-strong);
+  background: var(--glass-fill-strong);
 }
 
 .primary:active,
 .secondary:active {
-  transform: translateY(1px);
+  transform: scale(0.97);
 }
 
 .alsoLinks {
   margin: 20px 0 0;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--color-text-secondary);
 }
 
@@ -148,193 +154,245 @@
   padding: 0;
   border: 0;
   background: none;
-  color: var(--color-text-primary);
+  color: var(--color-primary);
   font: inherit;
-  text-decoration: underline;
-  text-decoration-color: var(--color-border-strong);
-  text-underline-offset: 3px;
+  letter-spacing: inherit;
+  text-decoration: none;
   cursor: pointer;
 }
 
 .alsoLinks a:hover,
 .inlineLink:hover {
-  text-decoration-color: currentColor;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/*
+ * Stage: a tall section whose child sticks while the board tilts up from the page and scales
+ * to full size, then the caption fades in. --p is the scroll progress through the section.
+ */
+.stage {
+  --p: 1;
+  position: relative;
+  width: 100%;
+  max-width: 1240px;
+  margin: clamp(40px, 6vw, 72px) auto 0;
+  padding-inline: clamp(16px, 4vw, 22px);
+}
+
+.stageSticky {
+  perspective: 1800px;
 }
 
 .heroVisual {
   margin: 0;
-  overflow: hidden;
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-overlay);
-  animation: reveal 700ms var(--ease-out) both;
+  transform-origin: 50% 0;
+  transform:
+    rotateX(calc((1 - var(--p)) * 28deg)) scale(calc(0.86 + var(--p) * 0.14))
+    translateY(calc((1 - var(--p)) * 40px));
+  will-change: transform;
 }
 
 .heroVisual img {
   display: block;
   width: 100%;
   height: auto;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-glass), var(--shadow-overlay);
 }
 
-/* The board is revealed top to bottom once, like a page being drawn: no fade-up, no float. */
-@keyframes reveal {
-  from {
-    clip-path: inset(0 0 100% 0);
-  }
-  to {
-    clip-path: inset(0 0 0 0);
-  }
+.stageCaption {
+  max-width: 52ch;
+  margin: 24px auto 0;
+  font-size: clamp(17px, 1.6vw, 21px);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  text-align: center;
+  color: var(--color-text-secondary);
+  opacity: clamp(0, calc((var(--p) - 0.7) * 4), 1);
 }
 
-@media (min-width: 1024px) {
-  /* The text keeps its measure; the actions sit beside the lede on wide screens. */
-  .heroText {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    column-gap: 64px;
-    align-items: end;
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  .stage {
+    --p: 0;
   }
 
-  .title {
-    grid-column: 1 / -1;
-  }
+  /* Pin only where there's room: on wide screens the board sticks while it flattens. */
+  @media (min-width: 768px) {
+    .stage {
+      height: 175vh;
+    }
 
-  .lede {
-    margin-bottom: 0;
-  }
-
-  .heroCtas {
-    padding-bottom: 4px;
+    .stageSticky {
+      position: sticky;
+      top: 72px;
+    }
   }
 }
 
 /* Sections */
 .section {
-  margin-top: clamp(72px, 10vw, 128px);
+  margin-top: clamp(96px, 14vw, 168px);
 }
 
 .sectionTitle {
-  margin: 0 0 24px;
-  font-size: clamp(22px, 2.4vw, 28px);
+  margin: 0;
+  font-size: clamp(32px, 5vw, 56px);
   font-weight: 600;
-  letter-spacing: -0.02em;
+  line-height: 1.07;
+  letter-spacing: -0.04em;
+}
+
+.sectionLede {
+  max-width: 48ch;
+  margin: 12px 0 0;
+  font-size: clamp(17px, 1.6vw, 21px);
+  line-height: 1.4;
+  letter-spacing: -0.015em;
+  color: var(--color-text-secondary);
 }
 
 .sectionLink {
-  margin: 20px 0 0;
-  font-size: 14px;
+  margin: 24px 0 0;
+  font-size: 17px;
 }
 
 .sectionLink a {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: var(--color-text-secondary);
+  color: var(--color-primary);
   text-decoration: none;
 }
 
 .sectionLink a:hover {
-  color: var(--color-text-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
-/* How it works: a sequence, so numbered; rows with hairlines, not cards. */
+/* How it works: a numbered sequence. Each utterance lights up word by word as it passes. */
 .steps {
-  margin: 0;
+  margin: 40px 0 0;
   padding: 0;
   list-style: none;
-  border-top: 1px solid var(--color-border-default);
 }
 
 .step {
   display: grid;
-  gap: 8px 32px;
-  padding-block: 28px;
-  border-bottom: 1px solid var(--color-border-default);
+  gap: 12px 40px;
+  padding-block: clamp(28px, 4vw, 44px);
+  border-top: 1px solid var(--color-border-default);
 }
 
 .stepNumber {
-  font: 500 13px/1.6 var(--font-mono), monospace;
-  color: var(--color-text-muted);
+  font: 500 13px/1.6 var(--font-mono);
+  color: var(--color-primary);
 }
 
 .utterance {
+  --p: 1;
   margin: 0;
-  font: 500 clamp(19px, 2.2vw, 26px) / 1.3 var(--font-mono), monospace;
-  letter-spacing: -0.01em;
+  font-size: clamp(26px, 3.6vw, 44px);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+}
+
+/* Word w of n is lit when p·(n+2) passes w: muted → ink, AA at every step. */
+.utterance [data-words] > span {
+  color: color-mix(
+    in srgb,
+    var(--color-text-primary) calc(clamp(0, var(--p) * (var(--n) + 2) - var(--i), 1) * 100%),
+    var(--color-text-muted)
+  );
+}
+
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  .utterance {
+    --p: 0;
+  }
 }
 
 .stepTitle {
   margin: 0 0 4px;
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 600;
 }
 
 .stepBody {
-  max-width: 48ch;
+  max-width: 44ch;
   margin: 0;
-  font-size: 15px;
+  font-size: 17px;
   color: var(--color-text-secondary);
 }
 
-@media (min-width: 768px) {
+@media (min-width: 900px) {
   .step {
-    grid-template-columns: 48px minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: 40px minmax(0, 1.4fr) minmax(0, 1fr);
     align-items: baseline;
   }
 }
 
-/* Measured: real numbers, set in mono so they read as data. */
+/* Measured: real numbers on white panels, SF Pro Display with tabular figures. */
 .measured {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin: 0;
-  border-top: 1px solid var(--color-border-default);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin: 40px 0 0;
 }
 
 .metric {
   display: flex;
   flex-direction: column-reverse;
-  gap: 6px;
-  padding: 24px 24px 24px 0;
-  border-bottom: 1px solid var(--color-border-default);
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 28px 24px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-raised);
 }
 
 .metric dd {
   margin: 0;
-  font: 500 clamp(28px, 3.6vw, 40px) / 1 var(--font-mono), monospace;
-  letter-spacing: -0.03em;
+  color: var(--color-primary);
+  font-size: clamp(34px, 3.8vw, 46px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .metric dt {
-  max-width: 28ch;
-  font-size: 14px;
+  max-width: 26ch;
+  font-size: 15px;
   color: var(--color-text-secondary);
 }
 
-@media (min-width: 1024px) {
-  .measured {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-/* Templates and recent boards: quiet lists. */
+/* Templates and recent boards: an inset grouped list (iOS Settings), chevrons on the right. */
 .templates,
 .list {
-  margin: 0;
+  margin: 32px 0 0;
   padding: 0;
+  overflow: hidden;
   list-style: none;
-  border-top: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-raised);
+}
+
+.templates li + li .template,
+.list .row + .row {
+  box-shadow: inset 0 1px 0 var(--color-border-subtle);
 }
 
 .template {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 4px 24px;
+  gap: 2px 24px;
   align-items: center;
-  padding: 18px 4px;
-  border-bottom: 1px solid var(--color-border-default);
+  padding: 16px 20px;
   color: var(--color-text-primary);
   text-decoration: none;
   transition: background-color var(--duration-fast) var(--ease-out);
@@ -350,7 +408,7 @@
 
 .templateDesc {
   grid-column: 1;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--color-text-secondary);
 }
 
@@ -358,19 +416,16 @@
   grid-column: 2;
   grid-row: 1 / span 2;
   color: var(--color-text-muted);
-  transition:
-    transform var(--duration-normal) var(--ease-out),
-    color var(--duration-fast) var(--ease-out);
+  transition: transform var(--duration-normal) var(--ease-out);
 }
 
 .template:hover .templateArrow {
   transform: translateX(3px);
-  color: var(--color-text-primary);
 }
 
 @media (min-width: 768px) {
   .template {
-    grid-template-columns: 220px minmax(0, 1fr) auto;
+    grid-template-columns: 240px minmax(0, 1fr) auto;
   }
 
   .templateDesc {
@@ -385,12 +440,12 @@
 
 .muted {
   color: var(--color-text-secondary);
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .banner {
-  padding: 8px 12px;
-  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
   background: var(--color-primary-subtle);
 }
 
@@ -398,14 +453,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  border-bottom: 1px solid var(--color-border-default);
+  padding-right: 12px;
 }
 
 .rowLink {
   display: grid;
   flex: 1;
   gap: 2px;
-  padding: 16px 4px;
+  padding: 16px 20px;
   color: var(--color-text-primary);
   text-decoration: none;
 }
@@ -422,30 +477,72 @@
 .fileError {
   display: block;
   margin-top: 8px;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--color-state-saturated);
 }
 
-.footer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 24px;
-  padding-block: 28px 36px;
-  border-top: 1px solid var(--color-border-subtle);
+/* Small text actions inside list rows (Delete on a recent board). */
+.ghost {
+  min-height: 36px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-state-saturated);
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.ghost:hover {
+  background: var(--color-surface-sunken);
+}
+
+/* Closing call to action. */
+.closing {
+  margin-top: clamp(96px, 14vw, 168px);
+  text-align: center;
+}
+
+.closingTitle {
+  max-width: 18ch;
+  margin: 0 auto 32px;
+  font-size: clamp(32px, 5vw, 56px);
+  font-weight: 600;
+  line-height: 1.07;
+  letter-spacing: -0.04em;
+}
+
+/* Inner pages that share the home shell (interview picker). */
+.pageMain {
+  flex: 1;
+  padding-block: clamp(40px, 7vw, 80px) clamp(64px, 10vw, 120px);
+}
+
+.pageTitle {
+  margin: 0;
+  font-size: clamp(36px, 5.5vw, 64px);
+  font-weight: 600;
+  line-height: 1.06;
+  letter-spacing: -0.04em;
+}
+
+.pageLede {
+  max-width: 52ch;
+  margin: 16px 0 40px;
+  font-size: clamp(17px, 1.6vw, 21px);
+  line-height: 1.45;
+  letter-spacing: -0.015em;
   color: var(--color-text-secondary);
-  font-size: 14px;
-}
-
-.footer a {
-  color: inherit;
-}
-
-.footer a:hover {
-  color: var(--color-text-primary);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .heroVisual {
+  .titleFirst,
+  .titleRest,
+  .lede,
+  .hero .actions,
+  .alsoLinks {
     animation: none;
   }
 
@@ -453,33 +550,15 @@
   .secondary,
   .template,
   .templateArrow,
+  .ghost,
   .primary svg {
     transition: none;
   }
 
   .primary:active,
-  .secondary:active {
+  .secondary:active,
+  .primary:hover svg,
+  .template:hover .templateArrow {
     transform: none;
   }
-}
-
-/* Small text actions inside list rows (Delete on a recent board). */
-.ghost {
-  min-height: 36px;
-  padding: 6px 10px;
-  border: 0;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--color-text-secondary);
-  font: inherit;
-  font-size: 14px;
-  cursor: pointer;
-  transition:
-    color var(--duration-fast) var(--ease-out),
-    background-color var(--duration-fast) var(--ease-out);
-}
-
-.ghost:hover {
-  background: var(--color-surface-sunken);
-  color: var(--color-text-primary);
 }
