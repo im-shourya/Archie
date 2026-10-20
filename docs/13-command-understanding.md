@@ -1,6 +1,6 @@
 # 13 · Command Understanding
 
-How an utterance becomes ops. Two tiers: **fast path** (deterministic, local) and **AI** (Claude).
+How an utterance becomes ops. Two tiers: **fast path** (deterministic, local) and **AI** (LLM).
 
 ```
 utterance

@@ -18,6 +18,6 @@
 - [ ] `docs/31-project-state.md` updated (end of phase)
 
 ## Security
-- [ ] No secrets, no `NEXT_PUBLIC_` secrets, no `.claude/` files
+- [ ] No secrets, no `NEXT_PUBLIC_` secrets
 - [ ] New inputs validated (Zod + bounds)
 - [ ] Security-sensitive change? Describe it:

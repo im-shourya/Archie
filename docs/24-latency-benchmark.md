@@ -9,7 +9,7 @@ Real numbers across real queries, not a lucky run.
 | Fast path | `npm run bench:fast` | `normalize + grammar + resolve + applyBatch` for every fast-path-eligible eval utterance | P50 < 10 ms, P100 < 50 ms (NFR-001) |
 | Simulator | `npm run bench:sim` | `simulate()` on generated graphs of 10 / 50 / 100 / 200 nodes | P95 < 5 ms @ 100 (NFR-003) |
 | Layout | `npm run bench:layout` | ELK layered layout, 10 / 50 / 100 nodes (Node, worker-equivalent) | < 100 ms @ 50 (NFR-004) |
-| AI command | `npm run eval` (timings) | `/api/command` server time: context + Claude + validate + repair | P50 < 3 s, P95 < 6 s (NFR-002) |
+| AI command | `npm run eval` (timings) | `/api/command` server time: context + the LLM + validate + repair | P50 < 3 s, P95 < 6 s (NFR-002) |
 | End-to-end (user-perceived) | Playwright trace on the deployed site | submit → canvas updated | report only |
 
 ## Method

@@ -3,7 +3,7 @@ import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { COMMAND_OUTPUT } from "./output";
 import { ProviderError, type Completion, type CompletionRequest, type LlmProvider, type OutputSpec } from "./types";
 
-/** Claude via the Anthropic SDK (docs/12 · Model configuration). Paid; opt in with ARCHIE_PROVIDER=anthropic. */
+/** Anthropic SDK provider (docs/12 · Model configuration). Paid; opt in with ARCHIE_PROVIDER=anthropic. */
 
 export const ANTHROPIC_DEFAULT_MODEL = "claude-opus-5-5";
 export const ANTHROPIC_MAX_TOKENS = 4_000;

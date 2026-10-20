@@ -22,11 +22,11 @@
 - [ ] Repo secrets `GEMINI_API_KEY` + `GROQ_API_KEY` for the manual eval workflow (the workflow reads them; you add them in GitHub).
 - [x] `@anthropic-ai/sdk`, `@google/genai`, `groq-sdk` installed in `ai` (server-only; ESLint and the CI bundle grep ban them from the frontend).
 
-## Model & API decisions (from the current Claude API docs)
+## Model & API decisions (from the current Anthropic API docs)
 
 | Decision | Value | Why |
 |----------|-------|-----|
-| Model | `claude-opus-5-5` (configurable via `ARCHIE_MODEL`) | default current model; per ADR-008 |
+| Model | `ANTHROPIC_DEFAULT_MODEL` (configurable via `ARCHIE_MODEL`) | default current model; per ADR-008 |
 | Call | `client.messages.parse({ model, max_tokens, system, messages, output_config: { format: zodOutputFormat(CommandResultSchema), effort } })` | typed JSON by construction; read `response.parsed_output` (guard `null`) |
 | Effort | `"low"` for `/api/command`, `"medium"` for review/interview later | latency for voice. On this model thinking can't be disabled and the default effort is `medium`, so **set it explicitly** |
 | Thinking | omit the parameter (adaptive) | `{type: "disabled"}` returns 400 on this model |
@@ -139,7 +139,7 @@ States: "thinking…" shimmer after submit, "still thinking…" after 4 s, abort
 
 Files: `evals/src/run.ts`, `evals/src/assertions.ts`, `evals/fixtures/*.json`, `evals/cases/dev.jsonl`, `evals/cases/test.jsonl`, `npm run eval`.
 
-- Runner: for each case, fast path → (null) harness (real Claude) → apply → assertions ([22](22-evaluation.md)). Writes `evals/results/latest.json` (validated against `specs/evaluation-schema.json`).
+- Runner: for each case, fast path → (null) harness (real model) → apply → assertions ([22](22-evaluation.md)). Writes `evals/results/latest.json` (validated against `specs/evaluation-schema.json`).
 - Report: task accuracy, kind accuracy, **false-action rate**, over-clarify rate, fast-path precision/coverage, repair rate, cache hit rate, latency P50/P70/P95/P99/P100 (warm and cold separately).
 - 30 cases now (≥ 2 per category from [23](23-eval-dataset.md), 60/40 dev/test); grow to ≥ 92 in Phase 7.
 

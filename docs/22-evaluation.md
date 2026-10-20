@@ -15,7 +15,7 @@ The **full** production path, not just the model:
 
 ```
 case.utterance + fixtures[case.fixture]
-  → fastpath.parse → (null) → harness.run (real model: Gemini by default, Claude via ARCHIE_PROVIDER) → guardrails
+  → fastpath.parse → (null) → harness.run (real model: Gemini by default, Anthropic via ARCHIE_PROVIDER) → guardrails
   → applyBatch → simulate → assertions
 ```
 
@@ -69,7 +69,7 @@ Added in Phase 4 (needed by the acceptance criteria):
 | Run | Description |
 |-----|-------------|
 | B0 | Fast path only (AI disabled): coverage + precision baseline |
-| B1 | Fast path + AI, `claude-opus-5-5`, effort `low` (default config) |
+| B1 | Fast path + AI, `ANTHROPIC_DEFAULT_MODEL`, effort `low` (default config) |
 | B2+ | Variants: prompt changes, effort `medium`, other models via `ARCHIE_MODEL` (only if the owner decides) |
 
 Results table (filled by `npm run eval -- --report`):

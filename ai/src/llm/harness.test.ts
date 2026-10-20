@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { applyBatch, buildTemplate, type Graph, type Op } from "@archie/simulator";
 import { COMMAND_SYSTEM_PROMPT } from "./prompts/command";
 import { HarnessError, runCommand } from "./harness";
-import { ANTHROPIC_MAX_TOKENS as COMMAND_MAX_TOKENS, createAnthropicProvider, type MessagesClient } from "./providers/anthropic";
+import { ANTHROPIC_DEFAULT_MODEL, ANTHROPIC_MAX_TOKENS as COMMAND_MAX_TOKENS, createAnthropicProvider, type MessagesClient } from "./providers/anthropic";
 import type { CommandKind, WireOp } from "./schemas";
 
 const threeTier = buildTemplate("three-tier");
@@ -70,7 +70,7 @@ function reply(out: Out | string, extra: Partial<Anthropic.Beta.BetaMessage> = {
     id: "msg_test",
     type: "message",
     role: "assistant",
-    model: "claude-opus-5-5",
+    model: "test-model",
     content: [{ type: "text", text, citations: null }],
     stop_reason: "end_turn",
     stop_sequence: null,
@@ -113,7 +113,7 @@ describe("runCommand: happy path", () => {
     expect(res.kind).toBe("ops");
     expect(res.ops).toEqual(ops);
     expect(res.focusNodeIds).toEqual(["kafka", "api"]);
-    expect(res).toMatchObject({ baseVersion: 0, attempts: 1, model: "claude-opus-5-5" });
+    expect(res).toMatchObject({ baseVersion: 0, attempts: 1, model: "test-model" });
     expect(res.usage).toEqual({ inputTokens: 900, outputTokens: 120, cacheReadTokens: 5000, cacheWriteTokens: 0 });
     expect(res.timings.totalMs).toBeGreaterThanOrEqual(res.timings.llmMs);
     expect(create).toHaveBeenCalledTimes(1);
@@ -123,7 +123,7 @@ describe("runCommand: happy path", () => {
     const { client, create } = mockClient(reply({ kind: "noop" }));
     await runCommand({ ...request("hello"), history: ["kill redis"], selection: ["api"] }, { provider: client, requestId: "req-1" });
     const [params, opts] = create.mock.calls[0]!;
-    expect(params.model).toBe("claude-opus-5-5");
+    expect(params.model).toBe(ANTHROPIC_DEFAULT_MODEL);
     expect(params.max_tokens).toBe(COMMAND_MAX_TOKENS);
     expect(params.system).toEqual([{ type: "text", text: COMMAND_SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }]);
     expect(params.output_config.effort).toBe("low");
@@ -145,8 +145,8 @@ describe("runCommand: happy path", () => {
   });
 
   it("reports the model that actually served the request", async () => {
-    const { client } = mockClient(reply({ kind: "noop" }, { model: "claude-opus-4-8" }));
-    expect((await runCommand(request("hi"), { provider: client })).model).toBe("claude-opus-4-8");
+    const { client } = mockClient(reply({ kind: "noop" }, { model: "test-model-2" }));
+    expect((await runCommand(request("hi"), { provider: client })).model).toBe("test-model-2");
   });
 
   it("reads the text after the last fallback hop", async () => {

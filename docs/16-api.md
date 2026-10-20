@@ -93,7 +93,7 @@ The AI tier of the command bar. It's only called when the fast path returns `nul
   "baseVersion": 12,
   "timings": { "contextMs": 2, "llmMs": 1640, "validateMs": 1, "totalMs": 1650 },
   "attempts": 1,
-  "model": "claude-opus-5-5"
+  "model":"gemini-2.5-flash"
 }
 ```
 

@@ -32,14 +32,14 @@ ai/src/
 
 ## Model configuration
 
-> **Provider (ADR-016, ADR-017):** the default is Gemini's free tier as a model ladder (`gemini-2.5-flash` with thinking off → `3.5-flash-lite` → `3.5-flash` → `3.8-flash`, JSON-schema output), failing over to Groq's free tier (`openai/gpt-oss-120b`, strict JSON schema, reasoning `low`). Each provider has a quota guard ([15](15-ai-retry-recovery.md#provider-fallback-and-quotas-adr-017)). The Claude settings below apply with `ARCHIE_PROVIDER=anthropic`.
+> **Provider (ADR-016, ADR-017):** the default is Gemini's free tier as a model ladder (`gemini-2.5-flash` with thinking off → `3.5-flash-lite` → `3.5-flash` → `3.8-flash`, JSON-schema output), failing over to Groq's free tier (`openai/gpt-oss-120b`, strict JSON schema, reasoning `low`). Each provider has a quota guard ([15](15-ai-retry-recovery.md#provider-fallback-and-quotas-adr-017)). The the LLM settings below apply with `ARCHIE_PROVIDER=anthropic`.
 
 | Route | Model | Effort | max_tokens | Output |
 |-------|-------|--------|------------|--------|
-| `command` | `claude-opus-5-5` | `low` | 4,000 | `CommandResult` |
-| `review` | `claude-opus-5-5` | `medium` | 8,000 | `ReviewResult` |
-| `interview/turn` | `claude-opus-5-5` | `low` | 2,000 | `InterviewTurn` |
-| `interview/score` | `claude-opus-5-5` | `medium` | 8,000 | `Scorecard` |
+| `command` | `ANTHROPIC_DEFAULT_MODEL` | `low` | 4,000 | `CommandResult` |
+| `review` | `ANTHROPIC_DEFAULT_MODEL` | `medium` | 8,000 | `ReviewResult` |
+| `interview/turn` | `ANTHROPIC_DEFAULT_MODEL` | `low` | 2,000 | `InterviewTurn` |
+| `interview/score` | `ANTHROPIC_DEFAULT_MODEL` | `medium` | 8,000 | `Scorecard` |
 
 - Overridable via `ARCHIE_MODEL`, so the eval harness can compare models if the owner decides to ([22](22-evaluation.md)).
 - Calls use `client.messages.parse({ …, output_config: { format: zodOutputFormat(Schema), effort } })` and read `parsed_output`, guarding `null`.

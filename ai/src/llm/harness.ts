@@ -25,7 +25,7 @@ export {
 /**
  * The /api/command harness (docs/15 · Harness algorithm): structured I/O, bounded retries, one
  * repair turn, guardrails, typed errors and timings. The LLM proposes; validateBatch disposes.
- * Provider-agnostic: Gemini (default, free tier) or Claude, see client.ts.
+ * Provider-agnostic: Gemini (default, free tier) or Anthropic, see client.ts.
  */
 
 const ms = (start: number) => Math.round((performance.now() - start) * 10) / 10;

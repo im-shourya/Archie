@@ -16,7 +16,7 @@ System design is a *spoken* skill (interviews, design reviews, whiteboarding), b
 
 ## Solution
 
-- **Voice → typed graph ops.** One dictation-friendly command bar (built for Wispr Flow). A deterministic local grammar handles common commands in milliseconds, and Claude handles open-ended language, emitting **validated ops**. The board is never regenerated.
+- **Voice → typed graph ops.** One dictation-friendly command bar (built for Wispr Flow). A deterministic local grammar handles common commands in milliseconds, and the LLM handles open-ended language, emitting **validated ops**. The board is never regenerated.
 - **A real simulator.** A deterministic queueing model computes load, utilization, latency (p50/p99), errors, backlog and cost. Every red node explains itself with numbers.
 - **Guardrails.** Ambiguity → clarify, destructive → confirm, off-topic → no-op, invalid → repair or clarify.
 - **Interview mode.** SLO checks computed by the simulator, plus an AI interviewer that probes the weakest point.
@@ -54,7 +54,7 @@ Full detail: [03-product-spec.md](03-product-spec.md).
 | Frontend | Next.js (App Router) + React + TypeScript, React Flow (`@xyflow/react`), elkjs, Zustand |
 | Backend | Hono (TypeScript), mounted in Next.js at `/api/*` via `hono/vercel` |
 | Simulator | Pure TypeScript package (no runtime deps) |
-| AI | Claude API, `@anthropic-ai/sdk`, model `claude-opus-5-5`, structured outputs |
+| AI | LLM API, `@anthropic-ai/sdk`, model `ANTHROPIC_DEFAULT_MODEL`, structured outputs |
 | Database | No server DB. IndexedDB in the browser (`idb`), share links in the URL hash ([ADR-003](30-architecture-decisions.md)) |
 | Authentication | None (no accounts). Rate limits + optional access code ([ADR-004](30-architecture-decisions.md)) |
 | Validation / contracts | Zod in code, JSON Schema + OpenAPI in `specs/` |
@@ -83,7 +83,7 @@ Full detail: [03-product-spec.md](03-product-spec.md).
                        ▼
 ┌──────────── Backend (Hono in Next.js) ─────────────┐
 │ rate limit → validate → AI harness (ai/llm)         │
-│    → Claude API (structured output)                 │
+│    → LLM API (structured output)                 │
 │    → validate ops (simulator) → repair → guardrails │
 └─────────────────────────────────────────────────────┘
 ```

@@ -27,7 +27,7 @@ Format: Context → Decision → Alternatives → Consequences. Status: `Accepte
 
 ## ADR-004 · No user accounts; protect the AI budget instead
 **Status:** Accepted · 2026-10-01
-**Context:** The only server-side asset worth protecting is the Claude budget. A signup wall hurts the demo.
+**Context:** The only server-side asset worth protecting is the LLM budget. A signup wall hurts the demo.
 **Decision:** No auth. Per-IP rate limits, a global daily cap, an optional access code header, and a Console spend limit.
 **Alternatives:** OAuth (Auth.js); a passcode for the whole site.
 **Consequences:** Frictionless demo. Abuse is bounded by caps rather than identity.
@@ -42,7 +42,7 @@ Format: Context → Decision → Alternatives → Consequences. Status: `Accepte
 ## ADR-006 · Two-tier command engine (deterministic fast path + AI)
 **Status:** Accepted · 2026-10-01
 **Context:** Voice UX needs sub-second response for frequent simple commands. LLM calls are seconds and cost money.
-**Decision:** A local grammar handles unambiguous simple commands and **abstains** otherwise. Everything else goes to Claude.
+**Decision:** A local grammar handles unambiguous simple commands and **abstains** otherwise. Everything else goes to the LLM.
 **Alternatives:** AI only (slow, costly); grammar only (rigid).
 **Consequences:** Most demo commands feel instant. Fast-path precision must be 100% (it's evaluated). Two code paths to maintain.
 
@@ -53,7 +53,7 @@ Format: Context → Decision → Alternatives → Consequences. Status: `Accepte
 **Alternatives:** A full discrete-event simulation (slower, harder to explain); a pure analytic sum (no percentiles).
 **Consequences:** Fast, deterministic, explainable. It's a teaching model, with assumptions documented ([09](09-simulation-engine.md)).
 
-## ADR-008 · Claude (`claude-opus-5-5`) with structured outputs
+## ADR-008 · Anthropic model (`ANTHROPIC_DEFAULT_MODEL`) with structured outputs
 **Status:** Accepted · 2026-10-01
 **Context:** We need reliable typed JSON, good spatial/architecture reasoning, and refusal handling.
 **Decision:** `@anthropic-ai/sdk` `messages.parse` + `zodOutputFormat`, effort `low` for commands and `medium` for review/scoring, server-side refusal fallback, and a cached static system prompt. The model is configurable via `ARCHIE_MODEL`.
@@ -112,7 +112,7 @@ Format: Context → Decision → Alternatives → Consequences. Status: `Accepte
 ## ADR-016 · Pluggable model provider; Gemini's free tier by default
 **Status:** Accepted · 2026-10-02 · amends ADR-008
 **Context:** The Anthropic API needs paid credits, and the project has no budget for them. The AI tier and the eval still need a real model.
-**Decision:** The harness calls an `LlmProvider` (`ai/src/llm/providers/`). It keeps the algorithm (repair turn, `max_tokens` retry, guardrails, budget, error mapping), and each provider turns one request into one model turn. The default is `gemini` (`@google/genai`, `gemini-3.8-flash`, JSON-schema structured output via `responseJsonSchema`, thinking `low`). `anthropic` keeps the ADR-008 path. Selection: `ARCHIE_PROVIDER`, else Claude when only `ANTHROPIC_API_KEY` is set. `ARCHIE_MODEL` overrides the model.
+**Decision:** The harness calls an `LlmProvider` (`ai/src/llm/providers/`). It keeps the algorithm (repair turn, `max_tokens` retry, guardrails, budget, error mapping), and each provider turns one request into one model turn. The default is `gemini` (`@google/genai`, `gemini-3.8-flash`, JSON-schema structured output via `responseJsonSchema`, thinking `low`). `anthropic` keeps the ADR-008 path. Selection: `ARCHIE_PROVIDER`, else the LLM when only `ANTHROPIC_API_KEY` is set. `ARCHIE_MODEL` overrides the model.
 **Alternatives:** Groq (free and fast, but JSON mode rather than schema-enforced output, so more repair turns); Ollama (free, but local only and won't run on the deployed demo).
 **Consequences:** It costs nothing to run. Free-tier prompts may be used by Google to improve its products; boards in the demo are public anyway, and the README says so. Thinking tokens count toward Gemini's output cap, so its cap is 8,000 (vs 4,000). Caching is implicit (`cachedContentTokenCount`); the system prompt stays byte-stable. Eval results record the provider's model, so B1 numbers name the model they came from.
 

@@ -4,7 +4,7 @@
 
 - Read [docs/00-overview.md](docs/00-overview.md) first. **The docs are the spec.** If code needs to deviate, update the doc (or add an ADR in [docs/30](docs/30-architecture-decisions.md)) in the same PR.
 - Reference IDs (`F-xx`, `FR-xxx`, `NFR-xxx`, `ADR-xxx`) in commits and PRs.
-- Never commit secrets or the `.claude/` directory (gitignored; local hooks block it).
+- Never commit secrets (local hooks block them).
 
 ## Branches
 

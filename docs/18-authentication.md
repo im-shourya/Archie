@@ -21,7 +21,7 @@ The only valuable server resource is the **AI provider quota** (free tiers by de
 | Global daily cap | same | `ARCHIE_DAILY_CAP=500` AI calls/day (resets 00:00 UTC) |
 | Optional access code | `backend/middleware/accessCode.ts` | off unless `ARCHIE_ACCESS_CODE` is set |
 | Free-tier quota guards | `ai/src/llm/quota.ts` | Gemini 9 rpm / 19 rpd **per model** (4-model ladder), Groq 28 rpm / 950 rpd / 7.6K tpm / 190K tpd (env-overridable); 429 before a provider is overrun |
-| Provider spend limit | Anthropic Console (only if Claude is enabled) | set before public deploy |
+| Provider spend limit | Anthropic Console (only if Anthropic is enabled) | set before public deploy |
 
 ### Optional access code flow
 

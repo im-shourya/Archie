@@ -17,7 +17,7 @@ import { ProviderError, type Completion, type CompletionRequest, type LlmProvide
  */
 export const GEMINI_DEFAULT_MODELS = ["gemini-2.5-flash", "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.8-flash"] as const;
 export const GEMINI_DEFAULT_MODEL = GEMINI_DEFAULT_MODELS[0];
-/** Thinking tokens count toward maxOutputTokens on Gemini, so this is higher than Claude's cap. */
+/** Thinking tokens count toward maxOutputTokens on Gemini, so this is higher than Anthropic's cap. */
 export const GEMINI_MAX_TOKENS = 8_000;
 
 /** The slice of the SDK the provider uses, so tests can pass a mock. */

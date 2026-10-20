@@ -10,7 +10,7 @@ run(task, input, { requestId }):
   ctx = buildContext(task, input)                       # contextMs
   attempt = 1
   loop:
-    res = callClaude(ctx)                               # SDK: maxRetries 2, timeout 15 s
+    res = callModel(ctx)                               # SDK: maxRetries 2, timeout 15 s
     check stop_reason:
       refusal     → throw LLM_REFUSED                   # after server-side fallback
       max_tokens  → if not yet: retry with 2× max_tokens; else throw LLM_UPSTREAM

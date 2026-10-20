@@ -32,7 +32,7 @@
 
 ## Integration & contract tests (`tests/integration`, `tests/contracts`)
 
-- Hono app via `app.request()` with the Claude SDK mocked: validation errors, 413, rate limiter (21st call → 429), access code, error mapping, `X-Request-Id`.
+- Hono app via `app.request()` with the LLM SDK mocked: validation errors, 413, rate limiter (21st call → 429), access code, error mapping, `X-Request-Id`.
 - **Contracts:** every fixture in `specs/fixtures/` validates against **both** the JSON Schema (`ajv`) and the Zod schema. Schema drift fails CI.
 
 ## E2E (`tests/e2e`, Playwright, Chromium + mobile viewport)

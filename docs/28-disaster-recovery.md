@@ -8,7 +8,7 @@
 | Source code, docs, evals | GitHub | repo deleted / corrupted | local clones + GitHub. Optionally mirror to a second remote |
 | Deployment | Vercel | bad deploy | promote the previous deployment (instant) |
 | API key | Vercel env | leaked or revoked | rotate (below) |
-| Claude API | Anthropic | outage / rate limits | degraded mode ([15](15-ai-retry-recovery.md)) |
+| LLM API | Anthropic | outage / rate limits | degraded mode ([15](15-ai-retry-recovery.md)) |
 
 ## Objectives
 
@@ -39,7 +39,7 @@
 2. Lower `ARCHIE_DAILY_CAP`.
 3. Review logs (ipHash distribution) and block if needed via Vercel firewall rules.
 
-### R-04 · Claude API outage
+### R-04 · LLM API outage
 
 Nothing to do server-side. Degraded mode activates automatically. Post a note in the README/status if prolonged.
 

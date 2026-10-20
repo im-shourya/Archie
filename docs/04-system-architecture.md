@@ -20,7 +20,7 @@
                         ┌───────▼───────────────────────────────────────┐
                         │ backend (Hono, mounted at /api in Next.js)    │
                         │  requestId → rateLimit → zod validate         │
-                        │  → ai/llm harness ─────────► Claude API       │
+                        │  → ai/llm harness ─────────► LLM API       │
                         │       ▲   validate / repair / guardrails      │
                         │       └── simulator (validateBatch, simulate) │
                         └───────────────────────────────────────────────┘
@@ -65,13 +65,13 @@ None. There is no server database ([ADR-003](30-architecture-decisions.md)).
 
 ## Backend → AI
 
-`ai/llm/harness.ts` → `@anthropic-ai/sdk` → Claude API (`claude-opus-5-5`, structured outputs). See [12](12-ai-architecture.md).
+`ai/llm/harness.ts` → `@anthropic-ai/sdk` → LLM API (`ANTHROPIC_DEFAULT_MODEL`, structured outputs). See [12](12-ai-architecture.md).
 
 ## External services
 
 | Service | Use | Failure behaviour |
 |---------|-----|-------------------|
-| Claude API | AI tier, review, interview | Degraded mode: fast path + simulator keep working ([15](15-ai-retry-recovery.md)) |
+| LLM API | AI tier, review, interview | Degraded mode: fast path + simulator keep working ([15](15-ai-retry-recovery.md)) |
 | Vercel | hosting, logs | Rollback to previous deployment ([25](25-deployment.md)) |
 | Wispr Flow | dictation on the user's machine | Not a runtime dependency; typing or the mic fallback works |
 
@@ -90,7 +90,7 @@ utterance → normalize → grammar match → resolve refs (unambiguous)
 ```
 utterance → fastpath miss → POST /api/command {utterance, graph, selection, history}
 → backend: rate limit → validate → harness:
-     context (compact DSL) → Claude parse → stop-reason checks
+     context (compact DSL) → LLM parse → stop-reason checks
      → validateBatch → [repair ×1] → guardrails → response {kind, ops, …}
 → client: version check → (ops) applyBatch… | (clarify) chips | (confirm) dialog
           | (answer) answer card + highlights | (noop) toast
@@ -108,7 +108,7 @@ graph change or workload change → simulate(graph)
 
 ```
 candidate speaks/edits → POST /api/interview/turn {problemId, graph, transcript}
-→ backend: simulate() + sloChecks() → Claude → one question + focusNodeIds
+→ backend: simulate() + sloChecks() → the LLM → one question + focusNodeIds
 → client: interviewer panel (+ TTS), SLO checklist updates locally on every change
 ```
 
@@ -127,7 +127,7 @@ There are no accounts. AI routes are protected by IP rate limiting, a daily cap 
 
 | Failure | Detected by | Behaviour |
 |---------|-------------|-----------|
-| Claude timeout / 5xx / 429 | harness | SDK retries → typed error → client toast "AI unavailable, local commands still work" |
+| LLM timeout / 5xx / 429 | harness | SDK retries → typed error → client toast "AI unavailable, local commands still work" |
 | Invalid ops from the model | `validateBatch` | repair once → clarify |
 | Board changed mid-request | `baseVersion` check | re-validate → apply or "board changed, please repeat" |
 | IndexedDB unavailable (private mode) | repository init | in-memory fallback + banner "won't be saved, use Export" |

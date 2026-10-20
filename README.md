@@ -119,7 +119,7 @@ flowchart LR
 
 1. You speak a command; Wispr Flow types it into the command bar.
 2. The fast path matches it against an anchored grammar and resolves component names ("the db", "it", "postgres replica one"). It returns nothing unless it is certain.
-3. Otherwise `/api/command` sends the board (as a compact text form), the simulator summary, the last few chat turns and the utterance to the model (a ladder of Gemini free-tier models, each with its own daily quota, then Groq's free tier when Gemini is busy or out of quota; Claude optional), which returns structured output: edits, a question, a confirmation request, an answer or a no-op. Edits are validated; invalid ones get one repair turn and then become a question.
+3. Otherwise `/api/command` sends the board (as a compact text form), the simulator summary, the last few chat turns and the utterance to the model (a ladder of Gemini free-tier models, each with its own daily quota, then Groq's free tier when Gemini is busy or out of quota; the LLM optional), which returns structured output: edits, a question, a confirmation request, an answer or a no-op. Edits are validated; invalid ones get one repair turn and then become a question.
 4. The result is a batch of typed operations, validated as a whole and applied atomically, so one bad operation changes nothing.
 5. The simulator re-runs on the new graph in a few milliseconds, and the canvas, metrics and explanations update.
 
@@ -142,7 +142,7 @@ flowchart LR
 frontend/    Next.js app: pages, canvas (family shapes, brand logos), command bar, chat, metrics panel
 backend/     Hono API: /api/health and /api/command (rate limit, optional access code)
 simulator/   graph model, operations and the simulation engine (pure TypeScript)
-ai/          fastpath/ command parser (browser-safe); llm/ server-only model harness (Gemini → Groq, or Claude) with quota guards
+ai/          fastpath/ command parser (browser-safe); llm/ server-only model harness (Gemini → Groq, or Anthropic) with quota guards
 database/    IndexedDB repository (boards, events, chat log) and share-link codec
 evals/       eval runner, cases, fixtures, benchmarks and results
 specs/       JSON Schemas, OpenAPI and fixtures (machine-readable contracts)
@@ -163,7 +163,7 @@ npm run dev
 
 Open <http://localhost:3000>, pick **Open the 50k rps demo**, and try saying *"Shard Postgres into two."*
 
-Local commands and the simulator need no environment variables. AI commands (anything the fast path doesn't understand) need a free `GEMINI_API_KEY` from [Google AI Studio](https://aistudio.google.com/apikey) in `.env.local`, plus an optional free `GROQ_API_KEY` from [Groq](https://console.groq.com/keys) as the fallback. Keys are server-only and never sent to the browser. Per-provider quota guards keep usage under the free tiers: when both are full, the API answers 429 rather than failing upstream. To use Claude instead, set `ANTHROPIC_API_KEY` and `ARCHIE_PROVIDER=anthropic`. Note that Google may use prompts sent on its free tier to improve its products. [`.env.example`](.env.example) lists the optional ones: `ARCHIE_PROVIDER`, `ARCHIE_FALLBACK`, `ARCHIE_MODEL`, the quota overrides (`GEMINI_RPM`, `GROQ_TPM`, …), `ARCHIE_DAILY_CAP`, `ARCHIE_ACCESS_CODE`, `ARCHIE_IP_SALT`, `NEXT_PUBLIC_SITE_URL` and, behind a host's proxy, `ARCHIE_CLIENT_IP_HEADER`.
+Local commands and the simulator need no environment variables. AI commands (anything the fast path doesn't understand) need a free `GEMINI_API_KEY` from [Google AI Studio](https://aistudio.google.com/apikey) in `.env.local`, plus an optional free `GROQ_API_KEY` from [Groq](https://console.groq.com/keys) as the fallback. Keys are server-only and never sent to the browser. Per-provider quota guards keep usage under the free tiers: when both are full, the API answers 429 rather than failing upstream. To use the LLM instead, set `ANTHROPIC_API_KEY` and `ARCHIE_PROVIDER=anthropic`. Note that Google may use prompts sent on its free tier to improve its products. [`.env.example`](.env.example) lists the optional ones: `ARCHIE_PROVIDER`, `ARCHIE_FALLBACK`, `ARCHIE_MODEL`, the quota overrides (`GEMINI_RPM`, `GROQ_TPM`, …), `ARCHIE_DAILY_CAP`, `ARCHIE_ACCESS_CODE`, `ARCHIE_IP_SALT`, `NEXT_PUBLIC_SITE_URL` and, behind a host's proxy, `ARCHIE_CLIENT_IP_HEADER`.
 
 ### Run with Docker
 

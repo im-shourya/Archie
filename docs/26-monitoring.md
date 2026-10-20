@@ -8,7 +8,7 @@ One JSON line per request (`backend/middleware/logger.ts`) to stdout → Vercel 
 
 ```json
 {"ts":"2026-10-04T10:12:03.120Z","level":"info","requestId":"7f3c…","route":"POST /api/command",
- "status":200,"kind":"ops","attempts":1,"tier":"ai","model":"claude-opus-5-5",
+ "status":200,"kind":"ops","attempts":1,"tier":"ai","model":"gemini-2.5-flash",
  "timings":{"contextMs":2,"llmMs":1640,"validateMs":1,"totalMs":1650},
  "usage":{"input":612,"cacheRead":5980,"output":214},"nodes":8,"ops":3,"ipHash":"a91e…"}
 ```
@@ -23,7 +23,7 @@ The client generates `X-Request-Id` (uuid) per command, logs it in the browser c
 
 ## Health
 
-`GET /api/health` → `{ ok, llm: "configured" | "missing-key", model, version: <git sha> }`. Never calls Claude. The client polls it during degraded mode.
+`GET /api/health` → `{ ok, llm: "configured" | "missing-key", model, version: <git sha> }`. Never calls the LLM. The client polls it during degraded mode.
 
 ## Metrics to watch (from logs)
 

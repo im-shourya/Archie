@@ -25,7 +25,7 @@ const RESPONSE: CommandResponse = {
   focusNodeIds: ["memcache"],
   baseVersion: 0,
   attempts: 1,
-  model: "claude-opus-5-5",
+  model: "test-model",
   timings: { contextMs: 1, llmMs: 900, validateMs: 1, totalMs: 905 },
   usage: { inputTokens: 1, outputTokens: 1, cacheReadTokens: 1, cacheWriteTokens: 0 },
 };

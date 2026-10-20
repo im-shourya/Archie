@@ -30,7 +30,7 @@ function respond(route: Route, body: Record<string, unknown>, status = 200) {
           focusNodeIds: [],
           baseVersion: sent.baseVersion,
           attempts: 1,
-          model: "claude-opus-5-5",
+          model: "test-model",
           timings: { contextMs: 1, llmMs: 1500, validateMs: 1, totalMs: 1510 },
           ...body,
         }

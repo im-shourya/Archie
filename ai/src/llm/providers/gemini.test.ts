@@ -150,7 +150,7 @@ describe("provider selection", () => {
     expect(isConfigured()).toBe(false);
   });
 
-  it("uses Claude when only an Anthropic key is present, or when asked", () => {
+  it("uses Anthropic when only an Anthropic key is present, or when asked", () => {
     vi.stubEnv("ARCHIE_PROVIDER", "");
     vi.stubEnv("GEMINI_API_KEY", "");
     vi.stubEnv("ANTHROPIC_API_KEY", "sk-test");

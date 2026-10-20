@@ -62,7 +62,7 @@ A board that **listens, models, simulates and argues back**:
 - Users dictate with Wispr Flow or type. Text arrives in a normal input.
 - Designs are ≤ 200 components (realistic for interviews and design docs).
 - Users accept "teaching estimates" for capacities and can override them.
-- Claude API is available. When it isn't, the fast path + simulator still work.
+- LLM API is available. When it isn't, the fast path + simulator still work.
 
 ## Constraints
 

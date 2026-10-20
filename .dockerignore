@@ -2,8 +2,6 @@
 .env
 .env.*
 !.env.example
-.claude/
-CLAUDE.local.md
 WORKLOG.local.md
 
 # Rebuilt inside the image.
